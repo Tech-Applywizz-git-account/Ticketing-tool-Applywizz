@@ -1278,7 +1278,7 @@ export const TicketEditModal: React.FC<TicketEditModalProps> = ({
                 {ticketFiles.map((file, index) => (
                   <li key={index}>
                     <a
-                      href={`https://oqqbgqkxrhachfgkwiya.supabase.co/storage/v1/object/public/ticket-attachments/${file.file_path}`}
+                      href={`https://zkebbnegghodwmgmkynt.supabase.co/storage/v1/object/public/ticket-attachments/${file.file_path}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline"

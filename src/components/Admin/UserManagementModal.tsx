@@ -76,7 +76,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
     try {
       console.log("Creating user with data:", userData);
       // ✅ 1. Build verification URL with email parameter
-      const redirectUrl = `https://applywizz-ticketing-tool.vercel.app/EmailVerifyRedirect?email=${encodeURIComponent(userData.email)}`;
+      const redirectUrl = `https://ticketingtoolapplywizz.vercel.app/EmailVerifyRedirect?email=${encodeURIComponent(userData.email)}`;
 
       // ✅ 2. Sign up user with redirect
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -186,6 +186,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
           value={filterRole}
           onChange={(e) => setFilterRole(e.target.value as UserRole | 'all')}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          aria-label="Filter users by role"
         >
           <option value="all">All Roles</option>
           {Object.entries(roleLabels).map(([key, label]) => (
@@ -259,12 +260,14 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                           <button
                             onClick={() => handleEditUser(user)}
                             className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded"
+                            title="Edit User"
                           >
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => onDeleteUser(user.id)}
                             className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
+                            title="Delete User"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -349,7 +352,12 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               User Role *
             </label>
+            <label htmlFor="user-role-select" className="block text-sm font-medium text-gray-700 mb-2">
+              User Role *
+            </label>
             <select
+              id="user-role-select"
+              aria-label="User Role"
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -371,6 +379,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
               onChange={(e) => setFormData({ ...formData, department: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
               disabled={loading}
+              aria-label="Department"
             >
               <option value="">Select Department</option>
               {departmentOptions.map(dept => (
@@ -459,6 +468,8 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             disabled={loading}
+            title="Close"
+            aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>

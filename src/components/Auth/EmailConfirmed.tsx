@@ -153,6 +153,8 @@ const EmailConfirmed = () => {
                     value={email}
                     disabled
                     className="w-full p-2 border rounded bg-gray-100 mb-4 cursor-not-allowed"
+                    title="Your Email"
+                    placeholder="Your Email"
                 />
 
                 <label className="block mb-2 text-sm text-gray-600">New Password</label>

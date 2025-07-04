@@ -135,6 +135,8 @@ export const ClientOnboardingModal: React.FC<ClientOnboardingModalProps> = ({
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Close modal"
+            title="Close"
           >
             <X className="h-5 w-5" />
           </button>
@@ -244,6 +246,7 @@ export const ClientOnboardingModal: React.FC<ClientOnboardingModalProps> = ({
                   Work Authorization Details *
                 </label>
                 <select
+                  aria-label="Work Authorization Details"
                   value={formData.workAuthDetails}
                   onChange={(e) => setFormData({...formData, workAuthDetails: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -293,6 +296,7 @@ export const ClientOnboardingModal: React.FC<ClientOnboardingModalProps> = ({
                   Expected Salary Range *
                 </label>
                 <select
+                  aria-label="Expected Salary Range"
                   value={formData.salaryRange}
                   onChange={(e) => setFormData({...formData, salaryRange: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"

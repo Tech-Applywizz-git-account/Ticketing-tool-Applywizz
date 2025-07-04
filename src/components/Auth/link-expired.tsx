@@ -29,7 +29,7 @@ export default function LinkExpired() {
   //       type: "signup",
   //       email,
   //       options: {
-  //         emailRedirectTo: "https://applywizz-ticketing-tool.vercel.app/EmailConfirmed",
+  //         emailRedirectTo: "https://ticketingtoolapplywizz.vercel.app/EmailConfirmed",
   //       },
   //     });
   //     if (error) throw error;
@@ -50,7 +50,7 @@ export default function LinkExpired() {
     setLoading(true);
     try {
       // ✅ Resend verification with same redirect format
-      const redirectUrl = `https://yourdomain.com/EmailVerifyRedirect?email=${encodeURIComponent(email)}`;
+      const redirectUrl = `https://ticketingtoolapplywizz.vercel.app/EmailVerifyRedirect?email=${encodeURIComponent(email)}`;
       const { error } = await supabase.auth.resend({
         type: "signup",
         email,
@@ -77,11 +77,17 @@ export default function LinkExpired() {
         <p className="text-gray-600 text-center mb-4">
           No problem. Click the button below to resend.
         </p>
+        <label htmlFor="expired-email" className="sr-only">
+          Email address
+        </label>
         <input
+          id="expired-email"
           type="email"
           className="w-full p-2 mb-4 border border-gray-300 rounded bg-gray-100 cursor-not-allowed"
           value={email}
           disabled
+          placeholder="Email address"
+          title="Email address"
         />
         <button
           onClick={handleResend}

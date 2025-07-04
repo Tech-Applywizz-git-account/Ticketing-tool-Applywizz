@@ -778,6 +778,8 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Close modal"
+            title="Close"
           >
             <X className="h-5 w-5" />
           </button>
@@ -936,7 +938,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                 {ticketFiles.map((file, index) => (
                   <li key={index}>
                     <a
-                      href={`https://ogwiuvxvhblhqmdsncyg.supabase.co/storage/v1/object/public/ticket-attachments/${file.file_path}`}
+                      href={`https://zkebbnegghodwmgmkynt.supabase.co/storage/v1/object/public/ticket-attachments/${file.file_path}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline"
@@ -996,6 +998,8 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                           onChange={(e) => setUserFile(e.target.files?.[0] || null)}
                           accept=".pdf,.png,.jpg,.jpeg"
                           className="block w-full border rounded px-3 py-2"
+                          title="Upload a file (PDF, PNG, JPG, JPEG)"
+                          placeholder="Choose a file"
                         />
                       </div>
                       <button onClick={handleCloseTicket} disabled={isSubmittingComment} className="bg-red-500 text-white px-4 py-2 rounded">
@@ -1049,6 +1053,8 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                         type="file"
                         onChange={(e) => setUserFile(e.target.files?.[0] || null)}
                         className="mb-4"
+                        title="Upload a file"
+                        placeholder="Choose a file"
                       />
 
                       <button
@@ -1082,6 +1088,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                       <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Optional File Upload</label>
                         <input
+                          title='Upload a resolution file (PDF, PNG, JPG, JPEG)'
                           type="file"
                           accept=".pdf,.png,.jpg,.jpeg"
                           onChange={(e) => {

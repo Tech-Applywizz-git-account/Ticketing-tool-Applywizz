@@ -98,6 +98,7 @@ export function ClientEditModal({ client, isOpen, currentUserRole, onClose, onSu
         onChange={(e) => handleChange(field, e.target.value)}
         className="w-full border border-gray-300 p-2 rounded"
         disabled={isReadOnly}
+        placeholder={`Enter ${label}`}
       />
     </div>
   );
@@ -110,6 +111,8 @@ export function ClientEditModal({ client, isOpen, currentUserRole, onClose, onSu
         onChange={(e) => handleChange(field, e.target.value)}
         className="w-full border border-gray-300 p-2 rounded"
         disabled={isReadOnly}
+        placeholder={`Enter ${label}`}
+        title={label}
       />
     </div>
   );
@@ -122,6 +125,7 @@ export function ClientEditModal({ client, isOpen, currentUserRole, onClose, onSu
         onChange={(e) => handleChange(field, e.target.value)}
         className="w-full border border-gray-300 p-2 rounded"
         disabled={isReadOnly}
+        title={label}
       >
         <option value="">Select {label}</option>
         {users
@@ -141,7 +145,9 @@ export function ClientEditModal({ client, isOpen, currentUserRole, onClose, onSu
 
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Edit Client</h2>
-          <button onClick={onClose}><X className="h-5 w-5" /></button>
+          <button onClick={onClose} title="Close" aria-label="Close">
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Personal Info */}
@@ -181,9 +187,11 @@ export function ClientEditModal({ client, isOpen, currentUserRole, onClose, onSu
             <select
               value={form.work_auth_details}
               onChange={(e) => handleChange("work_auth_details", e.target.value)}
-        disabled={isReadOnly}
+              disabled={isReadOnly}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
               required
+              aria-label="Work Authorization Details"
+              title="Work Authorization Details"
             >
               <option value="">Select work authorization</option>
               <option value="H1B Visa">H1B Visa</option>
@@ -222,7 +230,7 @@ export function ClientEditModal({ client, isOpen, currentUserRole, onClose, onSu
                       <input
                         type="checkbox"
                         checked={form.job_role_preferences?.includes(role)}
-        disabled={isReadOnly}
+                        disabled={isReadOnly}
                         onChange={(e) => {
                           const updatedRoles = e.target.checked
                             ? [...form.job_role_preferences, role]
@@ -245,9 +253,10 @@ export function ClientEditModal({ client, isOpen, currentUserRole, onClose, onSu
                 <select
                   value={form.salary_range}
                   onChange={(e) => handleChange("salary_range", e.target.value)}
-        disabled={isReadOnly}
+                  disabled={isReadOnly}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
                   required
+                  title="Expected Salary Range"
                 >
                   <option value="">Select salary range</option>
                   <option value="$50,000 - $70,000">$50,000 - $70,000</option>
@@ -270,7 +279,7 @@ export function ClientEditModal({ client, isOpen, currentUserRole, onClose, onSu
                       <input
                         type="checkbox"
                         checked={form.location_preferences?.includes(location)}
-        disabled={isReadOnly}
+                        disabled={isReadOnly}
                         onChange={(e) => {
                           const updatedLocations = e.target.checked
                             ? [...form.location_preferences, location]

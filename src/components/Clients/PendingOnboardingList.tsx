@@ -146,6 +146,7 @@ export const PendingOnboardingList: React.FC<Props> = ({
               <div key={key}>
                 <label className="block text-sm font-medium mb-1">{label}</label>
                 <select
+                  aria-label={label}
                   value={(roleAssignments as any)[key]}
                   onChange={(e) =>
                     setRoleAssignments({ ...roleAssignments, [key]: e.target.value })

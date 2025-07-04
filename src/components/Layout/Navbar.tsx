@@ -27,11 +27,19 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
         </div>
         
         <div className="flex items-center space-x-4">
-          <button className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
+          <button
+            className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Notifications"
+            aria-label="Notifications"
+          >
             <Bell className="h-5 w-5" />
           </button>
           
-          <button className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
+          <button
+            className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Settings"
+            aria-label="Settings"
+          >
             <Settings className="h-5 w-5" />
           </button>
           
@@ -40,19 +48,15 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
               <div className="text-sm font-medium text-gray-900">{user.name}</div>
               <div className="text-xs text-gray-500">{roleLabels[user.role]}</div>
             </div>
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-medium text-sm">
-                {user.name.split(' ').map(n => n[0]).join('')}
-              </span>
-            </div>
+            <button
+              onClick={onLogout}
+              className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Log out"
+              aria-label="Log out"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
           </div>
-          
-          <button
-            onClick={onLogout}
-            className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <LogOut className="h-5 w-5" />
-          </button>
         </div>
       </div>
     </nav>

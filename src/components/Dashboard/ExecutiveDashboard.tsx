@@ -55,8 +55,9 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ user, ti
 
     <div className="space-y-8">
       <div className="mb-4">
-        <label className="text-sm font-medium text-gray-700 mr-2">Filter by Ticket Type:</label>
+        <label htmlFor="ticket-type-filter" className="text-sm font-medium text-gray-700 mr-2">Filter by Ticket Type:</label>
         <select
+          id="ticket-type-filter"
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
           className="border px-3 py-1 rounded text-sm"
