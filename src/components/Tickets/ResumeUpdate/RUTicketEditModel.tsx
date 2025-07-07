@@ -955,7 +955,7 @@ export const TicketEditModal: React.FC<TicketEditModalProps> = ({
                 <div>
                   <label className="text-sm font-medium text-gray-500">Created By</label>
                   <p className="text-gray-900">{createdByUser} </p>
-                </div>                
+                </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Ticket Sort Code</label>
                   <p className="text-gray-900">{ticket.short_code}</p>
@@ -1346,7 +1346,7 @@ export const TicketEditModal: React.FC<TicketEditModalProps> = ({
                           </a>
                         </div>
                       )}
-                        <h3 className="text-lg font-semibold text-purple-900 mb-4">Final Review Done</h3>
+                      <h3 className="text-lg font-semibold text-purple-900 mb-4">Final Review Done</h3>
                     </div>
                   )}
 
@@ -1385,12 +1385,12 @@ export const TicketEditModal: React.FC<TicketEditModalProps> = ({
 
           {!canEdit() && (
             <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
-                <div className="flex items-center space-x-2">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                    <p className="text-yellow-800">You don't have permission to edit this ticket. You can only view the details.</p>
-                </div>
+              <div className="flex items-center space-x-2">
+                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                <p className="text-yellow-800">You don't have permission to edit this ticket. You can only view the details.</p>
+              </div>
             </div>
-        )}
+          )}
         </div>
       </div>
     </div>

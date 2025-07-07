@@ -77,7 +77,7 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canResolveTickets: true,
     canEscalateTickets: true,
     canViewClients: true,
-    canManageUsers: true,
+    canManageUsers: false,
     canViewReports: true,
     canOnboardClients: false,
   },
