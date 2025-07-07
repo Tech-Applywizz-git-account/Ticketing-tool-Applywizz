@@ -377,7 +377,7 @@ function App() {
   // This function takes in a userId and userData and updates the user with the given userId in the users array
 
   const handleUpdateUser = (userId: string, userData: any) => {
-    // Map through the users array and return a new array with the user with the given userId updated with the new userData
+    // Map through the users array and return a new array with the user with cthe given userId updated with the new userData
     setUsers(users.map(user =>
       user.id === userId ? { ...user, ...userData } : user
     )); ``
@@ -629,7 +629,98 @@ function App() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {clients.map(client => (
+                    {currentUser?.role == 'career_associate' && 
+                    clients.filter(client => client.careerassociateid === currentUser.id).map(client => (
+                      <tr key={client.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="font-medium text-gray-900">{client.full_name}</div>
+                            <div className="text-sm text-gray-500">{client.personal_email}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
+                          <div className="text-sm text-gray-500">{client.callable_phone}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
+                            Roles:{" "}
+                            {client.job_role_preferences.join(", ")}
+                          </p>
+                          }</div>
+                          <div className="text-sm text-gray-500">{client.salary_range}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {currentUser?.role == 'career_associate' && (
+                            <button
+                              onClick={() => handleClientEdit(client)}
+                              className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                            >
+                              <span>View</span>
+                            </button>
+                          )}
+                          {currentUser?.role !== 'career_associate' && (
+                            <button
+                              onClick={() => handleClientEdit(client)}
+                              className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                            >
+                              <Edit className="h-4 w-4" />
+                              <span>Edit</span>
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {currentUser?.role == 'ca_team_lead' && 
+                    clients.filter(client => client.careerassociatemanagerid === currentUser.id).map(client => (
+                      <tr key={client.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="font-medium text-gray-900">{client.full_name}</div>
+                            <div className="text-sm text-gray-500">{client.personal_email}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
+                          <div className="text-sm text-gray-500">{client.callable_phone}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
+                            Roles:{" "}
+                            {client.job_role_preferences.join(", ")}
+                          </p>
+                          }</div>
+                          <div className="text-sm text-gray-500">{client.salary_range}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {currentUser?.role == 'career_associate' && (
+                            <button
+                              onClick={() => handleClientEdit(client)}
+                              className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                            >
+                              <span>View</span>
+                            </button>
+                          )}
+                          {currentUser?.role !== 'career_associate' && (
+                            <button
+                              onClick={() => handleClientEdit(client)}
+                              className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                            >
+                              <Edit className="h-4 w-4" />
+                              <span>Edit</span>
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {(currentUser?.role !== 'ca_team_lead' && currentUser?.role !== 'career_associate' )&& 
+                    clients.map(client => (
                       <tr key={client.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
