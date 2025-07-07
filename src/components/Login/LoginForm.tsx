@@ -94,7 +94,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         </form>
 
         <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-          <h3 className="text-sm font-medium text-gray-900 mb-2">Login Instructions:</h3>
+          <h3 className="text-sm font-medium text-gray-900 mb-2">Login Instructions :</h3>
           <ul className="text-xs text-gray-600 space-y-1">
             <li>• Use the email and password provided by your administrator</li>
             <li>• Contact your system admin if you need credentials</li>
