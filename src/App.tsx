@@ -719,7 +719,6 @@ function App() {
                         </td>
                       </tr>
                     ))}
-                    
                     {(currentUser?.role !== 'ca_team_lead' && currentUser?.role !== 'career_associate' )&& 
                     clients.map(client => (
                       <tr key={client.id} className="hover:bg-gray-50">
