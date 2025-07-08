@@ -2,16 +2,16 @@
 
 export type TicketType =
   | 'volume_shortfall'
-  | 'high_rejections'
-  | 'no_interviews'
-  | 'profile_data_issue'
-  | 'credential_issue'
-  | 'bulk_complaints'
-  | 'early_application_request'
   | 'resume_update'
-  | 'job_feed_empty'
-  | 'system_technical_failure'
-  | 'am_not_responding'
+  // | 'high_rejections'
+  // | 'no_interviews'
+  // | 'profile_data_issue'
+  // | 'credential_issue'
+  // | 'bulk_complaints'
+  // | 'early_application_request'
+  // | 'job_feed_empty'
+  // | 'system_technical_failure'
+  // | 'am_not_responding'
 
 export type UserRole =
   | 'client'

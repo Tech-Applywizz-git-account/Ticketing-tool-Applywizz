@@ -85,9 +85,9 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
            full_name,
            job_role_preferences,
           careerassociatemanagerid:careerassociatemanagerid (
-    id,
-    name
-  )`)
+            id,
+            name
+          )`)
         .eq('id', clientId)
         .single(); // Since you're fetching only one row;
  
@@ -112,16 +112,16 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
   const getDefaultTitle = (type: TicketType): string => {
     const titles: Record<TicketType, string> = {
       volume_shortfall: 'Volume Shortfall - Applications below expectation',
-      high_rejections: 'High Rejection Rate - Client feedback needed',
-      no_interviews: 'No Interview Calls - Client concern',
-      profile_data_issue: 'Profile Data Correction Required',
-      credential_issue: 'Client Credential Access Problem',
-      bulk_complaints: 'Multiple Client Complaints',
-      early_application_request: 'Client Requests Faster Processing',
       resume_update: 'Client Resume Update Required',
-      job_feed_empty: 'No Jobs Available in Feed',
-      system_technical_failure: 'System Technical Issue',
-      am_not_responding: 'Account Manager Not Responding to New Client',
+      // high_rejections: 'High Rejection Rate - Client feedback needed',
+      // no_interviews: 'No Interview Calls - Client concern',
+      // profile_data_issue: 'Profile Data Correction Required',
+      // credential_issue: 'Client Credential Access Problem',
+      // bulk_complaints: 'Multiple Client Complaints',
+      // early_application_request: 'Client Requests Faster Processing',
+      // job_feed_empty: 'No Jobs Available in Feed',
+      // system_technical_failure: 'System Technical Issue',
+      // am_not_responding: 'Account Manager Not Responding to New Client',
     };
     return titles[type] || '';
   };
@@ -164,6 +164,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       priority: slaConfig.priority, // Fixed: Now uses correct priority
       status: 'open',
       sla_hours: slaConfig.hours, // Fixed: Now uses correct hours
+      createdat: now,
       updatedAt: isoNow,
       dueDate: calculateDueDate(slaConfig.hours), // Fixed: Now uses correct hours
       escalation_level: 0,
@@ -176,7 +177,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     const { error: ticketError } = await supabase
       .from('tickets')
       .insert(newTicket)
-      .select('id')
+      .select('id') // Ensure we get the ID back
       .single();
  
     if (ticketError) {
@@ -220,42 +221,42 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
  
   const renderTicketSpecificFields = () => {
     switch (ticketType) {
-      case 'credential_issue':
-        return (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Credential Issue Type
-              </label>
-              <select
-                value={metadata.issueType || ''}
-                onChange={(e) => setMetadata({ ...metadata, issueType: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                required
-                title="Credential Issue Type"
-              >
-                <option value="">Select issue type</option>
-                <option value="password_changed">Password Changed</option>
-                <option value="account_locked">Account Locked</option>
-                <option value="2fa_enabled">2FA Enabled</option>
-                <option value="email_access_denied">Email Access Denied</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Last Successful Access
-              </label>
-              <input
-                type="datetime-local"
-                value={metadata.lastAccess || ''}
-                onChange={(e) => setMetadata({ ...metadata, lastAccess: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                title="Enter the last successful access date and time"
-                placeholder="YYYY-MM-DDThh:mm"
-              />
-            </div>
-          </div>
-        );
+      // case 'credential_issue':
+      //   return (
+      //     <div className="space-y-4">
+      //       <div>
+      //         <label className="block text-sm font-medium text-gray-700 mb-2">
+      //           Credential Issue Type
+      //         </label>
+      //         <select
+      //           value={metadata.issueType || ''}
+      //           onChange={(e) => setMetadata({ ...metadata, issueType: e.target.value })}
+      //           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+      //           required
+      //           title="Credential Issue Type"
+      //         >
+      //           <option value="">Select issue type</option>
+      //           <option value="password_changed">Password Changed</option>
+      //           <option value="account_locked">Account Locked</option>
+      //           <option value="2fa_enabled">2FA Enabled</option>
+      //           <option value="email_access_denied">Email Access Denied</option>
+      //         </select>
+      //       </div>
+      //       <div>
+      //         <label className="block text-sm font-medium text-gray-700 mb-2">
+      //           Last Successful Access
+      //         </label>
+      //         <input
+      //           type="datetime-local"
+      //           value={metadata.lastAccess || ''}
+      //           onChange={(e) => setMetadata({ ...metadata, lastAccess: e.target.value })}
+      //           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+      //           title="Enter the last successful access date and time"
+      //           placeholder="YYYY-MM-DDThh:mm"
+      //         />
+      //       </div>
+      //     </div>
+      //   );
  
       case 'volume_shortfall':
         return (
@@ -308,160 +309,160 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
           </div>
         );
  
-      case 'job_feed_empty':
-        return (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Job Categories Affected
-              </label>
-              <div className="space-y-2">
-                {['Software Engineer', 'Data Scientist', 'Product Manager', 'DevOps Engineer'].map(category => (
-                  <label key={category} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={metadata.jobCategories?.includes(category) || false}
-                      onChange={(e) => {
-                        const categories = metadata.jobCategories || [];
-                        if (e.target.checked) {
-                          setMetadata({ ...metadata, jobCategories: [...categories, category] });
-                        } else {
-                          setMetadata({ ...metadata, jobCategories: categories.filter((c: string) => c !== category) });
-                        }
-                      }}
-                      className="mr-2"
-                    />
-                    <span className="text-sm">{category}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Locations Affected
-              </label>
-              <input
-                type="text"
-                value={metadata.locations || ''}
-                onChange={(e) => setMetadata({ ...metadata, locations: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="New York, San Francisco"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Last Job Found Date
-              </label>
-              <input
-                type="date"
-                value={metadata.lastJobFound || ''}
-                onChange={(e) => setMetadata({ ...metadata, lastJobFound: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                title="Select the time period"
-                placeholder="YYYY-MM-DD"
-              />
-            </div>
-          </div>
-        );
+      // case 'job_feed_empty':
+      //   return (
+      //     <div className="space-y-4">
+      //       <div>
+      //         <label className="block text-sm font-medium text-gray-700 mb-2">
+      //           Job Categories Affected
+      //         </label>
+      //         <div className="space-y-2">
+      //           {['Software Engineer', 'Data Scientist', 'Product Manager', 'DevOps Engineer'].map(category => (
+      //             <label key={category} className="flex items-center">
+      //               <input
+      //                 type="checkbox"
+      //                 checked={metadata.jobCategories?.includes(category) || false}
+      //                 onChange={(e) => {
+      //                   const categories = metadata.jobCategories || [];
+      //                   if (e.target.checked) {
+      //                     setMetadata({ ...metadata, jobCategories: [...categories, category] });
+      //                   } else {
+      //                     setMetadata({ ...metadata, jobCategories: categories.filter((c: string) => c !== category) });
+      //                   }
+      //                 }}
+      //                 className="mr-2"
+      //               />
+      //               <span className="text-sm">{category}</span>
+      //             </label>
+      //           ))}
+      //         </div>
+      //       </div>
+      //       <div>
+      //         <label className="block text-sm font-medium text-gray-700 mb-2">
+      //           Locations Affected
+      //         </label>
+      //         <input
+      //           type="text"
+      //           value={metadata.locations || ''}
+      //           onChange={(e) => setMetadata({ ...metadata, locations: e.target.value })}
+      //           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+      //           placeholder="New York, San Francisco"
+      //         />
+      //       </div>
+      //       <div>
+      //         <label className="block text-sm font-medium text-gray-700 mb-2">
+      //           Last Job Found Date
+      //         </label>
+      //         <input
+      //           type="date"
+      //           value={metadata.lastJobFound || ''}
+      //           onChange={(e) => setMetadata({ ...metadata, lastJobFound: e.target.value })}
+      //           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+      //           title="Select the time period"
+      //           placeholder="YYYY-MM-DD"
+      //         />
+      //       </div>
+      //     </div>
+      //   );
  
-      case 'profile_data_issue':
-        return (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Incorrect Field
-              </label>
-              <select
-                value={metadata.incorrectField || ''}
-                onChange={(e) => setMetadata({ ...metadata, incorrectField: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                required
-                aria-label="Incorrect Field"
-              >
-                <option value="">Select field</option>
-                <option value="job_role">Job Role</option>
-                <option value="salary_range">Salary Range</option>
-                <option value="location">Location</option>
-                <option value="experience_level">Experience Level</option>
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Current (Incorrect) Value
-                </label>
-                <input
-                  type="text"
-                  value={metadata.currentValue || ''}
-                  onChange={(e) => setMetadata({ ...metadata, currentValue: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Current incorrect value"
-                  title="Enter the current incorrect value"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Correct Value
-                </label>
-                <input
-                  type="text"
-                  value={metadata.correctValue || ''}
-                  onChange={(e) => setMetadata({ ...metadata, correctValue: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Correct value"
-                  title="Enter the correct value"
-                />
-              </div>
-            </div>
-          </div>
-        );
+      // case 'profile_data_issue':
+      //   return (
+      //     <div className="space-y-4">
+      //       <div>
+      //         <label className="block text-sm font-medium text-gray-700 mb-2">
+      //           Incorrect Field
+      //         </label>
+      //         <select
+      //           value={metadata.incorrectField || ''}
+      //           onChange={(e) => setMetadata({ ...metadata, incorrectField: e.target.value })}
+      //           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+      //           required
+      //           aria-label="Incorrect Field"
+      //         >
+      //           <option value="">Select field</option>
+      //           <option value="job_role">Job Role</option>
+      //           <option value="salary_range">Salary Range</option>
+      //           <option value="location">Location</option>
+      //           <option value="experience_level">Experience Level</option>
+      //         </select>
+      //       </div>
+      //       <div className="grid grid-cols-2 gap-4">
+      //         <div>
+      //           <label className="block text-sm font-medium text-gray-700 mb-2">
+      //             Current (Incorrect) Value
+      //           </label>
+      //           <input
+      //             type="text"
+      //             value={metadata.currentValue || ''}
+      //             onChange={(e) => setMetadata({ ...metadata, currentValue: e.target.value })}
+      //             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+      //             placeholder="Current incorrect value"
+      //             title="Enter the current incorrect value"
+      //           />
+      //         </div>
+      //         <div>
+      //           <label className="block text-sm font-medium text-gray-700 mb-2">
+      //             Correct Value
+      //           </label>
+      //           <input
+      //             type="text"
+      //             value={metadata.correctValue || ''}
+      //             onChange={(e) => setMetadata({ ...metadata, correctValue: e.target.value })}
+      //             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+      //             placeholder="Correct value"
+      //             title="Enter the correct value"
+      //           />
+      //         </div>
+      //       </div>
+      //     </div>
+      //   );
  
-      case 'am_not_responding':
-        return (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Onboarding Date
-              </label>
-              <input
-                type="date"
-                value={metadata.onboardingDate || ''}
-                onChange={(e) => setMetadata({ ...metadata, onboardingDate: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                required
-                title="Select the onboarding date"
-                placeholder="YYYY-MM-DD"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Assigned Account Manager
-              </label>
-              <input
-                type="text"
-                value={metadata.assignedAM || 'Naveen'}
-                onChange={(e) => setMetadata({ ...metadata, assignedAM: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="Account Manager Name"
-                title="Enter the assigned Account Manager's name"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Days Since Onboarding
-              </label>
-              <input
-                type="number"
-                value={metadata.daysSinceOnboarding || ''}
-                onChange={(e) => setMetadata({ ...metadata, daysSinceOnboarding: Number(e.target.value) })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="2"
-                required
-              />
-            </div>
-          </div>
-        );
+      // case 'am_not_responding':
+      //   return (
+      //     <div className="space-y-4">
+      //       <div>
+      //         <label className="block text-sm font-medium text-gray-700 mb-2">
+      //           Onboarding Date
+      //         </label>
+      //         <input
+      //           type="date"
+      //           value={metadata.onboardingDate || ''}
+      //           onChange={(e) => setMetadata({ ...metadata, onboardingDate: e.target.value })}
+      //           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+      //           required
+      //           title="Select the onboarding date"
+      //           placeholder="YYYY-MM-DD"
+      //         />
+      //       </div>
+      //       <div>
+      //         <label className="block text-sm font-medium text-gray-700 mb-2">
+      //           Assigned Account Manager
+      //         </label>
+      //         <input
+      //           type="text"
+      //           value={metadata.assignedAM || 'Naveen'}
+      //           onChange={(e) => setMetadata({ ...metadata, assignedAM: e.target.value })}
+      //           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+      //           placeholder="Account Manager Name"
+      //           title="Enter the assigned Account Manager's name"
+      //           required
+      //         />
+      //       </div>
+      //       <div>
+      //         <label className="block text-sm font-medium text-gray-700 mb-2">
+      //           Days Since Onboarding
+      //         </label>
+      //         <input
+      //           type="number"
+      //           value={metadata.daysSinceOnboarding || ''}
+      //           onChange={(e) => setMetadata({ ...metadata, daysSinceOnboarding: Number(e.target.value) })}
+      //           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+      //           placeholder="2"
+      //           required
+      //         />
+      //       </div>
+      //     </div>
+      //   );
  
       default:
         return null;
