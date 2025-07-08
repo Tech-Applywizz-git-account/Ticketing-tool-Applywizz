@@ -1,17 +1,17 @@
 import { User, Client, Ticket, SLAConfig, RolePermissions, TicketType, UserRole } from '../types';
 
 export const slaConfig: SLAConfig = {
-  credential_issue: { priority: 'critical', hours: 8 },
-  profile_data_issue: { priority: 'critical', hours: 12 },
-  bulk_complaints: { priority: 'critical', hours: 24 },
   volume_shortfall: { priority: 'high', hours: 24 },
-  high_rejections: { priority: 'high', hours: 24 },
   resume_update: { priority: 'high', hours: 24 },
-  job_feed_empty: { priority: 'high', hours: 24 },
-  system_technical_failure: { priority: 'high', hours: 24 },
-  early_application_request: { priority: 'medium', hours: 24 },
-  no_interviews: { priority: 'medium', hours: 36 },
-  am_not_responding: { priority: 'high', hours: 12 },
+  // credential_issue: { priority: 'critical', hours: 8 },
+  // profile_data_issue: { priority: 'critical', hours: 12 },
+  // bulk_complaints: { priority: 'critical', hours: 24 },
+  // high_rejections: { priority: 'high', hours: 24 },
+  // job_feed_empty: { priority: 'high', hours: 24 },
+  // system_technical_failure: { priority: 'high', hours: 24 },
+  // early_application_request: { priority: 'medium', hours: 24 },
+  // no_interviews: { priority: 'medium', hours: 36 },
+  // am_not_responding: { priority: 'high', hours: 12 },
 };
 
 export const rolePermissions: Record<UserRole, RolePermissions> = {
@@ -27,7 +27,8 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canOnboardClients: false,
   },
   sales: {
-    canCreateTickets: ['am_not_responding'],
+    canCreateTickets: [],
+    // canCreateTickets: ['am_not_responding'],
     canViewTickets: false,
     canEditTickets: false,
     canResolveTickets: false,
@@ -40,16 +41,20 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
   account_manager: {
     canCreateTickets: [
       'volume_shortfall',
-      'high_rejections',
-      'no_interviews',
-      'profile_data_issue',
-      'credential_issue',
-      'bulk_complaints',
-      'early_application_request',
-      'resume_update',
-      'job_feed_empty',
-      'system_technical_failure'
+      'resume_update'
     ],
+    // canCreateTickets: [
+    //   'volume_shortfall',
+    //   'high_rejections',
+    //   'no_interviews',
+    //   'profile_data_issue',
+    //   'credential_issue',
+    //   'bulk_complaints',
+    //   'early_application_request',
+    //   'resume_update',
+    //   'job_feed_empty',
+    //   'system_technical_failure'
+    // ],
     canViewTickets: true,
     canEditTickets: true,
     canResolveTickets: true,
@@ -60,7 +65,8 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canOnboardClients: false,
   },
   career_associate: {
-    canCreateTickets: ['credential_issue', 'job_feed_empty'],
+    canCreateTickets: [],
+    // canCreateTickets: ['credential_issue', 'job_feed_empty'],
     canViewTickets: true,
     canEditTickets: false,
     canResolveTickets: false,
@@ -104,7 +110,8 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canOnboardClients: false,
   },
   credential_resolution: {
-    canCreateTickets: ['credential_issue'],
+    // canCreateTickets: ['credential_issue'],
+    canCreateTickets: [],
     canViewTickets: true,
     canEditTickets: true,
     canResolveTickets: true,
@@ -117,15 +124,15 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
   cro: {
     canCreateTickets: [
       'volume_shortfall',
-      'high_rejections',
-      'no_interviews',
-      'profile_data_issue',
-      'credential_issue',
-      'bulk_complaints',
-      'early_application_request',
-      'resume_update',
-      'job_feed_empty',
-      'system_technical_failure'
+      'resume_update'
+      // 'high_rejections',
+      // 'no_interviews',
+      // 'profile_data_issue',
+      // 'credential_issue',
+      // 'bulk_complaints',
+      // 'early_application_request',
+      // 'job_feed_empty',
+      // 'system_technical_failure'
     ],
     canViewTickets: true,
     canEditTickets: true,
@@ -445,16 +452,16 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
 
 export const ticketTypeLabels: Record<TicketType, string> = {
   volume_shortfall: 'Volume Shortfall',
-  high_rejections: 'High Rejections',
-  no_interviews: 'No Interviews',
-  profile_data_issue: 'Profile Data Issue',
-  credential_issue: 'Credential Issue',
-  bulk_complaints: 'Bulk Complaints',
-  early_application_request: 'Early Application Request',
   resume_update: 'Resume Update',
-  job_feed_empty: 'Job Feed Empty',
-  system_technical_failure: 'System Technical Failure',
-  am_not_responding: 'AM Not Responding',
+  // high_rejections: 'High Rejections',
+  // no_interviews: 'No Interviews',
+  // profile_data_issue: 'Profile Data Issue',
+  // credential_issue: 'Credential Issue',
+  // bulk_complaints: 'Bulk Complaints',
+  // early_application_request: 'Early Application Request',
+  // job_feed_empty: 'Job Feed Empty',
+  // system_technical_failure: 'System Technical Failure',
+  // am_not_responding: 'AM Not Responding',
 };
 
 export const roleLabels: Record<UserRole, string> = {
