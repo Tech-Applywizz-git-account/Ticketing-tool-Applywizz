@@ -339,25 +339,25 @@ function App() {
             }}
           />
         );
-      case "resume_update":
-        return (
-          <TicketEditModal
-            ticket={selectedTicket}
-            user={currentUser}
-            isOpen={isTicketEditModalOpen}
-            assignments={assignments}
-            onClose={() => {
-              setIsTicketEditModalOpen(false);
-              setSelectedTicket(null);
-            }}
-            onSubmit={(updateData) => {
-              if (selectedTicket) {
-                handleUpdateTicket(selectedTicket.id, updateData);
-              }
-            }}
-            onTicketUpdated={handleTicketUpdated} // Add this line
-          />
-        )
+      // case "resume_update":
+      //   return (
+      //     <TicketEditModal
+      //       ticket={selectedTicket}
+      //       user={currentUser}
+      //       isOpen={isTicketEditModalOpen}
+      //       assignments={assignments}
+      //       onClose={() => {
+      //         setIsTicketEditModalOpen(false);
+      //         setSelectedTicket(null);
+      //       }}
+      //       onSubmit={(updateData) => {
+      //         if (selectedTicket) {
+      //           handleUpdateTicket(selectedTicket.id, updateData);
+      //         }
+      //       }}
+      //       onTicketUpdated={handleTicketUpdated} // Add this line
+      //     />
+      //   )
       default:
         return null;
     }
@@ -457,7 +457,7 @@ function App() {
                   </button>
                 )}
                 {/* {(currentUser?.role === 'sales' || currentUser?.role == 'account_manager' || currentUser?.role == 'career_associate' || currentUser?.role == 'cro' || currentUser?.role == 'credential_resolution') && ( */}
-                {(currentUser?.role == 'account_manager' || currentUser?.role == 'cro') && (
+                {(currentUser?.role == 'account_manager' || isExecutive ) && (
                   <button
                     onClick={() => setIsCreateTicketModalOpen(true)}
                     className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -573,7 +573,7 @@ function App() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-gray-900">Tickets</h1>
-              {currentUser?.role == 'account_manager' && (
+              {(currentUser?.role == 'account_manager'|| currentUser.role== 'ceo'||currentUser.role== 'coo'||currentUser.role== 'cro') && (
                 <button
                   onClick={() => setIsCreateTicketModalOpen(true)}
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -821,21 +821,7 @@ function App() {
         );
     }
   };
-  // if (window.location.pathname === "/EmailConfirmed") {
-  //   return <EmailConfirmed />;
-  // }
 
-  // if (window.location.pathname === "/LinkExpired") {
-  //   return <LinkExpired />;
-  // }
-
-  // if (window.location.pathname === "/email-verify-redirect") {
-  //   return <EmailVerifyRedirect />;
-  // }
-
-  // if (!currentUser) {
-  //   return <LoginForm onLogin={handleLogin} />;
-  // }
 
 
 

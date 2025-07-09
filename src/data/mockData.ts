@@ -2,7 +2,7 @@ import { User, Client, Ticket, SLAConfig, RolePermissions, TicketType, UserRole 
 
 export const slaConfig: SLAConfig = {
   volume_shortfall: { priority: 'high', hours: 24 },
-  resume_update: { priority: 'high', hours: 24 },
+  // resume_update: { priority: 'high', hours: 24 },
   // credential_issue: { priority: 'critical', hours: 8 },
   // profile_data_issue: { priority: 'critical', hours: 12 },
   // bulk_complaints: { priority: 'critical', hours: 24 },
@@ -40,8 +40,7 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
   },
   account_manager: {
     canCreateTickets: [
-      'volume_shortfall',
-      'resume_update'
+      'volume_shortfall'
     ],
     // canCreateTickets: [
     //   'volume_shortfall',
@@ -123,8 +122,8 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
   },
   cro: {
     canCreateTickets: [
-      'volume_shortfall',
-      'resume_update'
+      'volume_shortfall'
+      // 'resume_update'
       // 'high_rejections',
       // 'no_interviews',
       // 'profile_data_issue',
@@ -155,7 +154,9 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canOnboardClients: false,
   },
   coo: {
-    canCreateTickets: [],
+    canCreateTickets: [
+      'volume_shortfall'
+    ],
     canViewTickets: true,
     canEditTickets: false,
     canResolveTickets: false,
@@ -166,7 +167,9 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canOnboardClients: false,
   },
   ceo: {
-    canCreateTickets: [],
+    canCreateTickets: [
+      'volume_shortfall'
+    ],
     canViewTickets: true,
     canEditTickets: false,
     canResolveTickets: false,
@@ -452,7 +455,7 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
 
 export const ticketTypeLabels: Record<TicketType, string> = {
   volume_shortfall: 'Volume Shortfall',
-  resume_update: 'Resume Update',
+  // resume_update: 'Resume Update',
   // high_rejections: 'High Rejections',
   // no_interviews: 'No Interviews',
   // profile_data_issue: 'Profile Data Issue',

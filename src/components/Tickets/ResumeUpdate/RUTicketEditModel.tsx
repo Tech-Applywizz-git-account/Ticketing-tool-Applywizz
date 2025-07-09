@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Clock, User, AlertTriangle, CheckCircle, MessageSquare, Calendar } from 'lucide-react';
 import { Ticket, User as UserType, TicketStatus } from '../../../types';
-import { ticketTypeLabels } from '../../../data/mockData';
+// import { ticketTypeLabels } from '../../../data/mockData';
 import { format } from 'date-fns';
 import { supabase } from '../../../lib/supabaseClient'
 
@@ -19,6 +19,10 @@ interface TicketEditModalProps {
   onSubmit: (ticketData: any) => void;
   onTicketUpdated?: () => void;
 }
+
+type TicketType = | 'resume_update';
+
+const ticketTypeLabels: Record<TicketType, string> = {resume_update: 'Resume Update',};
 
 export const TicketEditModal: React.FC<TicketEditModalProps> = ({
   ticket,
@@ -166,7 +170,8 @@ export const TicketEditModal: React.FC<TicketEditModalProps> = ({
 
   useEffect(() => {
     const updateStatusIfResumeTeamLead = async () => {
-      if (ticket && ticket.type === 'resume_update' &&
+      if (ticket && 
+      // if (ticket && ticket.type === 'resume_update' &&//vivek
         user.role === 'resume_team' &&
         ticket.status === 'open') {
         await supabase.from('tickets').update({
@@ -836,8 +841,8 @@ export const TicketEditModal: React.FC<TicketEditModalProps> = ({
     if (alreadyAssignedIds.has(user?.id)) return true;
     // if (user.role === 'ca_manager' && ticket.type === 'volume_shortfall') return true;
     // if (user.role === 'account_manager' && ticket.type === 'volume_shortfall') return true;
-    if (user.role === 'resume_team' && ticket.type === 'resume_update') return true;
-    if (user.role === 'scraping_team' && ticket.type === 'job_feed_empty') return true;
+    // if (user.role === 'resume_team' && ticket.type === 'resume_update') return true;//vivek
+    // if (user.role === 'scraping_team' && ticket.type === 'job_feed_empty') return true;//vivek
     return false;
   };
 
@@ -1022,7 +1027,8 @@ export const TicketEditModal: React.FC<TicketEditModalProps> = ({
           )}
 
           {/* Add this section after the metadata display */}
-          {user.role === 'resume_team' && localTicket?.status === 'open' && localTicket?.type === 'resume_update' && (
+          {user.role === 'resume_team' && (
+          // {user.role === 'resume_team' && localTicket?.status === 'open' && localTicket?.type === 'resume_update' && (//vivek
             <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
               <h3 className="text-lg font-semibold text-blue-900 mb-4">Resume Update</h3>
 
@@ -1120,7 +1126,8 @@ export const TicketEditModal: React.FC<TicketEditModalProps> = ({
 
 
 
-          {user.role === 'account_manager' && ticket.type === 'resume_update' && currentStatus === 'in_progress' && (
+          {user.role === 'account_manager'  && currentStatus === 'in_progress' && (
+          // {user.role === 'account_manager' && ticket.type === 'resume_update' && currentStatus === 'in_progress' && (//vivek
             <div className="bg-green-50 rounded-lg p-6 border border-green-200">
               <h3 className="text-lg font-semibold text-green-900 mb-4">Resume Review</h3>
 
@@ -1324,7 +1331,8 @@ export const TicketEditModal: React.FC<TicketEditModalProps> = ({
 
                 {/* CA/Scraping Team View - Read Only */}
                 {(user.role === 'career_associate' || user.role === 'scraping_team') &&
-                  ticket.type === 'resume_update' && ticket.status === 'closed' && (
+                   ticket.status === 'closed' && (
+                  // ticket.type === 'resume_update' && ticket.status === 'closed' && (//Vivek
                     <div className="bg-purple-50 rounded-lg p-6 border border-purple-200">
 
                       {/* Final Resume File */}
@@ -1351,7 +1359,8 @@ export const TicketEditModal: React.FC<TicketEditModalProps> = ({
                   )}
 
                 {/* Role-Specific Actions */}
-                {user.role === 'scraping_team' && ticket.type === 'job_feed_empty' && (
+                {user.role === 'scraping_team' &&  (
+                // {user.role === 'scraping_team' && ticket.type === 'job_feed_empty' && (//Vivek
                   <div className="bg-purple-50 rounded-lg p-6 border border-purple-200">
                     <h3 className="text-lg font-semibold text-purple-900 mb-4">Scraping Team Actions</h3>
                     <div className="space-y-3">

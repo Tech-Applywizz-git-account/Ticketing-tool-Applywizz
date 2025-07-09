@@ -112,7 +112,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
   const getDefaultTitle = (type: TicketType): string => {
     const titles: Record<TicketType, string> = {
       volume_shortfall: 'Volume Shortfall - Applications below expectation',
-      resume_update: 'Client Resume Update Required',
+      // resume_update: 'Client Resume Update Required',
       // high_rejections: 'High Rejection Rate - Client feedback needed',
       // no_interviews: 'No Interview Calls - Client concern',
       // profile_data_issue: 'Profile Data Correction Required',
@@ -500,6 +500,8 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       </div>
     )
   };
+   const isExecutive = user && ['ceo', 'coo', 'cro'].includes(user.role);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -519,7 +521,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
  
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Client Selection - for roles that can select clients */}
-          {(user.role === 'account_manager' || user.role === 'sales') && (
+          {(user.role === 'account_manager' || user.role === 'sales' || isExecutive) && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Select Client
