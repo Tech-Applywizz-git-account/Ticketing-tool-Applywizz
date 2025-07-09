@@ -34,7 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
           >
             <Bell className="h-5 w-5" />
           </button>
-          
+
           <button
             className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
             title="Settings"
