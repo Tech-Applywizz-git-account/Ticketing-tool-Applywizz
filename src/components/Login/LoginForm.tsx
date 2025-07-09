@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient'; 
 import { User } from '../../types';
-import { roleLabels } from '../../data/mockData'; // you can keep labels
+import { roleLabels } from '../../data/mockData';
 
 interface LoginFormProps {
   onLogin: (user: User) => void;
@@ -12,6 +12,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // New state for password visibility
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,12 +27,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       if (error) throw error;
       if (!data.user) throw new Error('No user data returned');
       
-      // Fetch user details from public.users
       const { data: publicUser, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', data.user.id)
-      .single();
+        .from('users')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
       
       if (userError || !publicUser) {
         throw new Error('Could not fetch user profile');
@@ -42,6 +42,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -70,18 +74,27 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
             />
           </div>
 
-          <div>
+          <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your password"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 pr-10"
+                placeholder="Enter your password"
+                required
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
 
           <button
@@ -105,4 +118,3 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
     </div>
   );
 };
-
