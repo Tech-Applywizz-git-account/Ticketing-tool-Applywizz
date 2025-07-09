@@ -32,6 +32,7 @@ interface Props {
   handleUpdateUser: (userId: string, data: any) => void;
   handleDeleteUser: (userId: string) => void;
   fetchData: () => Promise<void>;
+  pendingClientsCount: number;
 }
 
 const AppLayout: React.FC<Props> = ({
@@ -57,6 +58,7 @@ const AppLayout: React.FC<Props> = ({
   handleUpdateUser,
   handleDeleteUser,
   fetchData,
+  pendingClientsCount,
 }) => {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -67,6 +69,7 @@ const AppLayout: React.FC<Props> = ({
           user={currentUser}
           activeView={activeView}
           onViewChange={setActiveView}
+          pendingClientsCount={pendingClientsCount}
         />
         <main className="flex-1 p-8">
           {renderMainContent()}

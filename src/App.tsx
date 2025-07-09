@@ -1028,6 +1028,7 @@ function App() {
                   handleUpdateUser={handleUpdateUser}
                   handleDeleteUser={handleDeleteUser}
                   fetchData={fetchData}
+                  pendingClientsCount={pendingClients.length}
                 />
               </ProtectedRoute>
             }
