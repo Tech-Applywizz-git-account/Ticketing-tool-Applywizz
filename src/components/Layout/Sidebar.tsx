@@ -51,20 +51,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, activeView, onViewChange
       show: ["cro", "ceo", "coo"].includes(user.role),
       hasNotification: pendingClientsCount > 0,
     },
-
-
-    {
-      id: 'reports',
-      label: 'Reports',
-      icon: BarChart3,
-      show: permissions.canViewReports,
-    },
-    {
-      id: 'sla-monitor',
-      label: 'SLA Monitor',
-      icon: Clock,
-      show: ['cro', 'coo', 'ceo', 'cro_manager'].includes(user.role),
-    },
+    // {
+    //   id: 'reports',
+    //   label: 'Reports',
+    //   icon: BarChart3,
+    //   show: permissions.canViewReports,
+    // },
+    // {
+    //   id: 'sla-monitor',
+    //   label: 'SLA Monitor',
+    //   icon: Clock,
+    //   show: ['cro', 'coo', 'ceo', 'cro_manager'].includes(user.role),
+    // },
     {
       id: 'escalations',
       label: 'Escalations',
@@ -120,7 +118,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, activeView, onViewChange
         </div>
       </div>
 
-      <div className="px-6 py-4 border-t border-gray-200 mt-auto">
+      {/* <div className="px-6 py-4 border-t border-gray-200 mt-auto">
         <div className="text-xs text-gray-500 mb-2">Quick Actions</div>
         <div className="space-y-2">
           {permissions.canCreateTickets.length > 0 && (
@@ -143,7 +141,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, activeView, onViewChange
             </button>
           )}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
