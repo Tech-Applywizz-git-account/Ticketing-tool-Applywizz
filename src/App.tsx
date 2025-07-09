@@ -544,13 +544,13 @@ function App() {
                       <span className="font-medium text-green-900">Manage Clients</span>
                     </button>
 
-                    <button
+                    {/* <button
                       onClick={() => setActiveView('reports')}
                       className="w-full flex items-center space-x-3 p-3 text-left bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
                     >
                       <BarChart3 className="h-5 w-5 text-purple-600" />
                       <span className="font-medium text-purple-900">View Reports</span>
-                    </button>
+                    </button> */}
 
                     {currentUser?.role === 'system_admin' && (
                       <button
@@ -851,45 +851,45 @@ function App() {
           </div>
         );
 
-      case 'reports':
-        return (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900">Reports & Analytics</h1>
+      // case 'reports':
+      //   return (
+      //     <div className="space-y-6">
+      //       <h1 className="text-2xl font-bold text-gray-900">Reports & Analytics</h1>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">SLA Performance</h2>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">On-time Resolution Rate</span>
-                    <span className="font-semibold text-green-600">87%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-600 h-2 rounded-full" style={{ width: '87%' }}></div>
-                  </div>
-                </div>
-              </div>
+      //       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      //         <div className="bg-white rounded-xl border border-gray-200 p-6">
+      //           <h2 className="text-lg font-semibold text-gray-900 mb-4">SLA Performance</h2>
+      //           <div className="space-y-4">
+      //             <div className="flex justify-between items-center">
+      //               <span className="text-gray-600">On-time Resolution Rate</span>
+      //               <span className="font-semibold text-green-600">87%</span>
+      //             </div>
+      //             <div className="w-full bg-gray-200 rounded-full h-2">
+      //               <div className="bg-green-600 h-2 rounded-full" style={{ width: '87%' }}></div>
+      //             </div>
+      //           </div>
+      //         </div>
 
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Ticket Volume Trends</h2>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">This Week</span>
-                    <span className="font-semibold">{getVisibleTickets().length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Last Week</span>
-                    <span className="font-semibold">23</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-green-600">Growth</span>
-                    <span className="font-semibold text-green-600">+12%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
+      //         <div className="bg-white rounded-xl border border-gray-200 p-6">
+      //           <h2 className="text-lg font-semibold text-gray-900 mb-4">Ticket Volume Trends</h2>
+      //           <div className="space-y-3">
+      //             <div className="flex justify-between">
+      //               <span className="text-gray-600">This Week</span>
+      //               <span className="font-semibold">{getVisibleTickets().length}</span>
+      //             </div>
+      //             <div className="flex justify-between">
+      //               <span className="text-gray-600">Last Week</span>
+      //               <span className="font-semibold">23</span>
+      //             </div>
+      //             <div className="flex justify-between">
+      //               <span className="text-green-600">Growth</span>
+      //               <span className="font-semibold text-green-600">+12%</span>
+      //             </div>
+      //           </div>
+      //         </div>
+      //       </div>
+      //     </div>
+      //   );
 
       case 'escalations':
         return (<ExecutiveDashboard user={currentUser!} tickets={tickets} escalations={escalations} />);

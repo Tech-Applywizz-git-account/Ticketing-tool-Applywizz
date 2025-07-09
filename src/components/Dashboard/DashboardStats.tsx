@@ -56,7 +56,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> =({ stats, userRole, 
       }
     },
     {
-      label: 'Resolved Today',
+      label: 'Resolved Tickets',
       value: stats.resolvedTickets,
       icon: CheckCircle,
       color: 'green',
@@ -64,22 +64,22 @@ export const DashboardStats: React.FC<DashboardStatsProps> =({ stats, userRole, 
       show: true,
       onClick:onResolvedTicketsClick
     },
-    {
-      label: 'SLA Breaches',
-      value: stats.slaBreaches,
-      icon: Calendar,
-      color: 'red',
-      change: '-15%',
-      show: isExecutive,
-    },
-    {
-      label: 'Avg Resolution (hrs)',
-      value: stats.avgResolutionTime,
-      icon: BarChart3,
-      color: 'purple',
-      change: '-10%',
-      show: isExecutive,
-    },
+    // {
+    //   label: 'SLA Breaches',
+    //   value: stats.slaBreaches,
+    //   icon: Calendar,
+    //   color: 'red',
+    //   change: '-15%',
+    //   show: isExecutive,
+    // },
+    // {
+    //   label: 'Avg Resolution (hrs)',
+    //   value: stats.avgResolutionTime,
+    //   icon: BarChart3,
+    //   color: 'purple',
+    //   change: '-10%',
+    //   show: isExecutive,
+    // },
   ];
 
   const colorClasses = {
@@ -106,9 +106,9 @@ export const DashboardStats: React.FC<DashboardStatsProps> =({ stats, userRole, 
               <div className={`p-3 rounded-lg border ${colorClasses[stat.color as keyof typeof colorClasses]}`}>
                 <Icon className="h-6 w-6" />
               </div>
-              <div className={`text-sm font-medium ${isPositiveChange ? 'text-green-600' : 'text-red-600'}`}>
+              {/* <div className={`text-sm font-medium ${isPositiveChange ? 'text-green-600' : 'text-red-600'}`}>
                 {stat.change}
-              </div>
+              </div> */}
             </div>
 
             <div className="space-y-1">

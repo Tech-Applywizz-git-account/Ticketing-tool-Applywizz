@@ -69,7 +69,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ user, ti
         </select>
       </div>
       {/* Executive Summary */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      {/* <div className="bg-white rounded-xl border border-gray-200 p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-6">Executive Overview</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -97,7 +97,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ user, ti
             <div className="text-sm text-blue-700">Open Tickets</div>
           </div>
         </div>
-      </div>
+      </div> */}
       <div className="mt-6">
         <h2 className="text-xl font-bold mb-4 text-red-800">🚨 Escalated Tickets</h2>
 
@@ -135,7 +135,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ user, ti
       </div>
 
       {/* Critical Issues Requiring Attention */}
-      {isExecutive && criticalIssues.length > 0 && (
+      {/* {isExecutive && criticalIssues.length > 0 && (
         <div className="bg-white rounded-xl border border-red-200 p-6">
           <div className="flex items-center space-x-2 mb-6">
             <AlertTriangle className="h-6 w-6 text-red-600" />
@@ -167,10 +167,10 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ user, ti
             })}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Recent Escalations */}
-      {isExecutive && recentEscalations.length > 0 && (
+      {/* {isExecutive && recentEscalations.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Escalations</h2>
 
@@ -195,10 +195,10 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ user, ti
             ))}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* SLA Performance */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      {/* <div className="bg-white rounded-xl border border-gray-200 p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-6">SLA Performance</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -220,10 +220,10 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ user, ti
             <div className="text-sm text-red-700">SLA Breaches</div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Role-Specific Insights */}
-      {user.role === 'ceo' && (
+      {/* {user.role === 'ceo' && (
         <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-200 p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">CEO Strategic Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -283,7 +283,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ user, ti
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };
