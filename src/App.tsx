@@ -198,6 +198,9 @@ function App() {
   const handleLogin = (user: User) => {
     setCurrentUser(user);
     localStorage.setItem('currentUser', JSON.stringify(user));
+    if (user.role === 'client') {
+      setActiveView('tickets');
+    }
     // console.log('Logged in user:', user.name, 'with role:', user.role);
   };
   // console.log('Logged in user:', currentUser?.name, currentUser?.role);
@@ -571,7 +574,7 @@ function App() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-gray-900">Tickets</h1>
-              {(currentUser?.role == 'account_manager'|| currentUser.role== 'ceo'||currentUser.role== 'coo'||currentUser.role== 'cro') && (
+              {(currentUser?.role == 'account_manager'|| currentUser.role== 'ceo'||currentUser.role== 'coo'||currentUser.role== 'cro'||currentUser.role== 'client') && (
                 <button
                   onClick={() => setIsCreateTicketModalOpen(true)}
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

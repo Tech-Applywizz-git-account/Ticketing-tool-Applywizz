@@ -81,6 +81,7 @@ export interface Ticket {
   escalationLevel: number;
   metadata: Record<string, any>;
   comments: TicketComment[];
+  createdbyclient:boolean;
 }
 
 export interface TicketComment {
