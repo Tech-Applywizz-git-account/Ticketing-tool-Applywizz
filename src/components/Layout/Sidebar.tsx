@@ -19,9 +19,10 @@ interface SidebarProps {
   user: User;
   activeView: string;
   onViewChange: (view: string) => void;
+  pendingClientsCount: number;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ user, activeView, onViewChange }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ user, activeView, onViewChange, pendingClientsCount }) => {
   const permissions = rolePermissions[user.role];
   // console.log(permissions)
   const menuItems = [
@@ -48,6 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, activeView, onViewChange
       label: "Pending Onboarding",
       icon: UserPlus,
       show: ["cro", "ceo", "coo"].includes(user.role),
+      hasNotification: pendingClientsCount > 0,
     },
 
 
@@ -92,21 +94,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, activeView, onViewChange
           {visibleItems.map(item => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
+            const hasNotification = item.hasNotification;
 
             return (
               <button
                 key={item.id}
                 onClick={() => onViewChange(item.id)}
                 className={`
-                  w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-all duration-200
-                  ${isActive
+        w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-all duration-200 relative
+        ${isActive
                     ? 'bg-blue-50 text-blue-700 border border-blue-200'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                   }
-                `}
+        ${hasNotification ? 'border border-red-200' : ''}
+      `}
               >
                 <Icon className={`h-5 w-5 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
                 <span className="font-medium">{item.label}</span>
+                {hasNotification && (
+                  <span className="absolute right-3 top-2.5 h-2 w-2 bg-red-500 rounded-full"></span>
+                )}
               </button>
             );
           })}

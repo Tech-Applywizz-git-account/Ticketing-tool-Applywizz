@@ -27,7 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
         </div>
         
         <div className="flex items-center space-x-4">
-          <button
+          {/* <button
             className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
             title="Notifications"
             aria-label="Notifications"
@@ -41,7 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
             aria-label="Settings"
           >
             <Settings className="h-5 w-5" />
-          </button>
+          </button> */}
           
           <div className="flex items-center space-x-3">
             <div className="text-right">
