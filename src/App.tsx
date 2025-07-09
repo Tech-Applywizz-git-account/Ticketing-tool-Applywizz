@@ -26,8 +26,6 @@ import AppLayout from './components/Layout/AppLayout';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
 
-
-
 function App() {
   const fetchData = async () => {
     // 1. Get all tickets
