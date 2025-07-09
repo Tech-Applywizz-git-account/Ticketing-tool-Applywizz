@@ -15,7 +15,7 @@ export type UserRole =
 
 export type TicketType = 
   | 'volume_shortfall'
-  | 'resume_update';
+  // | 'resume_update';
   // | 'high_rejections'
   // | 'no_interviews'
   // | 'profile_data_issue'
