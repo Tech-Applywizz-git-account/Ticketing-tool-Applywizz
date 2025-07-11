@@ -153,13 +153,18 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     };
     const now = new Date();
     const isoNow = now.toISOString();
+    let clientLogginId: { data: { id: string } | null } = { data: { id: '' } };
+    if(user.role === 'client'){
+      clientLogginId = await supabase.from('clients').select('id').eq('personal_email',user.email).single();
+    }
     // Build the ticket data
     const newTicket = {
       id: uuidv4(),
       type: ticketType,
       title,
       description,
-      clientId: clientId || null,
+      clientId: user.role !== 'client' ? clientId : clientLogginId.data?.id, // Only set clientId if the user is not a client
+      // clientId: clientId || null,
       createdby: user.id,
       priority: slaConfig.priority, // Fixed: Now uses correct priority
       status: 'open',
@@ -170,6 +175,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       escalation_level: 0,
       metadata: JSON.stringify(metadata),
       comments: JSON.stringify([]),
+      createdbyclient: user.role === 'client',
     };
  
     // Send to Supabase
@@ -508,7 +514,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Create New Ticket</h2>
-            <p className="text-sm text-gray-600">Role: {user.name} - {user.role.replace('_', ' ').toUpperCase()}</p>
+            {(user.role!=='client')&&(<p className="text-sm text-gray-600">Role: {user.name} - {user.role.replace('_', ' ').toUpperCase()}</p>)}
           </div>
           <button
             onClick={onClose}

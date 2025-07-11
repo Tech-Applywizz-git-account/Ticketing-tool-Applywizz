@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { X, Clock, User, AlertTriangle, CheckCircle, MessageSquare, Calendar, Heading4 } from 'lucide-react';
-import { Ticket, User as UserType, TicketStatus } from '../../../types';
+import { Ticket, User as UserType, Client, TicketStatus } from '../../../types';
 import { ticketTypeLabels } from '../../../data/mockData';
 import { format } from 'date-fns';
 import { supabase } from '../../../lib/supabaseClient';
 import { id } from 'date-fns/locale';
 import { toast } from 'sonner';
 // import { toast } from 'react-hot-toast';
+import TicketTimeline from '../ClientTicketTimeLine/TicketTimeline';
 
 
 
@@ -46,6 +47,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
   // const [createdBy, setCreatedBy] = useState<string>('');
   const [createdByUser, setCreatedByUser] = useState<any>(null);
   // const userId = ticket.createdBy;
+  const [client, setClient] = useState<Client>(null);
 
   const [userComment, setUserComment] = useState('');
   const [userFile, setUserFile] = useState<File | null>(null);
@@ -138,6 +140,27 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
     }
 
   }, [ticket]);
+  useEffect(() => {
+    const fetchClient = async () => {
+      if (!ticket) return;
+      if (!ticket.clientId) return;
+
+      const { data, error } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', ticket.clientId)
+        .single(); // because only one client expected
+
+      // console.log('Fetching client', data);
+      if (error) {
+        console.error('Error fetching client name:', error);
+      } else {
+        setClient(data || '');
+      }
+    };
+
+    fetchClient();
+  }, [ticket ? ticket.clientId : null])
 
   useEffect(() => {
     const fetchClientName = async () => {
@@ -356,7 +379,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
       // Step 1: Fetch assigned CA and Scraper from client
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
-        .select('careerassociateid, scraperid')
+        .select('careerassociateid,careerassociatemanagerid, scraperid')
         .eq('id', ticket.clientId)
         .single();
 
@@ -366,86 +389,111 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
         return;
       }
 
-      const { careerassociateid, scraperid } = clientData;
-
+      const { careerassociateid, careerassociatemanagerid, scraperid } = clientData;
       if (!careerassociateid && !scraperid) {
         alert("No CA or Scraper assigned for this client.");
         return;
       }
-
-      // Step 2: Fetch existing ticket assignments
       const { data: existingAssignments, error: fetchError } = await supabase
         .from('ticket_assignments')
         .select('user_id')
         .eq('ticket_id', ticket.id);
-
       if (fetchError) {
         console.error("Failed to fetch existing assignments:", fetchError);
         return;
       }
-
       const alreadyAssignedIds = new Set(existingAssignments?.map(a => a.user_id));
-
-      const newAssignments = [];
-      if (careerassociateid && !alreadyAssignedIds.has(careerassociateid)) {
-        newAssignments.push({
-          ticket_id: ticket.id,
-          user_id: careerassociateid,
-          assignedBy: user?.id,
-        });
-      }
-      if (scraperid && !alreadyAssignedIds.has(scraperid)) {
-        newAssignments.push({
-          ticket_id: ticket.id,
-          user_id: scraperid,
-          assignedBy: user?.id,
-        });
-      }
-
-      // Step 3: Insert only new assignments
-      if (newAssignments.length > 0) {
+      if (careerassociatemanagerid === careerassociateid) {
         const { error: insertError } = await supabase
           .from('ticket_assignments')
-          .insert(newAssignments);
-
+          .insert({
+            ticket_id: ticket.id,
+            user_id: scraperid,
+            assignedBy: user?.id,
+          });
         if (insertError) {
           console.error("Failed to assign users:", insertError);
           alert("Error while assigning new users.");
           return;
         }
+        // Step 4: Update ticket status
+        const { error: updateError } = await supabase
+          .from('tickets')
+          .update({
+            status: 'forwarded',
+            updatedAt: new Date().toISOString(),
+          })
+          .eq('id', ticket.id);
+        const { error: updateErrorInVolumeShotfallTickes } = await supabase
+          .from("volume_shortfall_tickets")
+          .update({
+            forwarded_to_ca_scraping: true,
+            updated_at: new Date().toISOString()
+          })
+          .eq("ticket_id", ticket.id);
+        if (updateError || updateErrorInVolumeShotfallTickes) {
+          console.error("Failed to update ticket status:", updateError);
+          return;
+        }
+        else {
+          alert("Ticket successfully forwarded to Scraping Team.");
+        }
+        onUpdate?.();
+        onClose();
       }
       else {
-        alert("Ticket already forwarded to CA and Scraping Team.");
+        // Step 2: Fetch existing ticket assignments
+        const newAssignments = [];
+        if (careerassociateid && !alreadyAssignedIds.has(careerassociateid)) {
+          newAssignments.push({
+            ticket_id: ticket.id,
+            user_id: careerassociateid,
+            assignedBy: user?.id,
+          });
+        }
+        if (scraperid && !alreadyAssignedIds.has(scraperid)) {
+          newAssignments.push({
+            ticket_id: ticket.id,
+            user_id: scraperid,
+            assignedBy: user?.id,
+          });
+        }
+        // Step 3: Insert only new assignments
+        if (newAssignments.length > 0) {
+          const { error: insertError } = await supabase
+            .from('ticket_assignments')
+            .insert(newAssignments);
+          if (insertError) {
+            console.error("Failed to assign users:", insertError);
+            alert("Error while assigning new users.");
+            return;
+          }
+        }
+        // Step 4: Update ticket status
+        const { error: updateError } = await supabase
+          .from('tickets')
+          .update({
+            status: 'forwarded',
+            updatedAt: new Date().toISOString(),
+          })
+          .eq('id', ticket.id);
+        const { error: updateErrorInVolumeShotfallTickes } = await supabase
+          .from("volume_shortfall_tickets")
+          .update({
+            forwarded_to_ca_scraping: true,
+            updated_at: new Date().toISOString()
+          })
+          .eq("ticket_id", ticket.id);
+        if (updateError || updateErrorInVolumeShotfallTickes) {
+          console.error("Failed to update ticket status:", updateError);
+          return;
+        }
+        else {
+          alert("Ticket successfully forwarded to CA and Scraping Team.");
+        }
+        onUpdate?.();
+        onClose();
       }
-
-      // Step 4: Update ticket status
-      const { error: updateError } = await supabase
-        .from('tickets')
-        .update({
-          status: 'forwarded',
-          updatedAt: new Date().toISOString(),
-        })
-        .eq('id', ticket.id);
-
-      const { error: updateErrorInVolumeShotfallTickes } = await supabase
-        .from("volume_shortfall_tickets")
-        .update({
-          forwarded_to_ca_scraping: true,
-          updated_at: new Date().toISOString()
-        })
-        .eq("ticket_id", ticket.id);
-
-
-      if (updateError || updateErrorInVolumeShotfallTickes) {
-        console.error("Failed to update ticket status:", updateError);
-        // alert("Could not update ticket status.");
-        return;
-      }
-      else {
-        alert("Ticket successfully forwarded to CA and Scraping Team.");
-      }
-      onUpdate?.();
-      onClose();
     } catch (error) {
       console.error("Unexpected error:", error);
       alert("Unexpected error occurred while forwarding.");
@@ -543,20 +591,35 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
 
         const hasCA = userRoles.some(u => u.role === 'career_associate');
         const hasScraper = userRoles.some(u => u.role === 'scraping_team');
+        if (client?.careerassociateid === client?.careerassociatemanagerid) {
+          const updateRes = await supabase
+            .from('tickets')
+            .update({
+              status: 'replied',
+              updatedAt: new Date().toISOString()
+            })
+            .eq('id', ticket.id);
 
-        if (hasCA && hasScraper) {
-          // ✅ 3. Get CA Team Lead from the clients table using clientId
-          const { data: clientData, error: clientError } = await supabase
-            .from('clients')
-            .select('careerassociatemanagerid')
-            .eq('id', ticket.clientId)
-            .single();
+          // ✅ 5. Insert (or skip) ticket assignment to CA Team Lead
+          const { error: assignError } = await supabase
+            .from('ticket_assignments')
+            .upsert([
+              {
+                ticket_id: ticket.id,
+                user_id: client?.careerassociatemanagerid,
+                assignedBy: user.id // current user
+              }
+            ], { onConflict: 'ticket_id,user_id' });
 
-          if (clientError || !clientData?.careerassociatemanagerid) {
-            throw clientError || new Error("CA Team Lead not found for client");
+          if (updateRes.error || assignError) {
+            throw updateRes.error || assignError;
           }
 
-          const caManagerId = clientData.careerassociatemanagerid;
+          onUpdate?.();
+          console.log('✅ Ticket auto-updated to replied and reassigned to CA Team Lead.');
+        } else if (hasCA && hasScraper) {
+          // ✅ 3. Get CA Team Lead from the clients table using clientId
+          const caManagerId = client?.careerassociatemanagerid;
 
           // ✅ 4. Update ticket status to 'replied'
           const updateRes = await supabase
@@ -724,6 +787,45 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
     onClose();
   };
 
+  const handleAssistanceResponse = async (needsHelp: boolean) => {
+    if (!ticket) return;
+
+    try {
+      if (needsHelp) {
+        // Update to needs_manager_review status
+        const { error } = await supabase
+          .from('tickets')
+          .update({
+            status: 'manager_attention',
+            requiredManagerAttention: true,
+            updatedAt: new Date().toISOString()
+          })
+          .eq('id', ticket.id);
+
+        if (error) throw error;
+        alert("Account manager will contact you shortly");
+      } else {
+        // Update directly to resolved
+        const { error } = await supabase
+          .from('tickets')
+          .update({
+            status: 'resolved',
+            updatedAt: new Date().toISOString()
+          })
+          .eq('id', ticket.id);
+
+        if (error) throw error;
+        alert("Ticket marked as resolved");
+      }
+
+      // Refresh data
+      onUpdate?.();
+      onClose();
+    } catch (error) {
+      console.error("Error updating ticket:", error);
+      alert("Failed to update ticket status");
+    }
+  };
 
   // Function to check if the user can edit the ticket
   const canEdit = () => {
@@ -743,6 +845,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
       resolved: 'bg-green-100 text-green-800',
       escalated: 'bg-red-100 text-red-800',
       closed: 'bg-gray-100 text-gray-800',
+      manager_attention: 'bg-purple-100 text-purple-800',
       forwarded: 'bg-yellow-100 text-yellow-800',
       replied: 'bg-orange-100 text-orange-800',
     };
@@ -768,12 +871,15 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black gap-6 bg-opacity-50 flex items-center justify-center z-50 p-4">
+      {(['account_manager', 'coo', 'cro', 'ceo', 'client'].includes(user.role)) && <TicketTimeline ticket={ticket} />}
       <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Ticket Details & Actions</h2>
-            <p className="text-sm text-gray-600">Editing as: {user.name} ({user.role.replace('_', ' ').toUpperCase()})</p>
+            {user.role !== 'client' && (
+              <p className="text-sm text-gray-600">Editing as: {user.name} ({user.role.replace('_', ' ').toUpperCase()})</p>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -785,352 +891,507 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
-          {/* Ticket Information */}
-          <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Ticket Information</h3>
-              <div className="flex items-center space-x-3">
-                <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(ticket.status)}`}>
-                  {ticket.status.replace('_', ' ').toUpperCase()}
-                </span>
-                <span className={`px-3 py-1 text-sm font-medium rounded-full ${ticket.priority === 'critical' ? 'bg-red-100 text-red-800' :
-                  ticket.priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                  {ticket.priority.toUpperCase()}
-                </span>
-              </div>
-            </div>
+        {user.role === 'client' && (
+          <div className="px-6 py-4">
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Client name</label>
-                  <p className="text-gray-900">{clientName}</p>
-                </div>
-                <div>
+            {/* Ticket Information */}
+            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Ticket Information</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  {/* <div>
+                    <label className="text-sm font-medium text-gray-500">Client name</label>
+                    <p className="text-gray-900">{clientName}</p>
+                    </div> */}
+                  {/* <div>
                   <label className="text-sm font-medium text-gray-500">Ticket ID</label>
                   <p className="text-gray-900">{ticket.id}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Type</label>
-                  <p className="text-gray-900">{ticketTypeLabels[ticket.type]}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Title</label>
-                  <p className="text-gray-900">{ticket.title}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Description</label>
-                  <p className="text-gray-900">{ticket.description}</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Created By</label>
-                  <p className="text-gray-900">{createdByUser} </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Ticket Sort Code</label>
-                  <p className="text-gray-900">{ticket.short_code}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Assigned To</label>
-                  <div className="space-y-1">
-                    {' '}
-                    {assignments[ticket.id]?.length
-                      ? assignments[ticket.id].map((u, i) => (
-                        <span key={u.id}>
-                          {u.name} ({u.role?.replace('_', ' ') || 'Unknown Role'})
-                          {i < assignments[ticket.id].length - 1 && ', '}
-                        </span>
-                      ))
-                      : 'Unassigned'}
-                    {/*assignedUsers.map(user => (
-                      <p key={user.id} className="text-gray-900">{user.name} ({user.role.replace('_', ' ')})</p>
-                    ))*/}
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Created At</label>
-                  <p className="text-gray-900">{format(new Date(ticket.createdat), 'yyyy-MM-dd hh:mm a')}</p>
-                </div>
-                {ticket.status !== 'resolved' ? (
+                  </div> */}
                   <div>
-                    <label className="text-sm font-medium text-gray-500">SLA Status</label>
-                    <div className={`flex items-center space-x-2 ${isOverdue ? 'text-red-600' : 'text-gray-900'}`}>
-                      {isOverdue ? (
-                        <AlertTriangle className="h-4 w-4" />
-                      ) : (
-                        <Clock className="h-4 w-4" />
-                      )}
-                      <span className="font-medium">
-                        {isOverdue ? `${hoursRemaining}h overdue` : `${hoursRemaining}h remaining`}
-                      </span>
-                    </div>
+                    <label className="text-sm font-medium text-gray-500">Type</label>
+                    <p className="text-gray-900">{ticketTypeLabels[ticket.type]}</p>
                   </div>
-                ) : null}
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Title</label>
+                    <p className="text-gray-900">{ticket.title}</p>
+                  </div>
+                  {ticket.status !== 'resolved' ? (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">SLA Status</label>
+                      <div className={`flex items-center space-x-2 ${isOverdue ? 'text-red-600' : 'text-gray-900'}`}>
+                        {isOverdue ? (
+                          <AlertTriangle className="h-4 w-4" />
+                        ) : (
+                          <Clock className="h-4 w-4" />
+                        )}
+                        <span className="font-medium">
+                          {isOverdue ? `${hoursRemaining}h overdue` : `${hoursRemaining}h remaining`}
+                        </span>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Ticket Sort Code</label>
+                    <p className="text-gray-900">{ticket.short_code}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Created At</label>
+                    <p className="text-gray-900">{format(new Date(ticket.createdat), 'yyyy-MM-dd hh:mm a')}</p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Description</label>
+                <p className="text-gray-900">{ticket.description}</p>
               </div>
             </div>
-          </div>
-
-
-          {/* Ticket Metadata */}
-
-          {Object.keys(metadata).length > 0 && (
-            <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4">Ticket Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(metadata).map(([key, value]) => (
-                  <div key={key}>
-                    <label className="text-sm font-medium text-blue-700">
-                      {key
-                        .replace(/([A-Z])/g, ' $1')
-                        .replace(/^./, (str) => str.toUpperCase())}
-                    </label>
-                    <p className="text-blue-900">
-                      {Array.isArray(value) ? value.join(', ') : String(value)}
-                    </p>
-                  </div>
-                ))}
+            {ticketComments.length > 0 && (
+              <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mt-6">
+                <h3 className="text-md font-semibold mb-2">Comments:</h3>
+                <ul className="space-y-3">
+                  {ticketComments.map((comment, index) => (
+                    <li key={index} className="bg-gray-50 p-3 rounded border text-sm">
+                      <div className="text-gray-700">
+                        {comment.content}
+                        {' '}<span className="text-gray-600 italic">
+                          — {comment.users?.name || 'Unknown'} ({comment.users?.role?.replace('_', ' ') || 'Unknown Role'})
+                        </span>
+                      </div>
+                      <div className="text-gray-500 text-xs mt-1">
+                        {new Date(comment.created_at).toLocaleString()}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
-          )}
-          {currentUserRole === 'ca_team_lead' && ticket.type === 'volume_shortfall' && volumeShortfallData?.forwarded_to_ca_scraping && (
-            <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-300 mt-4">
-              <h3 className="text-md font-semibold mb-2 text-yellow-900">Volume Shortfall Extra Fields</h3>
-              <p>
-                <strong>Forwarded to CA & Scraping:</strong>{' '}
-                {volumeShortfallData?.forwarded_to_ca_scraping ? '✅ Yes' : '❌ No'}
-              </p>
-            </div>
-          )}
-
-          {/* --- Comments --- */}
-          {ticketComments.length > 0 && (
-            <div className="mt-6 border-t pt-4">
-              <h3 className="text-md font-semibold mb-2">Comments:</h3>
-              <ul className="space-y-3">
-                {ticketComments.map((comment, index) => (
-                  <li key={index} className="bg-gray-50 p-3 rounded border text-sm">
-                    <div className="text-gray-700">
-                      {comment.content}
-                      {' '}<span className="text-gray-600 italic">
-                        — {comment.users?.name || 'Unknown'} ({comment.users?.role?.replace('_', ' ') || 'Unknown Role'})
-                      </span>
-                    </div>
-                    <div className="text-gray-500 text-xs mt-1">
-                      {new Date(comment.created_at).toLocaleString()}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* --- Files --- */}
-          {ticketFiles.length > 0 && (
-            <div className="mt-6 border-t pt-4">
-              <h3 className="text-md font-semibold mb-2">Uploaded Files:</h3>
-              <ul className="space-y-2 text-sm">
-                {ticketFiles.map((file, index) => (
-                  <li key={index}>
-                    <a
-                      href={`https://zkebbnegghodwmgmkynt.supabase.co/storage/v1/object/public/ticket-attachments/${file.file_path}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      {file.file_path.split('/').pop()}
-                    </a>{' '}
-                    <span className="text-gray-400 text-xs">
-                      ({new Date(file.uploaded_at).toLocaleString()})
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {ticketFiles.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-md font-semibold text-gray-800 mb-2">Uploaded Files</h3>
-              <ul className="space-y-2">
-                {ticketFiles.map((file) => {
-                  const fileUrl = supabase.storage.from('ticket-attachments').getPublicUrl(file.file_path).data.publicUrl;
-
-                  return (
-                    <li key={file.id} className="text-sm text-blue-800 underline">
-                      <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+            )}
+            {/* --- Files --- */}
+            {ticketFiles.length > 0 && (
+              <div className="mt-6 border-t pt-4">
+                <h3 className="text-md font-semibold mb-2">Uploaded Files:</h3>
+                <ul className="space-y-2 text-sm">
+                  {ticketFiles.map((file, index) => (
+                    <li key={index}>
+                      <a
+                        href={`https://zkebbnegghodwmgmkynt.supabase.co/storage/v1/object/public/ticket-attachments/${file.file_path}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
                         {file.file_path.split('/').pop()}
-                      </a>
-                      <span className="ml-2 text-gray-500">
-                        (Uploaded by: {file.users?.name || 'Unknown'} on {new Date(file.uploaded_at).toLocaleDateString()})
+                      </a>{' '}
+                      <span className="text-gray-400 text-xs">
+                        ({new Date(file.uploaded_at).toLocaleString()})
                       </span>
                     </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
+                  ))}
+                </ul>
+              </div>
+            )}
+            {ticketFiles.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-md font-semibold text-gray-800 mb-2">Uploaded Files</h3>
+                <ul className="space-y-2">
+                  {ticketFiles.map((file) => {
+                    const fileUrl = supabase.storage.from('ticket-attachments').getPublicUrl(file.file_path).data.publicUrl;
 
+                    return (
+                      <li key={file.id} className="text-sm text-blue-800 underline">
+                        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                          {file.file_path.split('/').pop()}
+                        </a>
+                        <span className="ml-2 text-gray-500">
+                          (Uploaded by: {file.users?.name || 'Unknown'} on {new Date(file.uploaded_at).toLocaleDateString()})
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+            {ticket.status === 'closed' && (
+              <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mt-6">
+                {/* <h3 className="text-lg font-semibold text-blue-900 mb-4">
+                  Follow Up Question
+                </h3> */}
+                <p className="text-gray-700 mb-4">
+                  Was your problem completely solved?
+                </p>
 
-          {/* Action Form */}
-          {canEdit() &&
-            (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {currentUserRole === 'ca_team_lead' && ticket.type === 'volume_shortfall' && (ticket.status === 'open' || ticket.status === 'replied') && (
-                  <div className="bg-green-50 rounded-lg p-6 border border-green-200">
-                    <h3 className="text-lg font-semibold text-green-900 mb-4">Take Action</h3>
-                    <div className="space-y-4 mt-6">
-                      <textarea
-                        className="w-full border p-2 rounded"
-                        placeholder="Add a comment before closing"
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        required
-                      />
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Upload File</label>
-                        <input
-                          type="file"
-                          onChange={(e) => setUserFile(e.target.files?.[0] || null)}
-                          accept=".pdf,.png,.jpg,.jpeg"
-                          className="block w-full border rounded px-3 py-2"
-                          title="Upload a file (PDF, PNG, JPG, JPEG)"
-                          placeholder="Choose a file"
-                        />
-                      </div>
-                      <button onClick={handleCloseTicket} disabled={isSubmittingComment} className="bg-red-500 text-white px-4 py-2 rounded">
-                        {isSubmittingComment ? 'Closing ticket...' : 'Close Ticket '}
-                      </button>
-                      <button onClick={handleForwardTicket} className="bg-blue-500 text-white px-4 py-2 rounded ml-4">
-                        {isSubmittingComment ? ' Forwarding to CA & Scraping Team ... ' : ' Forward to CA & Scraping Team '}
-                      </button>
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => handleAssistanceResponse(false)}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  >
+                    No, I'm satisfied
+                  </button>
+                  <button
+                    onClick={() => handleAssistanceResponse(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Yes, I need help
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+        )}
+        {user.role !== 'client' && (
+          <div className="p-6 space-y-6">
+            {/* Ticket Information */}
+            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Ticket Information</h3>
+                <div className="flex items-center space-x-3">
+                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(ticket.status)}`}>
+                    {ticket.status.replace('_', ' ').toUpperCase()}
+                  </span>
+                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${ticket.priority === 'critical' ? 'bg-red-100 text-red-800' :
+                    ticket.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                    {ticket.priority.toUpperCase()}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Client name</label>
+                    <p className="text-gray-900">{clientName}</p>
+                  </div>
+                  {/* <div>
+                  <label className="text-sm font-medium text-gray-500">Ticket ID</label>
+                  <p className="text-gray-900">{ticket.id}</p>
+                </div> */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Type</label>
+                    <p className="text-gray-900">{ticketTypeLabels[ticket.type]}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Title</label>
+                    <p className="text-gray-900">{ticket.title}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Assigned To</label>
+                    <div className="space-y-1">
+                      {' '}
+                      {assignments[ticket.id]?.length
+                        ? assignments[ticket.id].map((u, i) => (
+                          <span key={u.id}>
+                            {u.name} ({u.role?.replace('_', ' ') || 'Unknown Role'})
+                            {i < assignments[ticket.id].length - 1 && ', '}
+                          </span>
+                        ))
+                        : 'Unassigned'}
+                      {/*assignedUsers.map(user => (
+                      <p key={user.id} className="text-gray-900">{user.name} ({user.role.replace('_', ' ')})</p>
+                      ))*/}
                     </div>
                   </div>
-                )}
-                {user?.role === 'ca_team_lead' &&
-                  ticket?.type === 'volume_shortfall' &&
-                  ticket?.status === 'replied' && (
-                    <div className="bg-red-50 border border-red-300 rounded-lg p-4 mt-4">
-                      <label className="flex items-center gap-2 mb-2">
-                        <input
-                          type="checkbox"
-                          checked={wantsToEscalate}
-                          onChange={(e) => setWantsToEscalate(e.target.checked)}
-                        />
-                        <span className="text-red-700 font-medium">Escalate CA for this ticket</span>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Created By</label>
+                    <p className="text-gray-900">{createdByUser} </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Ticket Sort Code</label>
+                    <p className="text-gray-900">{ticket.short_code}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Created At</label>
+                    <p className="text-gray-900">{format(new Date(ticket.createdat), 'yyyy-MM-dd hh:mm a')}</p>
+                  </div>
+                  {ticket.status !== 'resolved' ? (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">SLA Status</label>
+                      <div className={`flex items-center space-x-2 ${isOverdue ? 'text-red-600' : 'text-gray-900'}`}>
+                        {isOverdue ? (
+                          <AlertTriangle className="h-4 w-4" />
+                        ) : (
+                          <Clock className="h-4 w-4" />
+                        )}
+                        <span className="font-medium">
+                          {isOverdue ? `${hoursRemaining}h overdue` : `${hoursRemaining}h remaining`}
+                        </span>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Description</label>
+                <p className="text-gray-900">{ticket.description}</p>
+              </div>
+            </div>
+            {/* Ticket Metadata */}
+            {Object.keys(metadata).length > 0 && (
+              <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                <h3 className="text-lg font-semibold text-blue-900 mb-4">Ticket Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(metadata).map(([key, value]) => (
+                    <div key={key}>
+                      <label className="text-sm font-medium text-blue-700">
+                        {key
+                          .replace(/([A-Z])/g, ' $1')
+                          .replace(/^./, (str) => str.toUpperCase())}
                       </label>
-                      {wantsToEscalate && (
+                      <p className="text-blue-900">
+                        {Array.isArray(value) ? value.join(', ') : String(value)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {currentUserRole === 'ca_team_lead' && ticket.type === 'volume_shortfall' && volumeShortfallData?.forwarded_to_ca_scraping && (
+              <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-300 mt-4">
+                <h3 className="text-md font-semibold mb-2 text-yellow-900">Volume Shortfall Extra Fields</h3>
+                <p>
+                  <strong>Forwarded to CA & Scraping:</strong>{' '}
+                  {volumeShortfallData?.forwarded_to_ca_scraping ? '✅ Yes' : '❌ No'}
+                </p>
+              </div>
+            )}
+            {/* --- Comments --- */}
+            {ticketComments.length > 0 && (
+              <div className="mt-6 border-t pt-4">
+                <h3 className="text-md font-semibold mb-2">Comments:</h3>
+                <ul className="space-y-3">
+                  {ticketComments.map((comment, index) => (
+                    <li key={index} className="bg-gray-50 p-3 rounded border text-sm">
+                      <div className="text-gray-700">
+                        {comment.content}
+                        {' '}<span className="text-gray-600 italic">
+                          — {comment.users?.name || 'Unknown'} ({comment.users?.role?.replace('_', ' ') || 'Unknown Role'})
+                        </span>
+                      </div>
+                      <div className="text-gray-500 text-xs mt-1">
+                        {new Date(comment.created_at).toLocaleString()}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {/* --- Files --- */}
+            {ticketFiles.length > 0 && (
+              <div className="mt-6 border-t pt-4">
+                <h3 className="text-md font-semibold mb-2">Uploaded Files:</h3>
+                <ul className="space-y-2 text-sm">
+                  {ticketFiles.map((file, index) => (
+                    <li key={index}>
+                      <a
+                        href={`https://zkebbnegghodwmgmkynt.supabase.co/storage/v1/object/public/ticket-attachments/${file.file_path}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {file.file_path.split('/').pop()}
+                      </a>{' '}
+                      <span className="text-gray-400 text-xs">
+                        ({new Date(file.uploaded_at).toLocaleString()})
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {ticketFiles.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-md font-semibold text-gray-800 mb-2">Uploaded Files</h3>
+                <ul className="space-y-2">
+                  {ticketFiles.map((file) => {
+                    const fileUrl = supabase.storage.from('ticket-attachments').getPublicUrl(file.file_path).data.publicUrl;
+
+                    return (
+                      <li key={file.id} className="text-sm text-blue-800 underline">
+                        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                          {file.file_path.split('/').pop()}
+                        </a>
+                        <span className="ml-2 text-gray-500">
+                          (Uploaded by: {file.users?.name || 'Unknown'} on {new Date(file.uploaded_at).toLocaleDateString()})
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+            {/* Action Form */}
+            {canEdit() &&
+              (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {currentUserRole === 'ca_team_lead' && ticket.type === 'volume_shortfall' && (ticket.status === 'open' || ticket.status === 'replied') && (
+                    <div className="bg-green-50 rounded-lg p-6 border border-green-200">
+                      <h3 className="text-lg font-semibold text-green-900 mb-4">Take Action</h3>
+                      <div className="space-y-4 mt-6">
                         <textarea
-                          value={escalationReason}
-                          onChange={(e) => setEscalationReason(e.target.value)}
-                          placeholder="Write reason for escalation"
-                          className="w-full p-2 border border-gray-300 rounded"
-                          rows={3}
+                          className="w-full border p-2 rounded"
+                          placeholder="Add a comment before closing or forwarding..."
+                          value={comment}
+                          onChange={(e) => setComment(e.target.value)}
+                          required
                         />
-                      )}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Upload File</label>
+                          <input
+                            type="file"
+                            onChange={(e) => setUserFile(e.target.files?.[0] || null)}
+                            accept=".pdf,.png,.jpg,.jpeg"
+                            className="block w-full border rounded px-3 py-2"
+                            title="Upload a file (PDF, PNG, JPG, JPEG)"
+                            placeholder="Choose a file"
+                          />
+                        </div>
+                        <button onClick={handleCloseTicket} disabled={isSubmittingComment} className="bg-red-500 text-white px-4 py-2 rounded">
+                          {isSubmittingComment ? 'Closing ticket...' : 'Close Ticket '}
+                        </button>
+                        <button
+                          onClick={handleForwardTicket}
+                          disabled={!comment.trim() || isSubmittingComment}
+                          // className={`bg-blue-500 text-white px-4 py-2 rounded ml-4`}
+                          className={`px-4 py-2 rounded-lg ml-4 ${(!comment.trim() || isSubmittingComment)
+                            ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
+                        >
+                          {client?.careerassociateid === client?.careerassociatemanagerid ? (isSubmittingComment ? ' Forwarding to Scraping Team ... ' : ' Forward to Scraping Team ') : (isSubmittingComment ? ' Forwarding to CA & Scraping Team ... ' : ' Forward to CA & Scraping Team ')}
+                        </button>
+                      </div>
                     </div>
                   )}
 
-                {['career_associate', 'scraping_team'].includes(user?.role) && ticket.type === 'volume_shortfall' && ticket.status === 'forwarded' && (
-
-                  <div className="bg-green-50 rounded-lg p-6 border border-green-200">
-                    <h3 className="text-lg font-semibold text-green-900 mb-4">Take Action</h3>
-                    <div className="mt-6 border-t pt-6">
-                      <h3 className="text-md font-semibold mb-2">Reply with your comment and file:</h3>
-
-                      <textarea
-                        className="w-full border p-2 rounded mb-3"
-                        placeholder="Add your comment..."
-                        value={userComment}
-                        onChange={(e) => setUserComment(e.target.value)}
-                      />
-
-                      <input
-                        type="file"
-                        onChange={(e) => setUserFile(e.target.files?.[0] || null)}
-                        className="mb-4"
-                        title="Upload a file"
-                        placeholder="Choose a file"
-                      />
-
-                      <button
-                        onClick={handleCommentSubmit}
-                        disabled={isSubmittingComment}
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                      >
-                        {isSubmittingComment ? 'Submitting...' : 'Submit Comment'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-                {['account_manager', 'coo', 'cro', 'ceo'].includes(user.role) &&
-                  ticket.type === 'volume_shortfall' &&
-                  ticket.status === 'closed' && (
-                    <div className="mt-6 border-t pt-4">
-                      <h3 className="text-md font-semibold mb-2 text-gray-800">Resolve Ticket</h3>
-
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Final Comment
-                      </label>
-                      <textarea
-                        value={resolutionComment}
-                        onChange={(e) => setResolutionComment(e.target.value)}
-                        rows={4}
-                        className="w-full border px-3 py-2 rounded-lg"
-                        placeholder="Add a final note before resolving..."
-                        required
-                      />
-
-                      <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Optional File Upload</label>
-                        <input
-                          title='Upload a resolution file (PDF, PNG, JPG, JPEG)'
-                          type="file"
-                          accept=".pdf,.png,.jpg,.jpeg"
-                          onChange={(e) => {
-                            if (e.target.files && e.target.files[0]) {
-                              setResolutionFile(e.target.files[0]);
-                            }
-                          }}
-                        />
+                  {user?.role === 'ca_team_lead' &&
+                    ticket?.type === 'volume_shortfall' &&
+                    ticket?.status === 'replied' && (
+                      <div className="bg-red-50 border border-red-300 rounded-lg p-4 mt-4">
+                        <label className="flex items-center gap-2 mb-2">
+                          <input
+                            type="checkbox"
+                            checked={wantsToEscalate}
+                            onChange={(e) => setWantsToEscalate(e.target.checked)}
+                          />
+                          <span className="text-red-700 font-medium">Escalate CA for this ticket</span>
+                        </label>
+                        {wantsToEscalate && (
+                          <textarea
+                            value={escalationReason}
+                            onChange={(e) => setEscalationReason(e.target.value)}
+                            placeholder="Write reason for escalation"
+                            className="w-full p-2 border border-gray-300 rounded"
+                            rows={3}
+                          />
+                        )}
                       </div>
+                    )}
 
-                      <button
-                        className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-                        onClick={handleResolveTicket}
-                      >
-                        Resolve Ticket
-                      </button>
+                  {['career_associate', 'scraping_team'].includes(user?.role) && ticket.type === 'volume_shortfall' && ticket.status === 'forwarded' && (
+
+                    <div className="bg-green-50 rounded-lg p-6 border border-green-200">
+                      <h3 className="text-lg font-semibold text-green-900 mb-4">Take Action</h3>
+                      <div className="mt-6 border-t pt-6">
+                        <h3 className="text-md font-semibold mb-2">Reply with your comment and file:</h3>
+
+                        <textarea
+                          className="w-full border p-2 rounded mb-3"
+                          placeholder="Add your comment..."
+                          value={userComment}
+                          onChange={(e) => setUserComment(e.target.value)}
+                        />
+
+                        <input
+                          type="file"
+                          onChange={(e) => setUserFile(e.target.files?.[0] || null)}
+                          className="mb-4"
+                          title="Upload a file"
+                          placeholder="Choose a file"
+                        />
+
+                        <button
+                          onClick={handleCommentSubmit}
+                          disabled={isSubmittingComment}
+                          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                        >
+                          {isSubmittingComment ? 'Submitting...' : 'Submit Comment'}
+                        </button>
+                      </div>
                     </div>
-                  )
-                }
+                  )}
+                  {['account_manager', 'coo', 'cro', 'ceo'].includes(user.role) && alreadyAssignedIds.has(user?.id) && 
+                    ticket.status === 'manager_attention' && (
+                      <div className="mt-6 border-t pt-4">
+                        <h3 className="text-md font-semibold mb-2 text-gray-800">Resolve Ticket</h3>
 
-                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                  >
-                    Cancel
-                  </button>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Final Comment
+                        </label>
+                        <textarea
+                          value={resolutionComment}
+                          onChange={(e) => setResolutionComment(e.target.value)}
+                          rows={4}
+                          className="w-full border px-3 py-2 rounded-lg"
+                          placeholder="Add a final note before resolving..."
+                          required
+                        />
+
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Optional File Upload</label>
+                          <input
+                            title='Upload a resolution file (PDF, PNG, JPG, JPEG)'
+                            type="file"
+                            accept=".pdf,.png,.jpg,.jpeg"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                setResolutionFile(e.target.files[0]);
+                              }
+                            }}
+                          />
+                        </div>
+
+                        <button
+                          className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                          onClick={handleResolveTicket}
+                        >
+                          Resolve Ticket
+                        </button>
+                      </div>
+                    )
+                  }
+
+                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+
+            {!canEdit() && (
+              <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
+                <div className="flex items-center space-x-2">
+                  <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                  <p className="text-yellow-800">You don't have permission to edit this ticket. You can only view the details.</p>
                 </div>
-              </form>
-            )}
-
-          {!canEdit() && (
-            <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
-              <div className="flex items-center space-x-2">
-                <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                <p className="text-yellow-800">You don't have permission to edit this ticket. You can only view the details.</p>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
-    </div>
+    </div >
   );
 };

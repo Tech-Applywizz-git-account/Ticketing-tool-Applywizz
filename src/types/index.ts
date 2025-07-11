@@ -1,4 +1,4 @@
-export type UserRole = 
+export type UserRole =
   | 'client'
   | 'sales'
   | 'account_manager'
@@ -13,21 +13,21 @@ export type UserRole =
   | 'ceo'
   | 'system_admin';
 
-export type TicketType = 
+export type TicketType =
   | 'volume_shortfall'
-  // | 'resume_update';
-  // | 'high_rejections'
-  // | 'no_interviews'
-  // | 'profile_data_issue'
-  // | 'credential_issue'
-  // | 'bulk_complaints'
-  // | 'early_application_request'
-  // | 'job_feed_empty'
-  // | 'system_technical_failure'
-  // | 'am_not_responding';
+// | 'resume_update';
+// | 'high_rejections'
+// | 'no_interviews'
+// | 'profile_data_issue'
+// | 'credential_issue'
+// | 'bulk_complaints'
+// | 'early_application_request'
+// | 'job_feed_empty'
+// | 'system_technical_failure'
+// | 'am_not_responding';
 
 export type TicketPriority = 'critical' | 'high' | 'medium' | 'low';
-export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'escalated' | 'closed'| 'forwarded' | 'replied';
+export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'escalated' | 'manager_attention' | 'closed' | 'forwarded' | 'replied';
 
 export type AssignedUser = {
   id: string;
@@ -60,14 +60,14 @@ export interface Client {
   created_at: Date;
   careerassociatemanagerid: string;
   careerassociateid: string;
-  scraperid : string;
+  scraperid: string;
 }
 
 export interface Ticket {
   id: string;
   type: TicketType;
   title: string;
-  short_code:string;
+  short_code: string;
   description: string;
   clientId: string;
   createdby: string;
@@ -76,11 +76,13 @@ export interface Ticket {
   status: TicketStatus;
   slaHours: number;
   createdat: Date;
-  updatedAt: Date; 
+  updatedAt: Date;
   dueDate: Date;
   escalationLevel: number;
   metadata: Record<string, any>;
   comments: TicketComment[];
+  createdbyclient: boolean;
+  requiredManagerAttention:boolean;
 }
 
 export interface TicketComment {

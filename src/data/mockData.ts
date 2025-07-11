@@ -16,8 +16,8 @@ export const slaConfig: SLAConfig = {
 
 export const rolePermissions: Record<UserRole, RolePermissions> = {
   client: {
-    canCreateTickets: [],
-    canViewTickets: false,
+    canCreateTickets: ['volume_shortfall',],
+    canViewTickets: true,
     canEditTickets: false,
     canResolveTickets: false,
     canEscalateTickets: false,
