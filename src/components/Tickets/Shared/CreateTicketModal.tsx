@@ -153,13 +153,18 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     };
     const now = new Date();
     const isoNow = now.toISOString();
+    let clientLogginId: { data: { id: string } | null } = { data: { id: '' } };
+    if(user.role === 'client'){
+      clientLogginId = await supabase.from('clients').select('id').eq('personal_email',user.email).single();
+    }
     // Build the ticket data
     const newTicket = {
       id: uuidv4(),
       type: ticketType,
       title,
       description,
-      clientId: clientId || null,
+      clientId: user.role !== 'client' ? clientId : clientLogginId.data?.id, // Only set clientId if the user is not a client
+      // clientId: clientId || null,
       createdby: user.id,
       priority: slaConfig.priority, // Fixed: Now uses correct priority
       status: 'open',

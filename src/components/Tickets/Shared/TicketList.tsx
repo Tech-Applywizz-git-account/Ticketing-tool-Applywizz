@@ -115,6 +115,7 @@ export const TicketList: React.FC<TicketListProps> = ({ tickets, user, assignmen
             <option value="in_progress">In Progress</option>
             <option value="forwarded">Forwarded</option>
             <option value="replied">Replied</option>
+            <option value="manager_attention">Manager Attention</option>
             <option value="resolved">Resolved</option>
             <option value="escalated">Escalated</option>
             <option value="closed">Closed</option>
