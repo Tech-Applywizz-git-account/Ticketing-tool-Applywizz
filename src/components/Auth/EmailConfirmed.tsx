@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from '@/lib/supabaseClient';
 import { Eye, EyeOff } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const EmailConfirmed = () => {
     const [password, setPassword] = useState("");
@@ -112,7 +113,17 @@ const EmailConfirmed = () => {
             sessionStorage.removeItem("signup_email");
 
             // ✅ 4. Redirect to login
-            alert("Password updated successfully! Redirecting to login...");
+            // alert("Password updated successfully! Redirecting to login...");
+            toast("Password updated successfully! Redirecting to login...", {
+                position: "top-right",
+                autoClose: 4000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
             setTimeout(() => navigate("/login"), 3000);
         } catch (e: any) {
             alert("Error updating password: " + e.message);

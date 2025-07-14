@@ -5,6 +5,9 @@ import { rolePermissions, ticketTypeLabels } from '../../../data/mockData';
 import { fetchSLAConfig, SLAConfig } from '../../../services/slaService';
 import { supabase } from '../../../lib/supabaseClient'; // your Supabase client instance
 import { v4 as uuidv4 } from 'uuid';
+// import { toast } from 'sonner';
+// import { toast } from 'react-hot-toast';
+import {toast} from 'react-toastify';
  
 interface CreateTicketModalProps {
   user: UserType;
@@ -210,7 +213,18 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
         return;
       }
     }
-    alert("Ticket created successfully!");
+    // alert("Ticket created successfully!");
+    // toast.success("Ticket created successfully!");
+    toast("Ticket created successfully!", {
+            position: "top-right",
+            autoClose: 4000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
     onClose();
     onTicketCreated();
  

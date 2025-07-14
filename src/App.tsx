@@ -26,6 +26,7 @@ import AppLayout from './components/Layout/AppLayout';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
 
+
 function App() {
   const fetchData = async () => {
     // 1. Get all tickets
@@ -458,7 +459,7 @@ function App() {
                   </button>
                 )}
                 {/* {(currentUser?.role === 'sales' || currentUser?.role == 'account_manager' || currentUser?.role == 'career_associate' || currentUser?.role == 'cro' || currentUser?.role == 'credential_resolution') && ( */}
-                {(currentUser?.role == 'account_manager' || isExecutive ) && (
+                {(currentUser?.role == 'account_manager' || isExecutive) && (
                   <button
                     onClick={() => setIsCreateTicketModalOpen(true)}
                     className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -574,7 +575,7 @@ function App() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-gray-900">Tickets</h1>
-              {(currentUser?.role == 'account_manager'|| currentUser.role== 'ceo'||currentUser.role== 'coo'||currentUser.role== 'cro'||currentUser.role== 'client') && (
+              {(currentUser?.role == 'account_manager' || currentUser.role == 'ceo' || currentUser.role == 'coo' || currentUser.role == 'cro' || currentUser.role == 'client') && (
                 <button
                   onClick={() => setIsCreateTicketModalOpen(true)}
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -630,141 +631,141 @@ function App() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {currentUser?.role == 'career_associate' && 
-                    clients.filter(client => client.careerassociateid === currentUser.id).map(client => (
-                      <tr key={client.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div>
-                            <div className="font-medium text-gray-900">{client.full_name}</div>
-                            <div className="text-sm text-gray-500">{client.personal_email}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
-                          <div className="text-sm text-gray-500">{client.callable_phone}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
-                            Roles:{" "}
-                            {client.job_role_preferences.join(", ")}
-                          </p>
-                          }</div>
-                          <div className="text-sm text-gray-500">{client.salary_range}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {currentUser?.role == 'career_associate' && (
-                            <button
-                              onClick={() => handleClientEdit(client)}
-                              className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                            >
-                              <span>View</span>
-                            </button>
-                          )}
-                          {currentUser?.role !== 'career_associate' && (
-                            <button
-                              onClick={() => handleClientEdit(client)}
-                              className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                            >
-                              <Edit className="h-4 w-4" />
-                              <span>Edit</span>
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                    {currentUser?.role == 'ca_team_lead' && 
-                    clients.filter(client => client.careerassociatemanagerid === currentUser.id).map(client => (
-                      <tr key={client.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div>
-                            <div className="font-medium text-gray-900">{client.full_name}</div>
-                            <div className="text-sm text-gray-500">{client.personal_email}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
-                          <div className="text-sm text-gray-500">{client.callable_phone}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
-                            Roles:{" "}
-                            {client.job_role_preferences.join(", ")}
-                          </p>
-                          }</div>
-                          <div className="text-sm text-gray-500">{client.salary_range}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {currentUser?.role == 'career_associate' && (
-                            <button
-                              onClick={() => handleClientEdit(client)}
-                              className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                            >
-                              <span>View</span>
-                            </button>
-                          )}
-                          {currentUser?.role !== 'career_associate' && (
-                            <button
-                              onClick={() => handleClientEdit(client)}
-                              className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                            >
-                              <Edit className="h-4 w-4" />
-                              <span>Edit</span>
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                    {(currentUser?.role !== 'ca_team_lead' && currentUser?.role !== 'career_associate' )&& 
-                    clients.map(client => (
-                      <tr key={client.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div>
-                            <div className="font-medium text-gray-900">{client.full_name}</div>
-                            <div className="text-sm text-gray-500">{client.personal_email}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
-                          <div className="text-sm text-gray-500">{client.callable_phone}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
-                            Roles:{" "}
-                            {client.job_role_preferences.join(", ")}
-                          </p>
-                          }</div>
-                          <div className="text-sm text-gray-500">{client.salary_range}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {currentUser?.role == 'career_associate' && (
-                            <button
-                              onClick={() => handleClientEdit(client)}
-                              className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                            >
-                              <span>View</span>
-                            </button>
-                          )}
-                          {currentUser?.role !== 'career_associate' && (
-                            <button
-                              onClick={() => handleClientEdit(client)}
-                              className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                            >
-                              <Edit className="h-4 w-4" />
-                              <span>Edit</span>
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                    {currentUser?.role == 'career_associate' &&
+                      clients.filter(client => client.careerassociateid === currentUser.id).map(client => (
+                        <tr key={client.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="font-medium text-gray-900">{client.full_name}</div>
+                              <div className="text-sm text-gray-500">{client.personal_email}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
+                            <div className="text-sm text-gray-500">{client.callable_phone}</div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
+                              Roles:{" "}
+                              {client.job_role_preferences.join(", ")}
+                            </p>
+                            }</div>
+                            <div className="text-sm text-gray-500">{client.salary_range}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {currentUser?.role == 'career_associate' && (
+                              <button
+                                onClick={() => handleClientEdit(client)}
+                                className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                              >
+                                <span>View</span>
+                              </button>
+                            )}
+                            {currentUser?.role !== 'career_associate' && (
+                              <button
+                                onClick={() => handleClientEdit(client)}
+                                className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                              >
+                                <Edit className="h-4 w-4" />
+                                <span>Edit</span>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    {currentUser?.role == 'ca_team_lead' &&
+                      clients.filter(client => client.careerassociatemanagerid === currentUser.id).map(client => (
+                        <tr key={client.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="font-medium text-gray-900">{client.full_name}</div>
+                              <div className="text-sm text-gray-500">{client.personal_email}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
+                            <div className="text-sm text-gray-500">{client.callable_phone}</div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
+                              Roles:{" "}
+                              {client.job_role_preferences.join(", ")}
+                            </p>
+                            }</div>
+                            <div className="text-sm text-gray-500">{client.salary_range}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {currentUser?.role == 'career_associate' && (
+                              <button
+                                onClick={() => handleClientEdit(client)}
+                                className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                              >
+                                <span>View</span>
+                              </button>
+                            )}
+                            {currentUser?.role !== 'career_associate' && (
+                              <button
+                                onClick={() => handleClientEdit(client)}
+                                className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                              >
+                                <Edit className="h-4 w-4" />
+                                <span>Edit</span>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    {(currentUser?.role !== 'ca_team_lead' && currentUser?.role !== 'career_associate') &&
+                      clients.map(client => (
+                        <tr key={client.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="font-medium text-gray-900">{client.full_name}</div>
+                              <div className="text-sm text-gray-500">{client.personal_email}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
+                            <div className="text-sm text-gray-500">{client.callable_phone}</div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
+                              Roles:{" "}
+                              {client.job_role_preferences.join(", ")}
+                            </p>
+                            }</div>
+                            <div className="text-sm text-gray-500">{client.salary_range}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {currentUser?.role == 'career_associate' && (
+                              <button
+                                onClick={() => handleClientEdit(client)}
+                                className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                              >
+                                <span>View</span>
+                              </button>
+                            )}
+                            {currentUser?.role !== 'career_associate' && (
+                              <button
+                                onClick={() => handleClientEdit(client)}
+                                className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                              >
+                                <Edit className="h-4 w-4" />
+                                <span>Edit</span>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -918,126 +919,62 @@ function App() {
 
 
   return (
-    //   <DialogProvider>
-    //     <Router>
-    //       <Routes>
-    //         {/* Add this route configuration */}
-    //         <Route path="/EmailVerifyRedirect" element={<EmailVerifyRedirect />} />
-    //         <Route path="/LinkExpired" element={<LinkExpired />} />
-    //         <Route path="/EmailConfirmed" element={<EmailConfirmed />} />
-    //         {/* Add your other routes here
-    //         <Route path="/" element={<Home />} />
-    //         <Route path="/login" element={<Login />} /> */}
-    //         {/* ... other routes */}
+    <>
+      {/* <Toaster position="top-center" reverseOrder={false} /> */}
+      <DialogProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public auth routes */}
+            <Route path="/EmailVerifyRedirect" element={<EmailVerifyRedirect />} />
+            <Route path="/LinkExpired" element={<LinkExpired />} />
+            <Route path="/EmailConfirmed" element={<EmailConfirmed />} />
+            {/* Login route */}
+            <Route
+              path="/login"
+              element={
+                !currentUser
+                  ? (<LoginForm onLogin={handleLogin} />)
+                  : (<Navigate to="/" replace />)
+              }
+            />
+            {/* Protected main app routes */}
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute currentUser={currentUser}>
+                  <AppLayout
+                    currentUser={currentUser}
+                    activeView={activeView}
+                    setActiveView={setActiveView}
+                    renderMainContent={renderMainContent}
+                    renderTicketEditModal={renderTicketEditModal}
+                    isCreateTicketModalOpen={isCreateTicketModalOpen}
+                    setIsCreateTicketModalOpen={setIsCreateTicketModalOpen}
+                    isClientOnboardingModalOpen={isClientOnboardingModalOpen}
+                    setIsClientOnboardingModalOpen={setIsClientOnboardingModalOpen}
+                    isClientEditModalOpen={isClientEditModalOpen}
+                    setIsClientEditModalOpen={setIsClientEditModalOpen}
+                    isUserManagementModalOpen={isUserManagementModalOpen}
+                    setIsUserManagementModalOpen={setIsUserManagementModalOpen}
+                    selectedTicket={selectedTicket}
+                    selectedClient={selectedClient}
+                    setSelectedClient={setSelectedClient}
+                    handleLogout={handleLogout}
+                    handleCreateTicket={handleCreateTicket}
+                    handleUpdateClient={handleUpdateClient}
+                    handleUpdateUser={handleUpdateUser}
+                    handleDeleteUser={handleDeleteUser}
+                    fetchData={fetchData}
+                    pendingClientsCount={pendingClients.length}
+                  />
+                </ProtectedRoute>
+              }
+            />
 
-    //       </Routes>
-    //     </Router>
-
-    //     <div className="min-h-screen bg-gray-50">
-    //       <Navbar user={currentUser} onLogout={handleLogout} />
-
-    //       <div className="flex">
-    //         <Sidebar
-    //           user={currentUser}
-    //           activeView={activeView}
-    //           onViewChange={setActiveView}
-    //         />
-
-    //         <main className="flex-1 p-8">
-    //           {renderMainContent()}
-    //         </main>
-    //       </div>
-
-    // <CreateTicketModal
-    //   user={currentUser}
-    //   isOpen={isCreateTicketModalOpen}
-    //   onClose={() => setIsCreateTicketModalOpen(false)}
-    //   onSubmit={handleCreateTicket}
-    //   onTicketCreated={fetchData}
-    // />
-
-    // {renderTicketEditModal(selectedTicket, "edit")}
-
-    // <ClientOnboardingModal
-    //   user={currentUser}
-    //   isOpen={isClientOnboardingModalOpen}
-    //   onClose={() => setIsClientOnboardingModalOpen(false)}
-    //   onClientOnboarded={fetchData}
-    // />
-
-    // <ClientEditModal
-    //   client={selectedClient}
-    //   isOpen={isClientEditModalOpen}
-    //   currentUserRole={currentUser.role}
-    //   onClose={() => {
-    //     setIsClientEditModalOpen(false);
-    //     setSelectedClient(null);
-    //   }}
-    //   onSubmit={handleUpdateClient}
-    // />
-
-    // <UserManagementModal
-    //   isOpen={isUserManagementModalOpen}
-    //   onClose={() => setIsUserManagementModalOpen(false)}
-    //   onUpdateUser={handleUpdateUser}
-    //   onDeleteUser={handleDeleteUser}
-    // />
-    //     </div>
-    //   </DialogProvider>
-    // );
-    <DialogProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public auth routes */}
-          <Route path="/EmailVerifyRedirect" element={<EmailVerifyRedirect />} />
-          <Route path="/LinkExpired" element={<LinkExpired />} />
-          <Route path="/EmailConfirmed" element={<EmailConfirmed />} />
-          {/* Login route */}
-          <Route
-            path="/login"
-            element={
-              !currentUser
-                ? (<LoginForm onLogin={handleLogin} />)
-                : (<Navigate to="/" replace />)
-            }
-          />
-          {/* Protected main app routes */}
-          <Route
-            path="/*"
-            element={
-              <ProtectedRoute currentUser={currentUser}>
-                <AppLayout
-                  currentUser={currentUser}
-                  activeView={activeView}
-                  setActiveView={setActiveView}
-                  renderMainContent={renderMainContent}
-                  renderTicketEditModal={renderTicketEditModal}
-                  isCreateTicketModalOpen={isCreateTicketModalOpen}
-                  setIsCreateTicketModalOpen={setIsCreateTicketModalOpen}
-                  isClientOnboardingModalOpen={isClientOnboardingModalOpen}
-                  setIsClientOnboardingModalOpen={setIsClientOnboardingModalOpen}
-                  isClientEditModalOpen={isClientEditModalOpen}
-                  setIsClientEditModalOpen={setIsClientEditModalOpen}
-                  isUserManagementModalOpen={isUserManagementModalOpen}
-                  setIsUserManagementModalOpen={setIsUserManagementModalOpen}
-                  selectedTicket={selectedTicket}
-                  selectedClient={selectedClient}
-                  setSelectedClient={setSelectedClient}
-                  handleLogout={handleLogout}
-                  handleCreateTicket={handleCreateTicket}
-                  handleUpdateClient={handleUpdateClient}
-                  handleUpdateUser={handleUpdateUser}
-                  handleDeleteUser={handleDeleteUser}
-                  fetchData={fetchData}
-                  pendingClientsCount={pendingClients.length}
-                />
-              </ProtectedRoute>
-            }
-          />
-
-        </Routes>
-      </BrowserRouter>
-    </DialogProvider>
+          </Routes>
+        </BrowserRouter>
+      </DialogProvider>
+    </>
   );
 }
 
