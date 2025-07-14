@@ -1,7 +1,10 @@
 import React from 'react';
 import { Check, Clock, AlertCircle } from 'lucide-react';
 
+import { Ticket } from '../../../types';
+
 interface TimelineItemProps {
+  isResolved: boolean;
   status: string;
   description: string;
   isCompleted: boolean;
@@ -10,7 +13,12 @@ interface TimelineItemProps {
   date?: string;
 }
 
+interface TicketlineItem {
+  ticket: Ticket;
+}
+
 const TimelineItem: React.FC<TimelineItemProps> = ({
+  isResolved,
   status,
   description,
   isCompleted,
@@ -19,6 +27,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   date
 }) => {
   const getIcon = () => {
+    if (isResolved) return <Check className="h-4 w-4 text-green-500" />;
     if (isAttentionNeeded) return <AlertCircle className="h-4 w-4 text-yellow-500" />;
     if (isCurrent) return <Clock className="h-4 w-4 text-blue-500" />;
     if (isCompleted) return <Check className="h-4 w-4 text-green-500" />;
@@ -32,7 +41,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
           isAttentionNeeded ? 'bg-yellow-100' :
           isCurrent ? 'bg-blue-100' : 
           isCompleted ? 'bg-green-100' : 'bg-gray-100'
-        }`}>
+        }`} >
           {getIcon()}
         </div>
         <div className={`w-0.5 h-full ${
