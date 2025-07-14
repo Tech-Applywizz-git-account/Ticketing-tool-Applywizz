@@ -115,7 +115,7 @@ const EmailConfirmed = () => {
             // ✅ 4. Redirect to login
             // alert("Password updated successfully! Redirecting to login...");
             toast("Password updated successfully! Redirecting to login...", {
-                position: "top-right",
+                position: "top-center",
                 autoClose: 4000,
                 hideProgressBar: false,
                 closeOnClick: false,

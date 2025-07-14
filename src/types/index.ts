@@ -6,9 +6,7 @@ export type UserRole =
   | 'ca_team_lead'
   | 'resume_team'
   | 'scraping_team'
-  | 'credential_resolution'
   | 'cro'
-  | 'cro_manager'
   | 'coo'
   | 'ceo'
   | 'system_admin';

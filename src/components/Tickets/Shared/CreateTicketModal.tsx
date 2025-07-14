@@ -216,7 +216,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     // alert("Ticket created successfully!");
     // toast.success("Ticket created successfully!");
     toast("Ticket created successfully!", {
-            position: "top-right",
+            position: "top-center",
             autoClose: 4000,
             hideProgressBar: false,
             closeOnClick: false,
