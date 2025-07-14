@@ -69,13 +69,10 @@ const TicketTimeline: React.FC<TicketTimelineProps> = ({ ticket }) => {
       ? 'manager_attention' 
       : ticket.status)
   );
-  console.log('Current Status Index:', currentStatusIndex);
-  // const currentStatusIndex = statusSteps.findIndex(step => {
-  //   if (ticket.status === 'resolved' && ticket.requiredManagerAttention) {
-  //     return step.id === 'resolved';
-  //   }
-  //   return step.id === ticket.status;
-  // });
+  // console.log('Current Status Index:', currentStatusIndex);
+  console.log('Status Steps:', statusSteps);
+  const isResolved = ticket.status === 'resolved';
+  console.log('resolved:', isResolved);
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
@@ -83,6 +80,7 @@ const TicketTimeline: React.FC<TicketTimelineProps> = ({ ticket }) => {
       <div className="space-y-2">
         {statusSteps.map((step, index) => (
           <TimelineItem
+            isResolved={isResolved}
             key={step.id}
             status={step.title}
             description={step.description}

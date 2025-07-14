@@ -56,7 +56,10 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
               title="Log out"
               aria-label="Log out"
             >
-              <LogOut className="h-5 w-5" />
+              <div className="flex flex-col items-center">
+              <LogOut className="h-6 w-6" />
+              <p className='text-xs'>Log Out</p>
+              </div>
             </button>
           </div>
         </div>
