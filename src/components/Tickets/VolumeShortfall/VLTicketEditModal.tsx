@@ -5,9 +5,10 @@ import { ticketTypeLabels } from '../../../data/mockData';
 import { format } from 'date-fns';
 import { supabase } from '../../../lib/supabaseClient';
 import { id } from 'date-fns/locale';
-import { toast } from 'sonner';
-// import { toast } from 'react-hot-toast';
+// import { toast } from 'sonner';
+import { toast } from 'react-toastify';
 import TicketTimeline from '../ClientTicketTimeLine/TicketTimeline';
+
 
 
 
@@ -65,6 +66,9 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
   const [volumeShortfallData, setVolumeShortfallData] = useState<any>([]);
   const [wantsToEscalate, setWantsToEscalate] = useState(false);
   const [escalationReason, setEscalationReason] = useState('');
+
+  const [showCallbackPopup, setShowCallbackPopup] = useState(false);
+  const [wantsCallback, setWantsCallback] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -337,11 +341,30 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
           console.error("Escalation insert failed:", escalationError.message);
           toast.error("Failed to escalate CA. Ticket was closed, but escalation not saved.");
         } else {
-          toast.success("Escalation raised on CA successfully.");
+          toast("Escalation raised on CA successfully.", {
+            position: "top-right",
+            autoClose: 4000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
         }
       }
 
-      alert("Ticket closed successfully!");
+      // alert("Ticket closed successfully!");
+      toast("Ticket closed successfully!", {
+        position: "top-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
       onUpdate?.(); // notify parent component of update
       setUserComment('');
       setUserFile(null);
@@ -413,7 +436,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
           });
         if (insertError) {
           console.error("Failed to assign users:", insertError);
-          alert("Error while assigning new users.");
+          ("Error while assigning new users.");
           return;
         }
         // Step 4: Update ticket status
@@ -436,7 +459,17 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
           return;
         }
         else {
-          alert("Ticket successfully forwarded to Scraping Team.");
+          // alert("Ticket successfully forwarded to Scraping Team.");
+          toast("Ticket successfully forwarded to Scraping Team!", {
+            position: "top-right",
+            autoClose: 4000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
         }
         onUpdate?.();
         onClose();
@@ -489,7 +522,17 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
           return;
         }
         else {
-          alert("Ticket successfully forwarded to CA and Scraping Team.");
+          // alert("Ticket successfully forwarded to CA and Scraping Team.");
+          toast("Ticket successfully forwarded to CA and Scraping Team!", {
+            position: "top-right",
+            autoClose: 4000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
         }
         onUpdate?.();
         onClose();
@@ -554,7 +597,17 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
         ]);
       }
       onUpdate?.();
-      alert("Comment submitted successfully.");
+      // alert("Comment submitted successfully.");
+      toast("Comment submitted successfully!", {
+        position: "top-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
       setUserComment('');
       setUserFile(null);
       onClose();
@@ -718,7 +771,19 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
         return;
       }
 
-      alert("Ticket resolved.");
+      // alert("Ticket resolved.");
+      // toast.success("Ticket resolved successfully!");
+      toast("Ticket resolved successfully!", {
+        position: "top-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+
       onUpdate?.();
       setResolutionComment('');
       setResolutionFile(null);
@@ -792,18 +857,20 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
 
     try {
       if (needsHelp) {
+        setShowCallbackPopup(true);
+        return;
         // Update to needs_manager_review status
-        const { error } = await supabase
-          .from('tickets')
-          .update({
-            status: 'manager_attention',
-            requiredManagerAttention: true,
-            updatedAt: new Date().toISOString()
-          })
-          .eq('id', ticket.id);
+        // const { error } = await supabase
+        //   .from('tickets')
+        //   .update({
+        //     status: 'manager_attention',
+        //     requiredManagerAttention: true,
+        //     updatedAt: new Date().toISOString()
+        //   })
+        //   .eq('id', ticket.id);
 
-        if (error) throw error;
-        alert("Account manager will contact you shortly");
+        // if (error) throw error;
+        // alert("Account manager will contact you shortly");
       } else {
         // Update directly to resolved
         const { error } = await supabase
@@ -815,7 +882,17 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
           .eq('id', ticket.id);
 
         if (error) throw error;
-        alert("Ticket marked as resolved");
+        // alert("Ticket marked as resolved");
+        toast("Ticket marked as resolved!", {
+          position: "top-right",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       }
 
       // Refresh data
@@ -824,6 +901,48 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
     } catch (error) {
       console.error("Error updating ticket:", error);
       alert("Failed to update ticket status");
+    }
+  };
+
+  const handleCallbackResponse = async (needsCall: boolean) => {
+    try {
+
+      // setWantsCallback(needsCall);
+      if (needsCall) {
+        // Update to needs_manager_review status
+        const { error } = await supabase
+          .from('tickets')
+          .update({
+            status: 'manager_attention',
+            requiredManagerAttention: true,
+            updatedAt: new Date().toISOString()
+          })
+          .eq('id', ticket.id);
+
+        if (error) throw error;
+        // alert("Account manager will contact you shortly");
+        toast("Account manager will contact you shortly!", {
+          position: "top-right",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+
+      } else {
+        setShowCallbackPopup(false);
+        return;
+      }
+      onUpdate?.();
+      onClose();
+    } catch (error) {
+      console.error("Error updating ticket:", error);
+      alert("Failed to update ticket status");
+    } finally {
+      setShowCallbackPopup(false);
     }
   };
 
@@ -1029,14 +1148,35 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                     onClick={() => handleAssistanceResponse(false)}
                     className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                   >
-                    No, I'm satisfied
+                    Yes, I'm satisfied
                   </button>
                   <button
                     onClick={() => handleAssistanceResponse(true)}
                     className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                   >
-                    Yes, I need help
+                    No, I need help
                   </button>
+                </div>
+              </div>
+            )}
+            {showCallbackPopup && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white p-6 rounded-lg max-w-md w-full">
+                  <h3 className="text-lg font-semibold mb-4">Do you need a call from our team?</h3>
+                  <div className="flex justify-center space-x-4">
+                    <button
+                      onClick={() => handleCallbackResponse(true)}
+                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => handleCallbackResponse(false)}
+                      className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                    >
+                      No
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -1328,7 +1468,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                       </div>
                     </div>
                   )}
-                  {['account_manager', 'coo', 'cro', 'ceo'].includes(user.role) && alreadyAssignedIds.has(user?.id) && 
+                  {['account_manager', 'coo', 'cro', 'ceo'].includes(user.role) && alreadyAssignedIds.has(user?.id) &&
                     ticket.status === 'manager_attention' && (
                       <div className="mt-6 border-t pt-4">
                         <h3 className="text-md font-semibold mb-2 text-gray-800">Resolve Ticket</h3>
