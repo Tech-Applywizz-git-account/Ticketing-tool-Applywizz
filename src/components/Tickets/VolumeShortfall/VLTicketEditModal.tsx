@@ -342,7 +342,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
           toast.error("Failed to escalate CA. Ticket was closed, but escalation not saved.");
         } else {
           toast("Escalation raised on CA successfully.", {
-            position: "top-right",
+            position: "top-center",
             autoClose: 4000,
             hideProgressBar: false,
             closeOnClick: false,
@@ -356,7 +356,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
 
       // alert("Ticket closed successfully!");
       toast("Ticket closed successfully!", {
-        position: "top-right",
+        position: "top-center",
         autoClose: 4000,
         hideProgressBar: false,
         closeOnClick: false,
@@ -461,7 +461,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
         else {
           // alert("Ticket successfully forwarded to Scraping Team.");
           toast("Ticket successfully forwarded to Scraping Team!", {
-            position: "top-right",
+            position: "top-center",
             autoClose: 4000,
             hideProgressBar: false,
             closeOnClick: false,
@@ -524,7 +524,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
         else {
           // alert("Ticket successfully forwarded to CA and Scraping Team.");
           toast("Ticket successfully forwarded to CA and Scraping Team!", {
-            position: "top-right",
+            position: "top-center",
             autoClose: 4000,
             hideProgressBar: false,
             closeOnClick: false,
@@ -599,7 +599,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
       onUpdate?.();
       // alert("Comment submitted successfully.");
       toast("Comment submitted successfully!", {
-        position: "top-right",
+        position: "top-center",
         autoClose: 4000,
         hideProgressBar: false,
         closeOnClick: false,
@@ -774,7 +774,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
       // alert("Ticket resolved.");
       // toast.success("Ticket resolved successfully!");
       toast("Ticket resolved successfully!", {
-        position: "top-right",
+        position: "top-center",
         autoClose: 4000,
         hideProgressBar: false,
         closeOnClick: false,
@@ -884,7 +884,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
         if (error) throw error;
         // alert("Ticket marked as resolved");
         toast("Ticket marked as resolved!", {
-          position: "top-right",
+          position: "top-center",
           autoClose: 4000,
           hideProgressBar: false,
           closeOnClick: false,
@@ -922,7 +922,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
         if (error) throw error;
         // alert("Account manager will contact you shortly");
         toast("Account manager will contact you shortly!", {
-          position: "top-right",
+          position: "top-center",
           autoClose: 4000,
           hideProgressBar: false,
           closeOnClick: false,
@@ -1161,18 +1161,18 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
             )}
             {showCallbackPopup && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white p-6 rounded-lg max-w-md w-full">
-                  <h3 className="text-lg font-semibold mb-4">Do you need a call from our team?</h3>
+                <div className="bg-gray-100 border-4 border-blue-100 p-6 rounded-lg max-w-md w-full">
+                  <h3 className="text-lg font-semibold mb-4 text-center">Do you need a call from our team?</h3>
                   <div className="flex justify-center space-x-4">
                     <button
                       onClick={() => handleCallbackResponse(true)}
-                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                      className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700"
                     >
                       Yes
                     </button>
                     <button
                       onClick={() => handleCallbackResponse(false)}
-                      className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                      className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700"
                     >
                       No
                     </button>

@@ -68,7 +68,7 @@ export const ClientOnboardingModal: React.FC<ClientOnboardingModalProps> = ({
 
   // alert("Client submitted successfully.");
   toast("Client submitted successfully!", {
-        position: "top-right",
+        position: "top-center",
         autoClose: 4000,
         hideProgressBar: false,
         closeOnClick: false,

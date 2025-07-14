@@ -74,7 +74,7 @@ export function ClientEditModal({ client, isOpen, currentUserRole, onClose, onSu
     } else {
       // alert('Client updated successfully!');
       toast("Client updated successfully!", {
-        position: "top-right",
+        position: "top-center",
         autoClose: 4000,
         hideProgressBar: false,
         closeOnClick: false,
