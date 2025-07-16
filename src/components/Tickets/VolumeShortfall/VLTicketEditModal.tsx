@@ -8,6 +8,7 @@ import { id } from 'date-fns/locale';
 // import { toast } from 'sonner';
 import { toast } from 'react-toastify';
 import TicketTimeline from '../ClientTicketTimeLine/TicketTimeline';
+import { v4 as uuidv4 } from 'uuid';
 
 
 
@@ -56,7 +57,6 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
   const [alreadyAssignedIds, setAlreadyAssignedIds] = useState(new Set<string>());
 
   const [comment, setComment] = useState('');
-  const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const currentUserRole = user?.role;
   const currentUserId = user?.id;
@@ -66,6 +66,8 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
   const [volumeShortfallData, setVolumeShortfallData] = useState<any>([]);
   const [wantsToEscalate, setWantsToEscalate] = useState(false);
   const [escalationReason, setEscalationReason] = useState('');
+
+  const [saprateCommnetID, setSaparateCommnetID] = useState<string>(uuidv4());
 
   const [showCallbackPopup, setShowCallbackPopup] = useState(false);
   const [wantsCallback, setWantsCallback] = useState(false);
@@ -99,7 +101,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
       .from('ticket_files')
       .select(`
       id,
-      file_path,
+      file_path,commentid, id, file_name,
       uploaded_at,
       users:uploaded_by (
         id,
@@ -196,6 +198,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
       const { data: comments, error: commentError } = await supabase
         .from('ticket_comments')
         .select(`
+          id,
     content,
     created_at,
     user_id,
@@ -214,12 +217,16 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
       // Fetch Files
       const { data: files, error: fileError } = await supabase
         .from('ticket_files')
-        .select('file_path, uploaded_at, uploaded_by')
+        .select('file_path, uploaded_at, commentid, id, file_name, uploaded_by')
         .eq('ticket_id', ticket.id)
         .order('uploaded_at', { ascending: true });
 
       if (fileError) console.error('Error fetching files:', fileError);
-      else setTicketFiles(files || []);
+      else {
+        setTicketFiles(files || []);
+
+        console.log('vv', ticketFiles);
+      }
     };
 
     fetchTicketActivity();
@@ -249,21 +256,21 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
   const handleCloseTicket = async () => {
     if (!ticket) return;
     if (!ticket.id || !user?.id) return;
-    if (!comment && !file) {
+    if (!comment) {
       alert("Please write a comment or attach a file to close this ticket.");
       return;
     }
     setIsSubmittingComment(true);
     try {
       setIsUploading(true);
-      let uploadedFilePath: string | null = null;
+      let uploadedFilePath = null;
 
-      if (file) {
+      if (userFile) {
         // Upload file to Supabase storage
-        const filePath = `${ticket.id}/${Date.now()}-${file.name}`;
+        const filePath = `${ticket.id}/${Date.now()}-${userFile.name}`;
         const { error: uploadError } = await supabase.storage
           .from('ticket-attachments')
-          .upload(filePath, file);
+          .upload(filePath, userFile);
 
         if (uploadError) {
           console.error("File upload failed:", uploadError);
@@ -271,36 +278,35 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
           return;
         }
         uploadedFilePath = filePath;
+        const { error: insertError } = await supabase.from('ticket_files').insert(
+          {
+            commentid: saprateCommnetID,
+            ticket_id: ticket.id,
+            uploaded_by: user.id,
+            file_path: uploadedFilePath,
+            uploaded_at: new Date().toISOString(),
+            file_name: userFile.name,
+          },
+        );
+        if (insertError) {
+          console.error("Failed to record uploaded file:", insertError);
+          alert("Error saving file info.");
+          return;
+        }
       }
 
       // Insert comment with status at time
       if (comment.trim() !== '') {
         await supabase.from('ticket_comments').insert([
           {
+            id: saprateCommnetID,
             ticket_id: ticket.id,
-            user_id: currentUserId,
+            user_id: user.id,
             content: comment,
             is_internal: false,
             ticketStatusAtTime: 'closed',
           },
         ]);
-      }
-
-      // Save file reference
-      if (uploadedFilePath) {
-        const { error: insertError } = await supabase.from('ticket_files').insert([
-          {
-            ticket_id: ticket.id,
-            uploaded_by: currentUserId,
-            file_path: uploadedFilePath,
-            uploaded_at: new Date().toISOString(),
-          },
-        ]);
-        if (insertError) {
-          console.error("Failed to record uploaded file:", insertError);
-          alert("Error saving file info.");
-          return;
-        }
       }
 
       // Update ticket status
@@ -367,6 +373,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
       });
       onUpdate?.(); // notify parent component of update
       setUserComment('');
+      setSaparateCommnetID(uuidv4());
       setUserFile(null);
       onClose(); // close modal
     } catch (error) {
@@ -379,7 +386,6 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
   };
 
   const handleForwardTicket = async () => {
-
     setIsSubmittingComment(true);
     try {
       if (!ticket) return;
@@ -387,10 +393,41 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
         alert("Client ID missing from ticket.");
         return;
       }
+
+      if (userFile) {
+        // Upload file to Supabase storage
+        const filePath = `${ticket.id}/${Date.now()}-${userFile.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('ticket-attachments')
+          .upload(filePath, userFile);
+
+        if (uploadError) {
+          console.error("File upload failed:", uploadError);
+          alert("File upload failed.");
+          return;
+        }
+        const { error: insertError } = await supabase.from('ticket_files').insert(
+          {
+            commentid: saprateCommnetID,
+            ticket_id: ticket.id,
+            uploaded_by: user.id,
+            file_path: filePath,
+            uploaded_at: new Date().toISOString(),
+            file_name: userFile.name,
+          },
+        );
+        if (insertError) {
+          console.error("Failed to record uploaded file:", insertError);
+          alert("Error saving file info.");
+          return;
+        }
+      }
+
       // Insert comment with status at time
       if (comment && comment.trim() !== '') {
         await supabase.from('ticket_comments').insert([
           {
+            id: saprateCommnetID,
             ticket_id: ticket.id,
             user_id: currentUserId,
             content: comment,
@@ -473,6 +510,9 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
         }
         onUpdate?.();
         onClose();
+        setUserComment('');
+        setSaparateCommnetID(uuidv4());
+        setUserFile(null);
       }
       else {
         // Step 2: Fetch existing ticket assignments
@@ -536,6 +576,9 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
         }
         onUpdate?.();
         onClose();
+        setUserComment('');
+        setSaparateCommnetID(uuidv4());
+        setUserFile(null);
       }
     } catch (error) {
       console.error("Unexpected error:", error);
@@ -557,7 +600,6 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
 
     try {
       // Step 1: Upload file if provided
-      let uploadedFilePath: string | null = null;
 
       if (userFile) {
         const filePath = `${ticket.id}/${Date.now()}-${userFile.name}`;
@@ -570,13 +612,28 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
           alert("File upload failed.");
           return;
         }
-        uploadedFilePath = filePath;
+        const { error: insertError } = await supabase.from('ticket_files').insert(
+          {
+            commentid: saprateCommnetID,
+            ticket_id: ticket.id,
+            uploaded_by: user.id,
+            file_path: filePath,
+            uploaded_at: new Date().toISOString(),
+            file_name: userFile.name,
+          },
+        );
+        if (insertError) {
+          console.error("Failed to record uploaded file:", insertError);
+          alert("Error saving file info.");
+          return;
+        }
       }
 
       // Step 2: Insert comment (if text provided)
       if (userComment.trim() !== '') {
         await supabase.from('ticket_comments').insert([
           {
+            id: saprateCommnetID,
             ticket_id: ticket.id,
             user_id: user.id,
             content: userComment,
@@ -586,16 +643,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
         ]);
       }
 
-      // Step 3: Insert ticket_files (if file uploaded)
-      if (uploadedFilePath) {
-        await supabase.from('ticket_files').insert([
-          {
-            ticket_id: ticket.id,
-            file_path: uploadedFilePath,
-            uploaded_by: user.id,
-          }
-        ]);
-      }
+
       onUpdate?.();
       // alert("Comment submitted successfully.");
       toast("Comment submitted successfully!", {
@@ -609,6 +657,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
         theme: "dark",
       });
       setUserComment('');
+      setSaparateCommnetID(uuidv4());
       setUserFile(null);
       onClose();
     } catch (err) {
@@ -714,29 +763,30 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
       alert("Please write a resolution comment or attach a resolution file.");
       return;
     }
+    setIsSubmittingComment(true);
     try {
       // 1. Upload file (if exists)
-      let filePath = null;
 
       if (resolutionFile) {
-        const path = `${ticket.id}/${Date.now()}-${resolutionFile.name}`;
+        const filePath = `${ticket.id}/${Date.now()}-${resolutionFile.name}`;
         const { error: uploadError } = await supabase.storage
           .from('ticket-attachments')
-          .upload(path, resolutionFile);
+          .upload(filePath, resolutionFile);
 
         if (uploadError) {
+          console.error("Upload failed:", uploadError);
           alert("File upload failed.");
           return;
         }
-
-        filePath = path;
-
         const { error: insertFileError } = await supabase
           .from('ticket_files')
           .insert({
+            commentid: saprateCommnetID,
             ticket_id: ticket.id,
-            file_path: path,
             uploaded_by: user.id,
+            file_path: filePath,
+            uploaded_at: new Date().toISOString(),
+            file_name: resolutionFile.name,
           });
 
         if (insertFileError) {
@@ -747,6 +797,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
       // 2. Add resolution comment
       if (resolutionComment.trim()) {
         const { error: commentError } = await supabase.from('ticket_comments').insert({
+          id: saprateCommnetID,
           ticket_id: ticket.id,
           user_id: user.id,
           content: resolutionComment,
@@ -786,11 +837,14 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
 
       onUpdate?.();
       setResolutionComment('');
+      setSaparateCommnetID(uuidv4());
       setResolutionFile(null);
       onClose();
     } catch (error) {
       console.error("Resolution error:", error);
       alert("Unexpected error during resolution.");
+    }finally{
+      setIsSubmittingComment(false);
     }
   };
 
@@ -1085,52 +1139,31 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                       <div className="text-gray-500 text-xs mt-1">
                         {new Date(comment.created_at).toLocaleString()}
                       </div>
+                      {/* --- Files --- */}
+                      {ticketFiles.filter((file) => file.commentid === comment.id).length > 0 && (
+                        <div className="mt-6 border-t pt-4">
+                          <h3 className="text-md font-semibold mb-2">Uploaded File :</h3>
+                          <ul className="space-y-2 text-sm">
+                            {ticketFiles.filter((file) => file.commentid === comment.id).map((file, index) => (
+                              <li key={index}>
+                                <a
+                                  href={`https://zkebbnegghodwmgmkynt.supabase.co/storage/v1/object/public/ticket-attachments/${file.file_path}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  {file.file_name}
+                                </a>{' '}
+                                <span className="text-gray-400 text-xs">
+                                  ({new Date(file.uploaded_at).toLocaleString()})
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </li>
                   ))}
-                </ul>
-              </div>
-            )}
-            {/* --- Files --- */}
-            {ticketFiles.length > 0 && (
-              <div className="mt-6 border-t pt-4">
-                <h3 className="text-md font-semibold mb-2">Uploaded Files:</h3>
-                <ul className="space-y-2 text-sm">
-                  {ticketFiles.map((file, index) => (
-                    <li key={index}>
-                      <a
-                        href={`https://zkebbnegghodwmgmkynt.supabase.co/storage/v1/object/public/ticket-attachments/${file.file_path}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        {file.file_path.split('/').pop()}
-                      </a>{' '}
-                      <span className="text-gray-400 text-xs">
-                        ({new Date(file.uploaded_at).toLocaleString()})
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {ticketFiles.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-md font-semibold text-gray-800 mb-2">Uploaded Files</h3>
-                <ul className="space-y-2">
-                  {ticketFiles.map((file) => {
-                    const fileUrl = supabase.storage.from('ticket-attachments').getPublicUrl(file.file_path).data.publicUrl;
-
-                    return (
-                      <li key={file.id} className="text-sm text-blue-800 underline">
-                        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                          {file.file_path.split('/').pop()}
-                        </a>
-                        <span className="ml-2 text-gray-500">
-                          (Uploaded by: {file.users?.name || 'Unknown'} on {new Date(file.uploaded_at).toLocaleDateString()})
-                        </span>
-                      </li>
-                    );
-                  })}
                 </ul>
               </div>
             )}
@@ -1161,8 +1194,8 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
             )}
             {showCallbackPopup && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-gray-100 border-4 border-blue-100 p-6 rounded-lg max-w-md w-full">
-                  <h3 className="text-lg font-semibold mb-4 text-center">Do you need a call from our team?</h3>
+                <div className="bg-gray-400 border-4 border-blue-100 p-16 rounded-lg max-w-xl w-full">
+                  <h3 className="text-xl font-semibold mb-4 text-center">Do you need a call from our Account Manager?</h3>
                   <div className="flex justify-center space-x-4">
                     <button
                       onClick={() => handleCallbackResponse(true)}
@@ -1172,7 +1205,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                     </button>
                     <button
                       onClick={() => handleCallbackResponse(false)}
-                      className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700"
+                      className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700"
                     >
                       No
                     </button>
@@ -1305,7 +1338,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
             )}
             {/* --- Comments --- */}
             {ticketComments.length > 0 && (
-              <div className="mt-6 border-t pt-4">
+              <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mt-6">
                 <h3 className="text-md font-semibold mb-2">Comments:</h3>
                 <ul className="space-y-3">
                   {ticketComments.map((comment, index) => (
@@ -1319,55 +1352,35 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                       <div className="text-gray-500 text-xs mt-1">
                         {new Date(comment.created_at).toLocaleString()}
                       </div>
+                      {/* --- Files --- */}
+                      {ticketFiles.filter((file) => file.commentid === comment.id).length > 0 && (
+                        <div className="mt-6 border-t pt-4">
+                          <h3 className="text-md font-semibold mb-2">Uploaded File :</h3>
+                          <ul className="space-y-2 text-sm">
+                            {ticketFiles.filter((file) => file.commentid === comment.id).map((file, index) => (
+                              <li key={index}>
+                                <a
+                                  href={`https://zkebbnegghodwmgmkynt.supabase.co/storage/v1/object/public/ticket-attachments/${file.file_path}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  {file.file_name}
+                                </a>{' '}
+                                <span className="text-gray-400 text-xs">
+                                  ({new Date(file.uploaded_at).toLocaleString()})
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
               </div>
             )}
-            {/* --- Files --- */}
-            {ticketFiles.length > 0 && (
-              <div className="mt-6 border-t pt-4">
-                <h3 className="text-md font-semibold mb-2">Uploaded Files:</h3>
-                <ul className="space-y-2 text-sm">
-                  {ticketFiles.map((file, index) => (
-                    <li key={index}>
-                      <a
-                        href={`https://zkebbnegghodwmgmkynt.supabase.co/storage/v1/object/public/ticket-attachments/${file.file_path}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        {file.file_path.split('/').pop()}
-                      </a>{' '}
-                      <span className="text-gray-400 text-xs">
-                        ({new Date(file.uploaded_at).toLocaleString()})
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {ticketFiles.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-md font-semibold text-gray-800 mb-2">Uploaded Files</h3>
-                <ul className="space-y-2">
-                  {ticketFiles.map((file) => {
-                    const fileUrl = supabase.storage.from('ticket-attachments').getPublicUrl(file.file_path).data.publicUrl;
 
-                    return (
-                      <li key={file.id} className="text-sm text-blue-800 underline">
-                        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                          {file.file_path.split('/').pop()}
-                        </a>
-                        <span className="ml-2 text-gray-500">
-                          (Uploaded by: {file.users?.name || 'Unknown'} on {new Date(file.uploaded_at).toLocaleDateString()})
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
             {/* Action Form */}
             {canEdit() &&
               (
@@ -1384,17 +1397,26 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                           required
                         />
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Upload File</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Upload File </label>
                           <input
                             type="file"
-                            onChange={(e) => setUserFile(e.target.files?.[0] || null)}
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                setUserFile(e.target.files[0])
+                              }
+                            }}
                             accept=".pdf,.png,.jpg,.jpeg"
                             className="block w-full border rounded px-3 py-2"
                             title="Upload a file (PDF, PNG, JPG, JPEG)"
                             placeholder="Choose a file"
                           />
                         </div>
-                        <button onClick={handleCloseTicket} disabled={isSubmittingComment} className="bg-red-500 text-white px-4 py-2 rounded">
+                        <button
+                          onClick={handleCloseTicket} disabled={!comment.trim() || isSubmittingComment}
+                          className={`px-4 py-2 rounded-lg ml-4 ${(!comment.trim() || isSubmittingComment)
+                            ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}>
                           {isSubmittingComment ? 'Closing ticket...' : 'Close Ticket '}
                         </button>
                         <button
@@ -1452,7 +1474,11 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
 
                         <input
                           type="file"
-                          onChange={(e) => setUserFile(e.target.files?.[0] || null)}
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              setUserFile(e.target.files[0])
+                            }
+                          }}
                           className="mb-4"
                           title="Upload a file"
                           placeholder="Choose a file"
@@ -1460,8 +1486,12 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
 
                         <button
                           onClick={handleCommentSubmit}
-                          disabled={isSubmittingComment}
-                          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                          disabled={!userComment.trim() || isSubmittingComment}
+                          // className={`bg-blue-500 text-white px-4 py-2 rounded ml-4`}
+                          className={`px-4 py-2 rounded-lg ml-4 ${(!userComment.trim() || isSubmittingComment)
+                            ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
                         >
                           {isSubmittingComment ? 'Submitting...' : 'Submit Comment'}
                         </button>
@@ -1474,7 +1504,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                         <h3 className="text-md font-semibold mb-2 text-gray-800">Resolve Ticket</h3>
 
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Final Comment
+                          Final Comment <span className='text-red-800 text-2xl'>*</span>
                         </label>
                         <textarea
                           value={resolutionComment}
@@ -1486,11 +1516,12 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                         />
 
                         <div className="mt-4">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Optional File Upload</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Optional File Upload (.pdf, .png, .jpg, .jpeg formats are supported)</label>
                           <input
                             title='Upload a resolution file (PDF, PNG, JPG, JPEG)'
                             type="file"
                             accept=".pdf,.png,.jpg,.jpeg"
+                            placeholder="Choose a file"
                             onChange={(e) => {
                               if (e.target.files && e.target.files[0]) {
                                 setResolutionFile(e.target.files[0]);
@@ -1500,10 +1531,15 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                         </div>
 
                         <button
-                          className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
                           onClick={handleResolveTicket}
+                          disabled={!resolutionComment.trim() || isSubmittingComment}
+                          // className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"                     
+                          className={`px-4 py-2 rounded-lg mt-4 ${(!resolutionComment.trim() || isSubmittingComment)
+                            ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                            : 'bg-green-600 text-white hover:bg-green-700 rounded'
+                            }`}
                         >
-                          Resolve Ticket
+                          {isSubmittingComment ? 'Resolving Ticket...' : 'Resolve Ticket'}
                         </button>
                       </div>
                     )

@@ -70,9 +70,9 @@ const TicketTimeline: React.FC<TicketTimelineProps> = ({ ticket }) => {
       : ticket.status)
   );
   // console.log('Current Status Index:', currentStatusIndex);
-  console.log('Status Steps:', statusSteps);
+  // console.log('Status Steps:', statusSteps);
   const isResolved = ticket.status === 'resolved';
-  console.log('resolved:', isResolved);
+  // console.log('resolved:', isResolved);
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
