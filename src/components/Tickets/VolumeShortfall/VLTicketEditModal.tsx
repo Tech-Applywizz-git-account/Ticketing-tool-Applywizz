@@ -843,7 +843,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
     } catch (error) {
       console.error("Resolution error:", error);
       alert("Unexpected error during resolution.");
-    }finally{
+    } finally {
       setIsSubmittingComment(false);
     }
   };
@@ -1234,7 +1234,6 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                   </span>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <div>
@@ -1254,24 +1253,10 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                     <p className="text-gray-900">{ticket.title}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Assigned To</label>
-                    <div className="space-y-1">
-                      {' '}
-                      {assignments[ticket.id]?.length
-                        ? assignments[ticket.id].map((u, i) => (
-                          <span key={u.id}>
-                            {u.name} ({u.role?.replace('_', ' ') || 'Unknown Role'})
-                            {i < assignments[ticket.id].length - 1 && ', '}
-                          </span>
-                        ))
-                        : 'Unassigned'}
-                      {/*assignedUsers.map(user => (
-                      <p key={user.id} className="text-gray-900">{user.name} ({user.role.replace('_', ' ')})</p>
-                      ))*/}
-                    </div>
+                    <label className="text-sm font-medium text-gray-500">Created At</label>
+                    <p className="text-gray-900">{format(new Date(ticket.createdat), 'yyyy-MM-dd hh:mm a')}</p>
                   </div>
                 </div>
-
                 <div className="space-y-3">
                   <div>
                     <label className="text-sm font-medium text-gray-500">Created By</label>
@@ -1281,10 +1266,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                     <label className="text-sm font-medium text-gray-500">Ticket Sort Code</label>
                     <p className="text-gray-900">{ticket.short_code}</p>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Created At</label>
-                    <p className="text-gray-900">{format(new Date(ticket.createdat), 'yyyy-MM-dd hh:mm a')}</p>
-                  </div>
+
                   {ticket.status !== 'resolved' ? (
                     <div>
                       <label className="text-sm font-medium text-gray-500">SLA Status</label>
@@ -1300,6 +1282,23 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                       </div>
                     </div>
                   ) : null}
+                </div>
+              </div>
+              <div className='my-2'>
+                <label className="text-sm font-medium text-gray-500 ">Assigned To</label>
+                <div className="space-y-1">
+                  {' '}
+                  {assignments[ticket.id]?.length
+                    ? assignments[ticket.id].map((u, i) => (
+                      <span key={u.id}>
+                        {u.name} ({u.role?.replace('_', ' ') || 'Unknown Role'})
+                        {i < assignments[ticket.id].length - 1 && ', '}
+                      </span>
+                    ))
+                    : 'Unassigned'}
+                  {/*assignedUsers.map(user => (
+                      <p key={user.id} className="text-gray-900">{user.name} ({user.role.replace('_', ' ')})</p>
+                      ))*/}
                 </div>
               </div>
               <div>
@@ -1329,7 +1328,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
             )}
             {currentUserRole === 'ca_team_lead' && ticket.type === 'volume_shortfall' && volumeShortfallData?.forwarded_to_ca_scraping && (
               <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-300 mt-4">
-                <h3 className="text-md font-semibold mb-2 text-yellow-900">Volume Shortfall Extra Fields</h3>
+                {/* <h3 className="text-md font-semibold mb-2 text-yellow-900">Volume Shortfall Extra Fields</h3> */}
                 <p>
                   <strong>Forwarded to CA & Scraping:</strong>{' '}
                   {volumeShortfallData?.forwarded_to_ca_scraping ? '✅ Yes' : '❌ No'}
@@ -1387,8 +1386,11 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {currentUserRole === 'ca_team_lead' && ticket.type === 'volume_shortfall' && (ticket.status === 'open' || ticket.status === 'replied') && (
                     <div className="bg-green-50 rounded-lg p-6 border border-green-200">
-                      <h3 className="text-lg font-semibold text-green-900 mb-4">Take Action</h3>
-                      <div className="space-y-4 mt-6">
+                      <h3 className="text-lg font-semibold text-green-900">Take Action</h3>
+                      <div className="space-y-2 mt-2" >
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Add a comment : <span className="text-red-800 text-xl relative top-1">*</span>
+                        </label>
                         <textarea
                           className="w-full border p-2 rounded"
                           placeholder="Add a comment before closing or forwarding..."
@@ -1397,7 +1399,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                           required
                         />
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Upload File </label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Upload File (Only .pdf, .png, .jpg, .jpeg formats are supported) </label>
                           <input
                             type="file"
                             onChange={(e) => {
@@ -1463,7 +1465,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                     <div className="bg-green-50 rounded-lg p-6 border border-green-200">
                       <h3 className="text-lg font-semibold text-green-900 mb-4">Take Action</h3>
                       <div className="mt-6 border-t pt-6">
-                        <h3 className="text-md font-semibold mb-2">Reply with your comment and file:</h3>
+                        <h3 className="text-md font-semibold mb-2">Reply with your comment and file (Only .pdf, .png, .jpg, .jpeg formats are supported) :</h3>
 
                         <textarea
                           className="w-full border p-2 rounded mb-3"
@@ -1501,10 +1503,9 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                   {['account_manager', 'coo', 'cro', 'ceo'].includes(user.role) && alreadyAssignedIds.has(user?.id) &&
                     ticket.status === 'manager_attention' && (
                       <div className="mt-6 border-t pt-4">
-                        <h3 className="text-md font-semibold mb-2 text-gray-800">Resolve Ticket</h3>
-
+                        <h3 className="text-md font-semibold text-gray-800">Resolve Ticket</h3>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Final Comment <span className='text-red-800 text-2xl'>*</span>
+                          Final Comment <span className="text-red-800 text-xl relative top-1">*</span>
                         </label>
                         <textarea
                           value={resolutionComment}
@@ -1516,7 +1517,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                         />
 
                         <div className="mt-4">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Optional File Upload (.pdf, .png, .jpg, .jpeg formats are supported)</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Optional File Upload (Only .pdf, .png, .jpg, .jpeg formats are supported)</label>
                           <input
                             title='Upload a resolution file (PDF, PNG, JPG, JPEG)'
                             type="file"
