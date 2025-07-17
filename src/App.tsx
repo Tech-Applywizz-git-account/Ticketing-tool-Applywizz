@@ -25,8 +25,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './components/Layout/AppLayout';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
-
-
 function App() {
   const fetchData = async () => {
     // 1. Get all tickets
@@ -55,7 +53,6 @@ function App() {
       setClients(clientData || []);
     }
 
-
     // 3. Get all ticket assignments
     const { data: assignmentData, error: assignmentError } = await supabase
       .from('ticket_assignments')
@@ -78,7 +75,6 @@ function App() {
         name: userMap.get(user_id) ?? 'Unknown',
         role: userData.find(u => u.id === user_id)?.role || 'Unknown Role'
       });
-
     });
 
     const { data: escalationData, error: escalationError } = await supabase
@@ -122,11 +118,8 @@ function App() {
   const [users, setUsers] = useState<User[]>([]);
   const [pendingClients, setPendingClients] = useState<any[]>([]);
   const [filterPriority, setFilterPriority] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
-
-
   // State to store the clients
   const [clients, setClients] = useState<Client[]>([]);
-
   // State to store the active view
   const [activeView, setActiveView] = useState('dashboard');
   // State to store whether the create ticket modal is open
@@ -154,6 +147,89 @@ function App() {
   useEffect(() => {
     fetchData();
   }, []);
+  useEffect(() => {
+    const allChannels = [
+      { name: 'tickets', table: 'tickets' },
+      { name: 'ticket_comments', table: 'ticket_comments' },
+      { name: 'ticket_files', table: 'ticket_files' },
+      { name: 'ticket_assignments', table: 'ticket_assignments' },
+      { name: 'ticket_escalations', table: 'ticket_escalations' },
+      { name: 'volume_shortfall_tickets', table: 'volume_shortfall_tickets' },
+      { name: 'clients', table: 'clients' },
+      { name: 'pending_clients', table: 'pending_clients' },
+      { name: 'rolepermissions', table: 'rolepermissions' },
+      { name: 'sla_config', table: 'sla_config' },
+      { name: 'ticket_status_flow', table: 'ticket_status_flow' },
+      { name: 'ticket_type', table: 'ticket_type' },
+      { name: 'users', table: 'users' },
+    ];
+
+    const activeChannels = allChannels.map(({ name, table }) =>
+      supabase
+        .channel(`realtime-${name}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table,
+          },
+          async (payload) => {
+            console.log(`📡 ${table} updated:`, payload);
+            await fetchData(); // re-fetch the latest view
+          }
+        )
+        .subscribe()
+    );
+
+    return () => {
+      activeChannels.forEach((channel) => supabase.removeChannel(channel));
+    };
+  }, []);
+
+  // useEffect(() => {
+  //   // 📡 1. Tickets Realtime Listener
+  //   const ticketsChannel = supabase
+  //     .channel('realtime-tickets')
+  //     .on(
+  //       'postgres_changes',
+  //       {
+  //         event: '*',
+  //         schema: 'public',
+  //         table: 'tickets',
+  //       },
+  //       async (payload) => {
+  //         console.log('📡 Ticket event:', payload);
+  //         await fetchData();
+  //       }
+  //     )
+  //     .subscribe();
+
+  //   // 📡 2. Comments Realtime Listener
+  //   const commentsChannel = supabase
+  //     .channel('realtime-comments')
+  //     .on(
+  //       'postgres_changes',
+  //       {
+  //         event: '*',
+  //         schema: 'public',
+  //         table: 'ticket_comments',
+  //       },
+  //       async (payload) => {
+  //         console.log('💬 Comment event:', payload);
+  //         await fetchData();
+  //       }
+  //     )
+  //     .subscribe();
+
+  //   // 🔁 Cleanup both channels on component unmount
+  //   return () => {
+  //     supabase.removeChannel(ticketsChannel);
+  //     supabase.removeChannel(commentsChannel);
+  //   };
+  // }, []);
+
+
   // assignments: Record<string, { id: string; name: string; role: string }[]>
 
   // Function to handle user login
@@ -903,7 +979,6 @@ function App() {
             onAssignRoles={handleAssignRoles}
           />
         );
-
 
       default:
         return (
