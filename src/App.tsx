@@ -38,13 +38,15 @@ function App() {
     // 2. Get all users
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('*');
+      .select('*')
+      .order('name', { ascending: true });
     // if(userData) console.log(userData);
     if (userError) console.error(userError);
 
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
-      .select('*');
+      .select('*')
+      .order('full_name', { ascending: true });
 
     if (clientError) {
       console.error("Error loading clients:", clientError.message);
@@ -699,6 +701,7 @@ function App() {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.No.</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preferences</th>
@@ -708,8 +711,9 @@ function App() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {currentUser?.role == 'career_associate' &&
-                      clients.filter(client => client.careerassociateid === currentUser.id).map(client => (
+                      clients.filter(client => client.careerassociateid === currentUser.id).map((client,index) => (
                         <tr key={client.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="font-medium text-gray-900">{client.full_name}</div>
@@ -753,8 +757,9 @@ function App() {
                         </tr>
                       ))}
                     {currentUser?.role == 'ca_team_lead' &&
-                      clients.filter(client => client.careerassociatemanagerid === currentUser.id).map(client => (
+                      clients.filter(client => client.careerassociatemanagerid === currentUser.id).map((client,index) => (
                         <tr key={client.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="font-medium text-gray-900">{client.full_name}</div>
@@ -798,8 +803,9 @@ function App() {
                         </tr>
                       ))}
                     {(currentUser?.role !== 'ca_team_lead' && currentUser?.role !== 'career_associate') &&
-                      clients.map(client => (
+                      clients.map((client,index) => (
                         <tr key={client.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="font-medium text-gray-900">{client.full_name}</div>
@@ -872,6 +878,7 @@ function App() {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.No.</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
@@ -880,8 +887,9 @@ function App() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {users.map(user => (
+                    {users.map((user,index) => (
                       <tr key={user.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">

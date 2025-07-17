@@ -1128,7 +1128,9 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
               <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mt-6">
                 <h3 className="text-md font-semibold mb-2">Comments:</h3>
                 <ul className="space-y-3">
-                  {ticketComments.map((comment, index) => (
+                  {ticketComments
+                  .filter((comment)=>(comment.users.role!=='scraping_team' && comment.users.role!=='career_associate'))
+                  .map((comment, index) => (
                     <li key={index} className="bg-gray-50 p-3 rounded border text-sm">
                       <div className="text-gray-700">
                         {comment.content}
@@ -1385,6 +1387,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
               (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {currentUserRole === 'ca_team_lead' && ticket.type === 'volume_shortfall' && (ticket.status === 'open' || ticket.status === 'replied') && (
+                    <>
                     <div className="bg-green-50 rounded-lg p-6 border border-green-200">
                       <h3 className="text-lg font-semibold text-green-900">Take Action</h3>
                       <div className="space-y-2 mt-2" >
@@ -1434,11 +1437,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                         </button>
                       </div>
                     </div>
-                  )}
-
-                  {user?.role === 'ca_team_lead' &&
-                    ticket?.type === 'volume_shortfall' &&
-                    ticket?.status === 'replied' && (
+                  
                       <div className="bg-red-50 border border-red-300 rounded-lg p-4 mt-4">
                         <label className="flex items-center gap-2 mb-2">
                           <input
@@ -1458,6 +1457,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                           />
                         )}
                       </div>
+                      </>
                     )}
 
                   {['career_associate', 'scraping_team'].includes(user?.role) && ticket.type === 'volume_shortfall' && ticket.status === 'forwarded' && (

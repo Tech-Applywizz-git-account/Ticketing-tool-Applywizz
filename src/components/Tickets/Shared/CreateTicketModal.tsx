@@ -67,7 +67,8 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     const fetchClients = async () => {
       const { data, error } = await supabase
         .from('clients')
-        .select('id, full_name, job_role_preferences');
+        .select('id, full_name, job_role_preferences')
+        .order('full_name', { ascending: true });
       // console.log(data);
       if (error) {
         console.error('Failed to fetch clients:', error);
