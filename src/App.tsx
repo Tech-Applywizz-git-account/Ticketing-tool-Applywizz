@@ -25,8 +25,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './components/Layout/AppLayout';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
-
-
 function App() {
   const fetchData = async () => {
     // 1. Get all tickets
@@ -40,13 +38,15 @@ function App() {
     // 2. Get all users
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('*');
+      .select('*')
+      .order('name', { ascending: true });
     // if(userData) console.log(userData);
     if (userError) console.error(userError);
 
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
-      .select('*');
+      .select('*')
+      .order('full_name', { ascending: true });
 
     if (clientError) {
       console.error("Error loading clients:", clientError.message);
@@ -54,7 +54,6 @@ function App() {
       // console.log("Clients:", clientData);
       setClients(clientData || []);
     }
-
 
     // 3. Get all ticket assignments
     const { data: assignmentData, error: assignmentError } = await supabase
@@ -78,7 +77,6 @@ function App() {
         name: userMap.get(user_id) ?? 'Unknown',
         role: userData.find(u => u.id === user_id)?.role || 'Unknown Role'
       });
-
     });
 
     const { data: escalationData, error: escalationError } = await supabase
@@ -122,11 +120,8 @@ function App() {
   const [users, setUsers] = useState<User[]>([]);
   const [pendingClients, setPendingClients] = useState<any[]>([]);
   const [filterPriority, setFilterPriority] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
-
-
   // State to store the clients
   const [clients, setClients] = useState<Client[]>([]);
-
   // State to store the active view
   const [activeView, setActiveView] = useState('dashboard');
   // State to store whether the create ticket modal is open
@@ -154,6 +149,89 @@ function App() {
   useEffect(() => {
     fetchData();
   }, []);
+  useEffect(() => {
+    const allChannels = [
+      { name: 'tickets', table: 'tickets' },
+      { name: 'ticket_comments', table: 'ticket_comments' },
+      { name: 'ticket_files', table: 'ticket_files' },
+      { name: 'ticket_assignments', table: 'ticket_assignments' },
+      { name: 'ticket_escalations', table: 'ticket_escalations' },
+      { name: 'volume_shortfall_tickets', table: 'volume_shortfall_tickets' },
+      { name: 'clients', table: 'clients' },
+      { name: 'pending_clients', table: 'pending_clients' },
+      { name: 'rolepermissions', table: 'rolepermissions' },
+      { name: 'sla_config', table: 'sla_config' },
+      { name: 'ticket_status_flow', table: 'ticket_status_flow' },
+      { name: 'ticket_type', table: 'ticket_type' },
+      { name: 'users', table: 'users' },
+    ];
+
+    const activeChannels = allChannels.map(({ name, table }) =>
+      supabase
+        .channel(`realtime-${name}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table,
+          },
+          async (payload) => {
+            console.log(`📡 ${table} updated:`, payload);
+            await fetchData(); // re-fetch the latest view
+          }
+        )
+        .subscribe()
+    );
+
+    return () => {
+      activeChannels.forEach((channel) => supabase.removeChannel(channel));
+    };
+  }, []);
+
+  // useEffect(() => {
+  //   // 📡 1. Tickets Realtime Listener
+  //   const ticketsChannel = supabase
+  //     .channel('realtime-tickets')
+  //     .on(
+  //       'postgres_changes',
+  //       {
+  //         event: '*',
+  //         schema: 'public',
+  //         table: 'tickets',
+  //       },
+  //       async (payload) => {
+  //         console.log('📡 Ticket event:', payload);
+  //         await fetchData();
+  //       }
+  //     )
+  //     .subscribe();
+
+  //   // 📡 2. Comments Realtime Listener
+  //   const commentsChannel = supabase
+  //     .channel('realtime-comments')
+  //     .on(
+  //       'postgres_changes',
+  //       {
+  //         event: '*',
+  //         schema: 'public',
+  //         table: 'ticket_comments',
+  //       },
+  //       async (payload) => {
+  //         console.log('💬 Comment event:', payload);
+  //         await fetchData();
+  //       }
+  //     )
+  //     .subscribe();
+
+  //   // 🔁 Cleanup both channels on component unmount
+  //   return () => {
+  //     supabase.removeChannel(ticketsChannel);
+  //     supabase.removeChannel(commentsChannel);
+  //   };
+  // }, []);
+
+
   // assignments: Record<string, { id: string; name: string; role: string }[]>
 
   // Function to handle user login
@@ -623,6 +701,7 @@ function App() {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.No.</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preferences</th>
@@ -632,8 +711,9 @@ function App() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {currentUser?.role == 'career_associate' &&
-                      clients.filter(client => client.careerassociateid === currentUser.id).map(client => (
+                      clients.filter(client => client.careerassociateid === currentUser.id).map((client,index) => (
                         <tr key={client.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="font-medium text-gray-900">{client.full_name}</div>
@@ -677,8 +757,9 @@ function App() {
                         </tr>
                       ))}
                     {currentUser?.role == 'ca_team_lead' &&
-                      clients.filter(client => client.careerassociatemanagerid === currentUser.id).map(client => (
+                      clients.filter(client => client.careerassociatemanagerid === currentUser.id).map((client,index) => (
                         <tr key={client.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="font-medium text-gray-900">{client.full_name}</div>
@@ -722,8 +803,9 @@ function App() {
                         </tr>
                       ))}
                     {(currentUser?.role !== 'ca_team_lead' && currentUser?.role !== 'career_associate') &&
-                      clients.map(client => (
+                      clients.map((client,index) => (
                         <tr key={client.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="font-medium text-gray-900">{client.full_name}</div>
@@ -796,6 +878,7 @@ function App() {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.No.</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
@@ -804,8 +887,9 @@ function App() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {users.map(user => (
+                    {users.map((user,index) => (
                       <tr key={user.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -903,7 +987,6 @@ function App() {
             onAssignRoles={handleAssignRoles}
           />
         );
-
 
       default:
         return (
