@@ -18,7 +18,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
   onUpdateUser,
   onDeleteUser
 }) => {
-  const [activeTab, setActiveTab] = useState<'list' | 'create' | 'edit'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'create' | 'edit'>('create');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [users, setUsers] = useState<UserType[]>([]);
@@ -29,7 +29,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    role: 'career_associate' as UserRole,
+    role: 'client' as UserRole,
     department: '',
     isActive: true,
     password: '',
@@ -65,7 +65,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
     setFormData({
       name: '',
       email: '',
-      role: 'career_associate',
+      role: 'client',
       department: '',
       isActive: true,
       password: '',
@@ -433,7 +433,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
           onClick={() => {
             resetForm();
             setSelectedUser(null);
-            setActiveTab('list');
+            setActiveTab('create');
           }}
           className="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
           disabled={loading}
