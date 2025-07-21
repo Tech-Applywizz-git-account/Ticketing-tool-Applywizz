@@ -5,6 +5,9 @@ import { rolePermissions, ticketTypeLabels } from '../../../data/mockData';
 import { fetchSLAConfig, SLAConfig } from '../../../services/slaService';
 import { supabase } from '../../../lib/supabaseClient'; // your Supabase client instance
 import { v4 as uuidv4 } from 'uuid';
+// import { toast } from 'sonner';
+// import { toast } from 'react-hot-toast';
+import {toast} from 'react-toastify';
  
 interface CreateTicketModalProps {
   user: UserType;
@@ -64,7 +67,8 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     const fetchClients = async () => {
       const { data, error } = await supabase
         .from('clients')
-        .select('id, full_name, job_role_preferences');
+        .select('id, full_name, job_role_preferences')
+        .order('full_name', { ascending: true });
       // console.log(data);
       if (error) {
         console.error('Failed to fetch clients:', error);
@@ -153,13 +157,18 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     };
     const now = new Date();
     const isoNow = now.toISOString();
+    let clientLogginId: { data: { id: string } | null } = { data: { id: '' } };
+    if(user.role === 'client'){
+      clientLogginId = await supabase.from('clients').select('id').eq('personal_email',user.email).single();
+    }
     // Build the ticket data
     const newTicket = {
       id: uuidv4(),
       type: ticketType,
       title,
       description,
-      clientId: clientId || null,
+      clientId: user.role !== 'client' ? clientId : clientLogginId.data?.id, // Only set clientId if the user is not a client
+      // clientId: clientId || null,
       createdby: user.id,
       priority: slaConfig.priority, // Fixed: Now uses correct priority
       status: 'open',
@@ -205,7 +214,18 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
         return;
       }
     }
-    alert("Ticket created successfully!");
+    // alert("Ticket created successfully!");
+    // toast.success("Ticket created successfully!");
+    toast("Ticket created successfully!", {
+            position: "top-center",
+            autoClose: 4000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
     onClose();
     onTicketCreated();
  

@@ -115,6 +115,7 @@ export const TicketList: React.FC<TicketListProps> = ({ tickets, user, assignmen
             <option value="in_progress">In Progress</option>
             <option value="forwarded">Forwarded</option>
             <option value="replied">Replied</option>
+            <option value="manager_attention">Manager Attention</option>
             <option value="resolved">Resolved</option>
             <option value="escalated">Escalated</option>
             <option value="closed">Closed</option>
@@ -146,7 +147,7 @@ export const TicketList: React.FC<TicketListProps> = ({ tickets, user, assignmen
           <div key={ticket.id}>
             <TicketCard ticket={ticket} onClick={onTicketClick} />
  
-            <div className="mt-1 ml-2 text-sm text-blue-700">
+            {/* <div className="mt-1 ml-2 text-sm text-blue-700">
               Assigned To :{' '}
               {assignments[ticket.id]?.length
                 ? assignments[ticket.id].map((u, i) => (
@@ -156,7 +157,7 @@ export const TicketList: React.FC<TicketListProps> = ({ tickets, user, assignmen
                   </span>
                 ))
                 : 'Unassigned'}
-            </div>
+            </div> */}
           </div>
         ))}
       </div>

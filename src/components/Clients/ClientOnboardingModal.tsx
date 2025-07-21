@@ -4,6 +4,8 @@ import { User as UserType } from '../../types';
 import { supabase } from '../../lib/supabaseClient';
 // import { useUser } from "@supabase/auth-helpers-react";
 
+import {toast} from 'react-toastify';
+
 
 interface ClientOnboardingModalProps {
   user: UserType;
@@ -64,7 +66,17 @@ export const ClientOnboardingModal: React.FC<ClientOnboardingModalProps> = ({
     return;
   }
 
-  alert("Client submitted successfully.");
+  // alert("Client submitted successfully.");
+  toast("Client submitted successfully!", {
+        position: "top-center",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
   onClientOnboarded();
   onClose(); // close modal
 };

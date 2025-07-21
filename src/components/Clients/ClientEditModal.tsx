@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { User } from "@/types";
 import { Building, FileText, Phone, X } from 'lucide-react';
+import {toast} from 'react-toastify';
 
 interface Client {
   id: string;
@@ -71,7 +72,17 @@ export function ClientEditModal({ client, isOpen, currentUserRole, onClose, onSu
     if (error) {
       alert('Error updating client: ' + error.message);
     } else {
-      alert('Client updated successfully!');
+      // alert('Client updated successfully!');
+      toast("Client updated successfully!", {
+        position: "top-center",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
       onSubmit(form);
       onClose();
     }
