@@ -56,7 +56,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
   const handleSendResetLink = async () => {
     if (!resetEmail) {
       setShowResetModal(false);
-       return setError("Please enter your email above to reset your password.");
+      return setError("Please enter your email above to reset your password.");
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
@@ -69,15 +69,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
     } else {
       // setToast({ type: 'success', message: 'Reset link sent to your email!' });
       toastify("Reset link sent to your email!", {
-                  position: "top-center",
-                  autoClose: 4000,
-                  hideProgressBar: false,
-                  closeOnClick: false,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                  theme: "dark",
-                });
+        position: "top-center",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
       setShowResetModal(false);
       setResetEmail('');
     }
@@ -179,6 +179,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         <div className="mt-4 p-4 bg-gray-50 rounded-lg">
           <h3 className="text-sm font-medium text-gray-900 mb-2">Login Instructions:</h3>
           <ul className="text-xs text-gray-600 space-y-1">
+            <li>• You’re now using the beta version of our internal ticketing system. 🎉
+              We’re testing and improving how tickets are created, tracked, and resolved across teams.
+              💬 Found a bug or have feedback? Let us know — your input helps us make it better!</li>
             <li>• Use the email and password provided by your administrator</li>
             <li>• Contact your system admin if you need credentials</li>
             <li>• Never share your password with anyone</li>
@@ -190,7 +193,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
           <div className="bg-gray-500 border-4 border-blue-100 p-16 rounded-lg max-w-xl w-full"
           //  style={{background: "linear-gradient(to left, rgba(0, 255, 94, 1) 0%, rgba(0, 217, 255, 1) 70%, rgba(0, 89, 255, 0.64) 100%)",}}
- >
+          >
             <h2 className="text-lg text-center justify-center  font-semibold mb-2">Reset Password</h2>
             <p className="text-sm text-center mb-4">Enter your email to receive a reset link:</p>
             <input
