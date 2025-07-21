@@ -24,6 +24,7 @@ import EmailVerifyRedirect from './components/Auth/EmailVerifyRedirect';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './components/Layout/AppLayout';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
+import FeedbackButton from './components/FeedbackButton';
 
 function App() {
   const fetchData = async () => {
@@ -645,6 +646,7 @@ function App() {
                 </div>
               </div>
             )}
+            <FeedbackButton user={currentUser}/>
           </div>
         );
 
@@ -672,7 +674,7 @@ function App() {
               initialFilterType={filterType} // Pass the filter type
               initialFilterPriority={filterPriority} // Pass the filter priority
             />
-
+            <FeedbackButton user={currentUser}/>
           </div>
         );
 
@@ -852,6 +854,7 @@ function App() {
                 </table>
               </div>
             </div>
+            <FeedbackButton user={currentUser}/>
           </div>
         );
 
@@ -934,6 +937,7 @@ function App() {
                 </table>
               </div>
             </div>
+            <FeedbackButton user={currentUser}/>
           </div>
         );
 
