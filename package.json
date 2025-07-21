@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@supabase/auth-helpers-react": "^0.5.0",
-    "@supabase/supabase-js": "^2.50.0",
+    "@supabase/supabase-js": "^2.52.0",
     "date-fns": "^2.30.0",
+    "dotenv": "^17.2.0",
     "lucide-react": "^0.344.0",
+    "papaparse": "^5.5.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.5.2",
@@ -40,5 +42,18 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^7.3.1",
     "vite": "^6.3.5"
-  }
+  },
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tech-Applywizz-git-account/Ticketing-tool-Applywizz.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Tech-Applywizz-git-account/Ticketing-tool-Applywizz/issues"
+  },
+  "homepage": "https://github.com/Tech-Applywizz-git-account/Ticketing-tool-Applywizz#readme",
+  "description": ""
 }

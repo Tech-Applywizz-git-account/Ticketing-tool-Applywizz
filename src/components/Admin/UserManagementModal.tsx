@@ -118,7 +118,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
       const success = await onCreateUser(formData);
       if (success) {
         resetForm();
-        setActiveTab('list');
+        setActiveTab('create');
       }
     } catch (err) {
       setError(err.message);
@@ -433,7 +433,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
           onClick={() => {
             resetForm();
             setSelectedUser(null);
-            setActiveTab('create');
+            setActiveTab('list');
           }}
           className="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
           disabled={loading}
