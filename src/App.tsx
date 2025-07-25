@@ -821,7 +821,7 @@ function App() {
                           <td className="px-6 py-4">
                             <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
                               Roles:{" "}
-                              {client.job_role_preferences.join(", ")}
+                              {client.job_role_preferences?client.job_role_preferences.join(", "):'-'}
                             </p>
                             }</div>
                             <div className="text-sm text-gray-500">{client.salary_range}</div>
