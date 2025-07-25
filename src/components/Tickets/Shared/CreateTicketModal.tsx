@@ -7,8 +7,8 @@ import { supabase } from '../../../lib/supabaseClient'; // your Supabase client 
 import { v4 as uuidv4 } from 'uuid';
 // import { toast } from 'sonner';
 // import { toast } from 'react-hot-toast';
-import {toast} from 'react-toastify';
- 
+import { toast } from 'react-toastify';
+
 interface CreateTicketModalProps {
   user: UserType;
   isOpen: boolean;
@@ -25,8 +25,8 @@ interface Client {
     name: any;
   }[];
 }
- 
- 
+
+
 export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
   user,
   isOpen,
@@ -46,10 +46,11 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
- 
+  const [file, setFile] = useState<File | null>(null);
+
   const permissions = rolePermissions[user.role];
   const allowedTicketTypes = permissions.canCreateTickets;
- 
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -76,10 +77,10 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
         setClients(data || []);
       }
     };
- 
+
     fetchClients();
   }, []);
- 
+
   useEffect(() => {
     const fetchClientsdata = async () => {
       if (!clientId) return;
@@ -94,28 +95,31 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
           )`)
         .eq('id', clientId)
         .single(); // Since you're fetching only one row;
- 
+
       if (error) {
         console.error('Error fetching selected client:', error);
       } else {
         setSelectedClient(data); // You can create a state like const [selectedClient, setSelectedClient] = useState(null)
       }
     };
- 
+
     fetchClientsdata();
   }, [clientId]);
- 
+
   if (!isOpen) return null;
- 
+
   const handleTicketTypeChange = (type: TicketType) => {
     setTicketType(type);
     setTitle(getDefaultTitle(type));
+    setDescription('');
     setMetadata({});
+    setFile(null);
   };
- 
+
   const getDefaultTitle = (type: TicketType): string => {
     const titles: Record<TicketType, string> = {
       volume_shortfall: 'Volume Shortfall - Applications below expectation',
+      data_mismatch: 'Data Mismatch - Mistake in application process',
       // resume_update: 'Client Resume Update Required',
       // high_rejections: 'High Rejection Rate - Client feedback needed',
       // no_interviews: 'No Interview Calls - Client concern',
@@ -129,27 +133,27 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     };
     return titles[type] || '';
   };
- 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
       alert('You must be logged in to submit a ticket');
       return;
     }
- 
+
     // Validate required fields
     if (!ticketType || !title || !description) {
       alert("Please fill in all required fields.");
       return;
     }
- 
+
     // Get the correct SLA config for this ticket type
     const slaConfig = getSLAForTicketType(ticketType);
     if (!slaConfig) {
       alert("Could not find SLA configuration for this ticket type.");
       return;
     }
- 
+
     const calculateDueDate = (hours: number) => {
       const now = new Date();
       now.setHours(now.getHours() + hours);
@@ -158,8 +162,8 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     const now = new Date();
     const isoNow = now.toISOString();
     let clientLogginId: { data: { id: string } | null } = { data: { id: '' } };
-    if(user.role === 'client'){
-      clientLogginId = await supabase.from('clients').select('id').eq('personal_email',user.email).single();
+    if (user.role === 'client') {
+      clientLogginId = await supabase.from('clients').select('id').eq('personal_email', user.email).single();
     }
     // Build the ticket data
     const newTicket = {
@@ -181,65 +185,95 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       comments: JSON.stringify([]),
       createdbyclient: user.role === 'client',
     };
- 
+
     // Send to Supabase
- 
-    const { error: ticketError } = await supabase
-      .from('tickets')
-      .insert(newTicket)
-      .select('id') // Ensure we get the ID back
-      .single();
- 
-    if (ticketError) {
-      console.error("Supabase insert error:", ticketError);
-      alert("Failed to create ticket.");
-      return;
-    }
-    const ticketId = newTicket.id;
-    if (ticketType === 'volume_shortfall') {
-      const { error: vsError } = await supabase
-        .from('volume_shortfall_tickets')
-        .insert([{
-          ticket_id: ticketId,
-          expected_applications: metadata.expectedApplications,
-          actual_applications: metadata.actualApplications,
-          time_period: metadata.timePeriod,
-          notes: description,
-          forwarded_to_ca_scraping: false
-        }]);
- 
-      if (vsError) {
-        console.error("Failed to insert volume shortfall fields", vsError.message);
-        alert("Failed to save volume shortfall-specific data.");
+    try {
+      const { error: ticketError } = await supabase
+        .from('tickets')
+        .insert(newTicket)
+        .select('id') // Ensure we get the ID back
+        .single();
+
+      if (ticketError) {
+        console.error("Supabase insert error:", ticketError);
+        alert("Failed to create ticket.");
         return;
       }
-    }
-    // alert("Ticket created successfully!");
-    // toast.success("Ticket created successfully!");
-    toast("Ticket created successfully!", {
-            position: "top-center",
-            autoClose: 4000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
+      const ticketId = newTicket.id;
+
+      if (file) {
+        const filePath = `${ticketId}/${Date.now()}-${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('ticket-attachments')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          toast.error("Ticket was created, but file upload failed.");
+          console.error("File upload failed:", uploadError);
+        } else {
+          // Step 3: Record the uploaded file in the 'ticket_files' table
+          const { error: fileInsertError } = await supabase.from('ticket_files').insert({
+            ticket_id: ticketId,
+            uploaded_by: user.id,
+            file_path: filePath,
+            file_name: file.name,
+            foraf:true,
           });
-    onClose();
-    onTicketCreated();
- 
- 
-    // Reset form
-    setTicketType('');
-    setClientId('');
-    setTitle('');
-    setDescription('');
-    setUrgency('');
-    setMetadata({});
-    onClose();
+          if (fileInsertError) {
+            toast.error("Ticket created, but failed to link the uploaded file.");
+            console.error("Failed to record file in DB:", fileInsertError);
+          }
+        }
+      }
+
+      if (ticketType === 'volume_shortfall') {
+        const { error: vsError } = await supabase
+          .from('volume_shortfall_tickets')
+          .insert([{
+            ticket_id: ticketId,
+            expected_applications: metadata.expectedApplications,
+            actual_applications: metadata.actualApplications,
+            time_period: metadata.timePeriod,
+            notes: description,
+            forwarded_to_ca_scraping: false
+          }]);
+
+        if (vsError) {
+          console.error("Failed to insert volume shortfall fields", vsError.message);
+          alert("Failed to save volume shortfall-specific data.");
+          return;
+        }
+      }
+      // alert("Ticket created successfully!");
+      // toast.success("Ticket created successfully!");
+      toast("Ticket created successfully!", {
+        position: "top-center",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      onClose();
+      onTicketCreated();
+      // Reset form
+      setTicketType('');
+      setClientId('');
+      setTitle('');
+      setDescription('');
+      setUrgency('');
+      setMetadata({});
+      setFile(null);
+      onClose();
+    } catch (error: any) {
+      console.error("Supabase insert error:", error);
+      toast.error(`Failed to create ticket: ${error.message}`);
+
+    }
   };
- 
+
   const renderTicketSpecificFields = () => {
     switch (ticketType) {
       // case 'credential_issue':
@@ -278,12 +312,12 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       //       </div>
       //     </div>
       //   );
- 
+
       case 'volume_shortfall':
         return (
           <div className="space-y-4">
             <>
- 
+
               {getCAMInfo()}</>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -329,7 +363,35 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
             </div>
           </div>
         );
- 
+
+      case 'data_mismatch':
+        return (
+          <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
+            <h3 className="font-medium text-gray-800">Data Mismatch Details</h3>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Application URL (if available)
+              </label>
+              <input
+                type="url"
+                value={metadata.applicationUrl || ''}
+                onChange={(e) => setMetadata({ ...metadata, applicationUrl: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="https://www.linkedin.com/jobs/view/..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Please Attach a Screenshot/File (Optional)</label>
+              <input
+                type="file"
+                onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+            </div>
+          </div>
+        );
+
       // case 'job_feed_empty':
       //   return (
       //     <div className="space-y-4">
@@ -385,7 +447,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       //       </div>
       //     </div>
       //   );
- 
+
       // case 'profile_data_issue':
       //   return (
       //     <div className="space-y-4">
@@ -437,7 +499,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       //       </div>
       //     </div>
       //   );
- 
+
       // case 'am_not_responding':
       //   return (
       //     <div className="space-y-4">
@@ -484,22 +546,22 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       //       </div>
       //     </div>
       //   );
- 
+
       default:
         return null;
     }
   };
- 
+
   const getSLAForTicketType = (type: TicketType | '') => {
     if (!type) return null;
     return slaConfigs.find(config => config.ticket_type === type);
   };
- 
+
   const getSLAInfo = () => {
     if (!ticketType) return null;
     const slaConfig = getSLAForTicketType(ticketType);
     if (!slaConfig) return null;
- 
+
     return (
       <div className="flex items-center space-x-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
         <Clock className="h-5 w-5 text-blue-600" />
@@ -521,7 +583,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       </div>
     )
   };
-   const isExecutive = user && ['ceo', 'coo', 'cro'].includes(user.role);
+  const isExecutive = user && ['ceo', 'coo', 'cro'].includes(user.role);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -529,7 +591,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Create New Ticket</h2>
-            {(user.role!=='client')&&(<p className="text-sm text-gray-600">Role: {user.name} - {user.role.replace('_', ' ').toUpperCase()}</p>)}
+            {(user.role !== 'client') && (<p className="text-sm text-gray-600">Role: {user.name} - {user.role.replace('_', ' ').toUpperCase()}</p>)}
           </div>
           <button
             onClick={onClose}
@@ -539,7 +601,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
             <X className="h-5 w-5" />
           </button>
         </div>
- 
+
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Client Selection - for roles that can select clients */}
           {(user.role === 'account_manager' || user.role === 'sales' || isExecutive) && (
@@ -556,17 +618,16 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
               >
                 <option value="">Choose a client</option>
                 {clients.map(client => (
- 
+
                   <option key={client.id} value={client.id}>
                     {client.full_name} - {(client.job_role_preferences || []).join(', ')}
                   </option>
- 
+
                 ))}
-                { }
               </select>
             </div>
           )}
- 
+
           {/* Ticket Type Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -586,7 +647,28 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
                 </option>
               ))}
             </select>
- 
+
+            {ticketType === 'data_mismatch' && (
+              <div>
+              <label className="block text-sm font-medium text-gray-700 my-2">
+                Type of Data Mismatch
+              </label>
+              <select
+                value={metadata.faultType || ''}
+                onChange={(e) => setMetadata({ ...metadata, faultType: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">Select the type of mistake</option>
+                <option value="applied_wrong_domain">Applied with Wrong Name</option>
+                <option value="spelling_mistake_in_name_or_cover_letter">Spelling Mistake in Name/Cover Letter</option>
+                <option value="incorrect_information_submitted">Incorrect Information Submitted</option>
+                <option value="wrong_document_attached">Wrong Document Attached (e.g., Resume)</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            )}
+
             {/* Role-specific restrictions notice */}
             {user.role === 'career_associate' && (
               <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -595,7 +677,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
                 </p>
               </div>
             )}
- 
+
             {user.role === 'sales' && (
               <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
@@ -604,10 +686,10 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
               </div>
             )}
           </div>
- 
+
           {/* SLA Information */}
           {getSLAInfo()}
- 
+
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -622,7 +704,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
               required
             />
           </div>
- 
+
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -637,10 +719,10 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
               required
             />
           </div>
- 
+
           {/* Ticket-specific fields */}
           {renderTicketSpecificFields()}
- 
+
           {/* Urgency for critical issues - NOW USING CORRECT PRIORITY CHECK */}
           {ticketType && getSLAForTicketType(ticketType)?.priority === 'critical' && (
             <div>
@@ -661,7 +743,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
               </div>
             </div>
           )}
- 
+
           {/* Submit Buttons */}
           <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
             <button
@@ -683,4 +765,3 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     </div>
   );
 };
- 

@@ -3,12 +3,12 @@ import { Ticket, User, TicketType, TicketStatus, TicketPriority } from '../../..
 import { TicketCard } from '../Shared/TicketCard';
 import { Search, Filter, SortAsc } from 'lucide-react';
 import { ticketTypeLabels } from '../../../data/mockData';
- 
+
 interface AssignedUser {
   id: string;
   name: string;
 }
- 
+
 interface TicketListProps {
   tickets: Ticket[];
   user: User;
@@ -18,33 +18,34 @@ interface TicketListProps {
   initialFilterType?: TicketType | 'all'; // New prop
   initialFilterPriority?: TicketPriority | 'all'; // Add this line
 }
- 
- 
+
+
 // export const TicketList: React.FC<TicketListProps> = ({ tickets, user, onTicketClick }) => {
 export const TicketList: React.FC<TicketListProps> = ({ tickets, user, assignments, onTicketClick, initialFilterStatus = 'all', initialFilterType = 'all', initialFilterPriority = 'all' }) => {
- 
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<TicketType | 'all'>(initialFilterType);
   const [filterStatus, setFilterStatus] = useState<TicketStatus | 'all'>(initialFilterStatus);
   const [filterPriority, setFilterPriority] = useState<TicketPriority | 'all'>(initialFilterPriority);
   const [sortBy, setSortBy] = useState<'created' | 'priority' | 'due'>('created');
- 
+
   // useEffect(() => {
   //   setFilterPriority(initialFilterPriority);
   // }, [initialFilterPriority]);
- 
+
   // useEffect(() => {
   //   setFilterPriority(initialFilterPriority || 'all');
   // }, [initialFilterPriority]);
- 
+
   const filteredTickets = tickets
     .filter(ticket => {
       const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        ticket.description.toLowerCase().includes(searchTerm.toLowerCase());
+        ticket.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ticket.short_code.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = filterType === 'all' || ticket.type === filterType;
       const matchesStatus = filterStatus === 'all' || ticket.status === filterStatus;
       const matchesPriority = filterPriority === 'all' || ticket.priority === filterPriority;
- 
+
       return matchesSearch && matchesType && matchesStatus && matchesPriority;
     })
     .sort((a, b) => {
@@ -60,7 +61,7 @@ export const TicketList: React.FC<TicketListProps> = ({ tickets, user, assignmen
       }
       return 0;
     });
- 
+
   return (
     <div className="space-y-6">
       {/* Filters */}
@@ -77,7 +78,7 @@ export const TicketList: React.FC<TicketListProps> = ({ tickets, user, assignmen
             />
           </div>
         </div>
- 
+
         <div className="flex gap-2">
           <select
             aria-label="Filter by ticket type"
@@ -90,7 +91,7 @@ export const TicketList: React.FC<TicketListProps> = ({ tickets, user, assignmen
               <option key={key} value={key}>{label}</option>
             ))}
           </select>
- 
+
           <select
             aria-label="Filter by priority"
             value={filterPriority}
@@ -103,7 +104,7 @@ export const TicketList: React.FC<TicketListProps> = ({ tickets, user, assignmen
             <option value="medium">Medium</option>
             <option value="low">Low</option>
           </select>
- 
+
           <select
             aria-label="Filter by ticket status"
             value={filterStatus}
@@ -120,7 +121,7 @@ export const TicketList: React.FC<TicketListProps> = ({ tickets, user, assignmen
             <option value="escalated">Escalated</option>
             <option value="closed">Closed</option>
           </select>
- 
+
           <select
             aria-label="Sort tickets"
             value={sortBy}
@@ -133,20 +134,20 @@ export const TicketList: React.FC<TicketListProps> = ({ tickets, user, assignmen
           </select>
         </div>
       </div>
- 
+
       {/* Ticket Count */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-gray-600">
           Showing {filteredTickets.length} of {tickets.length} tickets
         </div>
       </div>
- 
+
       {/* Tickets Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filteredTickets.map(ticket => (
           <div key={ticket.id}>
             <TicketCard ticket={ticket} onClick={onTicketClick} />
- 
+
             {/* <div className="mt-1 ml-2 text-sm text-blue-700">
               Assigned To :{' '}
               {assignments[ticket.id]?.length
@@ -161,7 +162,7 @@ export const TicketList: React.FC<TicketListProps> = ({ tickets, user, assignmen
           </div>
         ))}
       </div>
- 
+
       {filteredTickets.length === 0 && (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
@@ -174,6 +175,5 @@ export const TicketList: React.FC<TicketListProps> = ({ tickets, user, assignmen
     </div>
   );
 };
- 
- 
- 
+
+

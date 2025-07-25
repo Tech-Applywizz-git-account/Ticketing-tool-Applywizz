@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { TicketList } from './components/Tickets/Shared/TicketList';
 import { CreateTicketModal } from './components/Tickets/Shared/CreateTicketModal';
 import { VLTicketEditModal } from './components/Tickets/VolumeShortfall/VLTicketEditModal';
+import { DMTicketEditModal } from '@/components/Tickets/DataMismatch/DMTicketEditModel';
 import { TicketEditModal } from './components/Tickets/ResumeUpdate/RUTicketEditModel';
 import { ClientOnboardingModal } from './components/Clients/ClientOnboardingModal';
 import { PendingOnboardingList } from './components/Clients/PendingOnboardingList';
@@ -400,6 +401,29 @@ function App() {
       case "volume_shortfall":
         return (
           <VLTicketEditModal
+            ticket={selectedTicket}
+            user={currentUser}
+            isOpen={isTicketEditModalOpen}
+            assignments={assignments}
+            onClose={() => {
+              setIsTicketEditModalOpen(false);
+              setSelectedTicket(null);
+            }}
+            onSubmit={(updateData) => {
+              if (selectedTicket) {
+                handleUpdateTicket(selectedTicket.id, updateData);
+              }
+            }}
+            onUpdate={() => {
+              fetchData(); // ⬅️ refresh data when modal updates a ticket
+              setIsTicketEditModalOpen(false);
+              setSelectedTicket(null);
+            }}
+          />
+        );
+      case "data_mismatch" :
+        return (
+          <DMTicketEditModal
             ticket={selectedTicket}
             user={currentUser}
             isOpen={isTicketEditModalOpen}

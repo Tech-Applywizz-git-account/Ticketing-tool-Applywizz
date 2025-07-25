@@ -2,6 +2,7 @@
 
 export type TicketType =
   | 'volume_shortfall'
+  | 'data_mismatch'
   // | 'resume_update'
   // | 'high_rejections'
   // | 'no_interviews'

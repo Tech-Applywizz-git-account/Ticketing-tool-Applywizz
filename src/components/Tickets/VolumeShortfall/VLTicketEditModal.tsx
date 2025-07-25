@@ -44,6 +44,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
   const [status, setStatus] = useState<TicketStatus>('open');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [clientName, setClientName] = useState<string>('');
+  const [clientCA, setClientCA] = useState<string>('');
   const [resolution, setResolution] = useState('');
   const [ticketFiles, setTicketFiles] = useState<any[]>([]);
   // const [createdBy, setCreatedBy] = useState<string>('');
@@ -175,7 +176,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
 
       const { data, error } = await supabase
         .from('clients')
-        .select('full_name')
+        .select(`full_name`)
         .eq('id', ticket.clientId)
         .single(); // because only one client expected
 
@@ -188,6 +189,27 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
     };
 
     fetchClientName();
+  }, [ticket ? ticket.clientId : null]);
+  useEffect(() => {
+    const fetchClientCA = async () => {
+      if (!ticket) return;
+      if (!ticket.clientId) return;
+
+      const { data, error } = await supabase
+        .from('clients')
+        .select(`users:careerassociateid(name)`)
+        .eq('id', ticket.clientId)
+        .single(); // because only one client expected
+
+      // console.log('Fetching client', data);
+      if (error) {
+        console.error('Error fetching client name:', error);
+      } else {
+        setClientCA(data?.users?.name || '');
+      }
+    };
+
+    fetchClientCA();
   }, [ticket ? ticket.clientId : null]);
 
   useEffect(() => {
@@ -1435,6 +1457,9 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                         >
                           {client?.careerassociateid === client?.careerassociatemanagerid ? (isSubmittingComment ? ' Forwarding to Scraping Team ... ' : ' Forward to Scraping Team ') : (isSubmittingComment ? ' Forwarding to CA & Scraping Team ... ' : ' Forward to CA & Scraping Team ')}
                         </button>
+                        <div>
+                            <p>Respective Career Associate Name : {clientCA}</p>
+                        </div>
                       </div>
                     </div>
                   
