@@ -42,7 +42,7 @@ export function ClientEditModal({ client, isOpen, currentUserRole, onClose, onSu
   }, []);
 
   const fetchUsers = async () => {
-    const { data, error } = await supabase.from("users").select("*");
+    const { data, error } = await supabase.from("users").select("*").order('name', { ascending: true });
     if (error) console.error("Failed to fetch users", error);
     else setUsers(data);
   };

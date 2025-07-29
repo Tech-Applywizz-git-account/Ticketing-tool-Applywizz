@@ -9,12 +9,13 @@ import { format } from 'date-fns';
 import { TicketList } from './components/Tickets/Shared/TicketList';
 import { CreateTicketModal } from './components/Tickets/Shared/CreateTicketModal';
 import { VLTicketEditModal } from './components/Tickets/VolumeShortfall/VLTicketEditModal';
+import { DMTicketEditModal } from '@/components/Tickets/DataMismatch/DMTicketEditModel';
 import { TicketEditModal } from './components/Tickets/ResumeUpdate/RUTicketEditModel';
 import { ClientOnboardingModal } from './components/Clients/ClientOnboardingModal';
 import { PendingOnboardingList } from './components/Clients/PendingOnboardingList';
 import { ClientEditModal } from './components/Clients/ClientEditModal';
 import { UserManagementModal } from './components/Admin/UserManagementModal';
-import { Plus, Users, FileText, BarChart3, UserPlus, Edit, Settings } from 'lucide-react';
+import { Plus, Users, FileText, BarChart3, UserPlus, Search, Edit, Settings } from 'lucide-react';
 import { supabase } from './lib/supabaseClient';
 import { DialogProvider } from './context/DialogContext';
 import { supabaseAdmin } from './lib/supabaseAdminClient';
@@ -24,6 +25,8 @@ import EmailVerifyRedirect from './components/Auth/EmailVerifyRedirect';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './components/Layout/AppLayout';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
+import FeedbackButton from './components/FeedbackButton';
+import { ClientSearchBar } from './components/ClientSearchBar';
 
 function App() {
   const fetchData = async () => {
@@ -145,6 +148,7 @@ function App() {
 
   const [filterStatus, setFilterStatus] = useState<TicketStatus | 'all'>('all');
   const [filterType, setFilterType] = useState<TicketType | 'all'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -271,6 +275,7 @@ function App() {
   useEffect(() => {
     if (currentUser) {
       sessionStorage.setItem('activeView', activeView);
+      setSearchTerm('');
     }
   }, [activeView, currentUser]); // Runs whenever activeView or currentUser changes
 
@@ -305,9 +310,6 @@ function App() {
       return assignedUsers.some(assignedUser => assignedUser.id === currentUser.id);
     });
   };
-
-
-
 
   const handleCreateTicket = async (ticketData: any) => {
     const newTicket = {
@@ -390,8 +392,6 @@ function App() {
     await fetchData();
   };
 
-
-
   const renderTicketEditModal = (selectedTicket: Ticket | null, selectedView: string) => {
     if (!selectedTicket || selectedView !== "edit") return null;
 
@@ -399,6 +399,29 @@ function App() {
       case "volume_shortfall":
         return (
           <VLTicketEditModal
+            ticket={selectedTicket}
+            user={currentUser}
+            isOpen={isTicketEditModalOpen}
+            assignments={assignments}
+            onClose={() => {
+              setIsTicketEditModalOpen(false);
+              setSelectedTicket(null);
+            }}
+            onSubmit={(updateData) => {
+              if (selectedTicket) {
+                handleUpdateTicket(selectedTicket.id, updateData);
+              }
+            }}
+            onUpdate={() => {
+              fetchData(); // ⬅️ refresh data when modal updates a ticket
+              setIsTicketEditModalOpen(false);
+              setSelectedTicket(null);
+            }}
+          />
+        );
+      case "data_mismatch":
+        return (
+          <DMTicketEditModal
             ticket={selectedTicket}
             user={currentUser}
             isOpen={isTicketEditModalOpen}
@@ -645,6 +668,7 @@ function App() {
                 </div>
               </div>
             )}
+            <FeedbackButton user={currentUser} />
           </div>
         );
 
@@ -672,15 +696,17 @@ function App() {
               initialFilterType={filterType} // Pass the filter type
               initialFilterPriority={filterPriority} // Pass the filter priority
             />
-
+            <FeedbackButton user={currentUser} />
           </div>
         );
 
       case 'clients':
+
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
+
               {currentUser?.role === 'sales' && (
                 <button
                   onClick={() => setIsClientOnboardingModalOpen(true)}
@@ -691,11 +717,25 @@ function App() {
                 </button>
               )}
             </div>
+            <div className='relative'>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search clients by name or email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
 
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="font-semibold text-gray-900">Client Directory</h2>
+                <div className="relative w-full max-w-sm mb-4">
+                  <h2 className="font-semibold text-gray-900">Client Directory</h2>
+                </div>
+
               </div>
+
 
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -711,151 +751,170 @@ function App() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {currentUser?.role == 'career_associate' &&
-                      clients.filter(client => client.careerassociateid === currentUser.id).map((client,index) => (
-                        <tr key={client.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="font-medium text-gray-900">{client.full_name}</div>
-                              <div className="text-sm text-gray-500">{client.personal_email}</div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
-                            <div className="text-sm text-gray-500">{client.callable_phone}</div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
-                              Roles:{" "}
-                              {client.job_role_preferences.join(", ")}
-                            </p>
-                            }</div>
-                            <div className="text-sm text-gray-500">{client.salary_range}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {currentUser?.role == 'career_associate' && (
-                              <button
-                                onClick={() => handleClientEdit(client)}
-                                className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                              >
-                                <span>View</span>
-                              </button>
-                            )}
-                            {currentUser?.role !== 'career_associate' && (
-                              <button
-                                onClick={() => handleClientEdit(client)}
-                                className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                              >
-                                <Edit className="h-4 w-4" />
-                                <span>Edit</span>
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    {currentUser?.role == 'ca_team_lead' &&
-                      clients.filter(client => client.careerassociatemanagerid === currentUser.id).map((client,index) => (
-                        <tr key={client.id} className="hover:bg-gray-50">
+                      clients
+                        .filter(client => client.careerassociateid === currentUser.id)
+                        .filter(client =>
+                          client.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          client.personal_email.toLowerCase().includes(searchTerm.toLowerCase())
+                        ).map((client, index) => (
+                          <tr key={client.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="font-medium text-gray-900">{client.full_name}</div>
-                              <div className="text-sm text-gray-500">{client.personal_email}</div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
-                            <div className="text-sm text-gray-500">{client.callable_phone}</div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
-                              Roles:{" "}
-                              {client.job_role_preferences.join(", ")}
-                            </p>
-                            }</div>
-                            <div className="text-sm text-gray-500">{client.salary_range}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {currentUser?.role == 'career_associate' && (
-                              <button
-                                onClick={() => handleClientEdit(client)}
-                                className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                              >
-                                <span>View</span>
-                              </button>
-                            )}
-                            {currentUser?.role !== 'career_associate' && (
-                              <button
-                                onClick={() => handleClientEdit(client)}
-                                className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                              >
-                                <Edit className="h-4 w-4" />
-                                <span>Edit</span>
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="font-medium text-gray-900">{client.full_name}</div>
+                                <div className="text-sm text-gray-500">{client.personal_email}</div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
+                              <div className="text-sm text-gray-500">{client.callable_phone}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
+                                Roles:{" "}
+                                {client.job_role_preferences ? client.job_role_preferences.join(", ") : '-'}
+                              </p>
+                              }</div>
+                              <div className="text-sm text-gray-500">{client.salary_range}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {currentUser?.role == 'career_associate' && (
+                                <button
+                                  onClick={() => handleClientEdit(client)}
+                                  className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                                >
+                                  <span>View</span>
+                                </button>
+                              )}
+                              {currentUser?.role !== 'career_associate' && (
+                                <button
+                                  onClick={() => handleClientEdit(client)}
+                                  className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                  <span>Edit</span>
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                    {currentUser?.role == 'ca_team_lead' &&
+                      clients
+                        .filter(client => client.careerassociatemanagerid === currentUser.id)
+                        .filter(client =>
+                          client.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          client.personal_email.toLowerCase().includes(searchTerm.toLowerCase()
+                          )).map((client, index) => (
+                            <tr key={client.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div>
+                                  <div className="font-medium text-gray-900">{client.full_name}</div>
+                                  <div className="text-sm text-gray-500">{client.personal_email}</div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
+                                <div className="text-sm text-gray-500">{client.callable_phone}</div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
+                                  Roles:{" "}
+                                  {client.job_role_preferences ? client.job_role_preferences.join(", ") : '-'}
+                                </p>
+                                }</div>
+                                <div className="text-sm text-gray-500">{client.salary_range}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {currentUser?.role == 'career_associate' && (
+                                  <button
+                                    onClick={() => handleClientEdit(client)}
+                                    className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                                  >
+                                    <span>View</span>
+                                  </button>
+                                )}
+                                {currentUser?.role !== 'career_associate' && (
+                                  <button
+                                    onClick={() => handleClientEdit(client)}
+                                    className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                    <span>Edit</span>
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
                     {(currentUser?.role !== 'ca_team_lead' && currentUser?.role !== 'career_associate') &&
-                      clients.map((client,index) => (
-                        <tr key={client.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="font-medium text-gray-900">{client.full_name}</div>
-                              <div className="text-sm text-gray-500">{client.personal_email}</div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
-                            <div className="text-sm text-gray-500">{client.callable_phone}</div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
-                              Roles:{" "}
-                              {client.job_role_preferences.join(", ")}
-                            </p>
-                            }</div>
-                            <div className="text-sm text-gray-500">{client.salary_range}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {currentUser?.role == 'career_associate' && (
-                              <button
-                                onClick={() => handleClientEdit(client)}
-                                className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                              >
-                                <span>View</span>
-                              </button>
-                            )}
-                            {currentUser?.role !== 'career_associate' && (
-                              <button
-                                onClick={() => handleClientEdit(client)}
-                                className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                              >
-                                <Edit className="h-4 w-4" />
-                                <span>Edit</span>
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
+                      clients
+                        .filter(client =>
+                          client.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          client.personal_email.toLowerCase().includes(searchTerm.toLowerCase())
+                        ).map((client, index) => (
+                          <tr key={client.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="font-medium text-gray-900">{client.full_name}</div>
+                                <div className="text-sm text-gray-500">{client.personal_email}</div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{client.whatsapp_number}</div>
+                              <div className="text-sm text-gray-500">{client.callable_phone}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm text-gray-900">{<p className="text-sm text-gray-600">
+                                Roles:{" "}
+                                {client.job_role_preferences ? client.job_role_preferences.join(", ") : '-'}
+                              </p>
+                              }</div>
+                              <div className="text-sm text-gray-500">{client.salary_range}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{format(new Date(client.created_at), 'yyyy-MM-dd')}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {currentUser?.role == 'career_associate' && (
+                                <button
+                                  onClick={() => handleClientEdit(client)}
+                                  className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                                >
+                                  <span>View</span>
+                                </button>
+                              )}
+                              {currentUser?.role !== 'career_associate' && (
+                                <button
+                                  onClick={() => handleClientEdit(client)}
+                                  className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                  <span>Edit</span>
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
                   </tbody>
                 </table>
               </div>
             </div>
+            <FeedbackButton user={currentUser} />
           </div>
         );
 
       case 'user-management':
+        const filteredUsers = users.filter(user =>
+          user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        );
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -869,6 +928,16 @@ function App() {
               </button>
             </div>
 
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search clients by name or email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+
+            </div>
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="font-semibold text-gray-900">System User</h2>
@@ -887,7 +956,7 @@ function App() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {users.map((user,index) => (
+                    {filteredUsers.map((user, index) => (
                       <tr key={user.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{index + 1}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -934,6 +1003,7 @@ function App() {
                 </table>
               </div>
             </div>
+            <FeedbackButton user={currentUser} />
           </div>
         );
 

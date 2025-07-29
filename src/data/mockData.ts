@@ -2,6 +2,7 @@ import { User, Client, Ticket, SLAConfig, RolePermissions, TicketType, UserRole 
 
 export const slaConfig: SLAConfig = {
   volume_shortfall: { priority: 'high', hours: 24 },
+  data_mismatch:{ priority: 'high', hours: 24},
   // resume_update: { priority: 'high', hours: 24 },
   // credential_issue: { priority: 'critical', hours: 8 },
   // profile_data_issue: { priority: 'critical', hours: 12 },
@@ -16,7 +17,10 @@ export const slaConfig: SLAConfig = {
 
 export const rolePermissions: Record<UserRole, RolePermissions> = {
   client: {
-    canCreateTickets: ['volume_shortfall',],
+    canCreateTickets: [
+      'volume_shortfall',
+      'data_mismatch'
+    ],
     canViewTickets: true,
     canEditTickets: false,
     canResolveTickets: false,
@@ -40,7 +44,8 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
   },
   account_manager: {
     canCreateTickets: [
-      'volume_shortfall'
+      'volume_shortfall',
+      'data_mismatch'
     ],
     // canCreateTickets: [
     //   'volume_shortfall',
@@ -108,21 +113,22 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canViewReports: false,
     canOnboardClients: false,
   },
-  credential_resolution: {
-    // canCreateTickets: ['credential_issue'],
-    canCreateTickets: [],
-    canViewTickets: true,
-    canEditTickets: true,
-    canResolveTickets: true,
-    canEscalateTickets: false,
-    canViewClients: true,
-    canManageUsers: false,
-    canViewReports: false,
-    canOnboardClients: false,
-  },
+  // credential_resolution: {
+  //   // canCreateTickets: ['credential_issue'],
+  //   canCreateTickets: [],
+  //   canViewTickets: true,
+  //   canEditTickets: true,
+  //   canResolveTickets: true,
+  //   canEscalateTickets: false,
+  //   canViewClients: true,
+  //   canManageUsers: false,
+  //   canViewReports: false,
+  //   canOnboardClients: false,
+  // },
   cro: {
     canCreateTickets: [
-      'volume_shortfall'
+      'volume_shortfall',
+      'data_mismatch'
       // 'resume_update'
       // 'high_rejections',
       // 'no_interviews',
@@ -142,20 +148,21 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canViewReports: true,
     canOnboardClients: false,
   },
-  cro_manager: {
-    canCreateTickets: [],
-    canViewTickets: true,
-    canEditTickets: true,
-    canResolveTickets: true,
-    canEscalateTickets: true,
-    canViewClients: true,
-    canManageUsers: true,
-    canViewReports: true,
-    canOnboardClients: false,
-  },
+  // cro_manager: {
+  //   canCreateTickets: [],
+  //   canViewTickets: true,
+  //   canEditTickets: true,
+  //   canResolveTickets: true,
+  //   canEscalateTickets: true,
+  //   canViewClients: true,
+  //   canManageUsers: true,
+  //   canViewReports: true,
+  //   canOnboardClients: false,
+  // },
   coo: {
     canCreateTickets: [
-      'volume_shortfall'
+      'volume_shortfall',
+      'data_mismatch'
     ],
     canViewTickets: true,
     canEditTickets: false,
@@ -168,7 +175,8 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
   },
   ceo: {
     canCreateTickets: [
-      'volume_shortfall'
+      'volume_shortfall',
+      'data_mismatch'
     ],
     canViewTickets: true,
     canEditTickets: false,
@@ -455,6 +463,7 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
 
 export const ticketTypeLabels: Record<TicketType, string> = {
   volume_shortfall: 'Volume Shortfall',
+  data_mismatch: 'Data Mismatch'
   // resume_update: 'Resume Update',
   // high_rejections: 'High Rejections',
   // no_interviews: 'No Interviews',
@@ -475,9 +484,9 @@ export const roleLabels: Record<UserRole, string> = {
   ca_team_lead: 'CA Team Lead',
   resume_team: 'Resume Team',
   scraping_team: 'Scraping Team',
-  credential_resolution: 'Credential Resolution',
+  // credential_resolution: 'Credential Resolution',
   cro: 'CRO',
-  cro_manager: 'CRO Manager',
+  // cro_manager: 'CRO Manager',
   coo: 'COO',
   ceo: 'CEO',
   system_admin: 'System Admin',
