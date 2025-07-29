@@ -245,6 +245,7 @@ function App() {
   // // console.log('Logged in user:', currentUser?.name, currentUser?.role);
 
   // // Function to handle logout
+  
   // const handleLogout = () => {
   //   setCurrentUser(null);
   //   setActiveView('dashboard');
