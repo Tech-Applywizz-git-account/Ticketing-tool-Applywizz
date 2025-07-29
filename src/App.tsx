@@ -731,8 +731,6 @@ function App() {
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
                 <div className="relative w-full max-w-sm mb-4">
-                  <div className="px-6 pb-4 border-b border-gray-200">
-                  </div>
                   <h2 className="font-semibold text-gray-900">Client Directory</h2>
                 </div>
 
