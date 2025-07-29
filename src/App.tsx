@@ -66,7 +66,6 @@ function App() {
     if (assignmentError) console.error(assignmentError);
 
     // 4. Map ticket_id → [user objects]
-    // const userMap = new Map(userData.map(u => [u.id, u.name]));
     const userMap = new Map(
       (userData ?? []).map(u => [u.id, u.name])
     );
