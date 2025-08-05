@@ -251,7 +251,30 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
     if (!ticket) return;
     if (!ticket.id || !user?.id) return;
     if (!comment) {
-      alert("Please write a comment or attach a file to close this ticket.");
+      // alert("Please write a comment before forwarding to client");
+      toast("Please write a comment before forwarding to client!", {
+          position: "top-center",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+      return;
+    }
+    if (!userFile) {
+      toast("Please attach a updated resume file before forwarding to client!", {
+          position: "top-center",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       return;
     }
     setIsSubmittingComment(true);
@@ -310,7 +333,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
         updatedAt: new Date().toISOString(),
       }).eq('id', ticket.id);
 
-      toast("Updated resume forwarded successfully to client for review !", {
+      toast("We have sent the updated resume to the client for review!", {
         position: "top-center",
         autoClose: 4000,
         hideProgressBar: false,
@@ -366,7 +389,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
         updatedAt: new Date().toISOString(),
       }).eq('id', ticket.id);
 
-      toast("Updated resume forwarded successfully to client for review !", {
+      toast("Our team will update the resume in accordance with the new request. You will receive a response from us shortly. Thank You !", {
         position: "top-center",
         autoClose: 4000,
         hideProgressBar: false,
@@ -411,7 +434,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
           },
         ]);
       }
-      if (assignments[ticket.id].filter((u) =>  u.role === 'resume_team_member' ).length !== 1) {
+      if (assignments[ticket.id].filter((u) => u.role === 'resume_team_member').length !== 1) {
         const { error: insertError } = await supabase
           .from('ticket_assignments')
           .insert({
@@ -465,8 +488,17 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
   const handleCommentSubmit = async () => {
     if (!ticket) return;
     if (!ticket.id || !user?.id) return;
-    if (!userComment && !userFile) {
-      alert("Please write a comment or attach a file.");
+    if (!userComment || !userFile) {
+      toast("Please write a comment and attach updated resume file.", {
+          position: "top-center",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       return;
     }
 
@@ -528,8 +560,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
         return;
       }
       else {
-        // alert("Comment submitted successfully.");
-        toast("Comment submitted successfully!", {
+        toast("Updated resume forwarded to Resume team head !", {
           position: "top-center",
           autoClose: 4000,
           hideProgressBar: false,
@@ -547,7 +578,6 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
       setUserFile(null);
       onClose();
     } catch (err) {
-      console.error("Error submitting comment:", err);
       alert("Failed to submit comment.");
     } finally {
       setIsSubmittingComment(false);
@@ -920,7 +950,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
             )}
             {ticket.status === 'resolved' && ticket.metadata.length !== undefined && ticket.comments.length !== 2 && (
               <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mt-6">
-                <p className="text-gray-700 mb-4">
+                <p className="text-gray-700">
                   We are applying with your updated resume
                 </p>
               </div>
@@ -1126,7 +1156,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
                     <div className="bg-green-50 rounded-lg p-6 border border-green-200">
                       <h3 className="text-lg font-semibold text-green-900 mb-4">Take Action</h3>
                       <div className="mt-6 border-t pt-6">
-                        <h3 className="text-md font-semibold mb-2">Reply with your comment and file (Only .pdf, .png, .jpg, .jpeg formats are supported) :</h3>
+                        <h3 className="text-md font-semibold mb-2">Reply with your comment and Updated Resume (Only .pdf, .png, .jpg, .jpeg formats are supported) :</h3>
 
                         <textarea
                           className="w-full border p-2 rounded mb-3"
@@ -1149,14 +1179,14 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
 
                         <button
                           onClick={handleCommentSubmit}
-                          disabled={!userComment.trim() || isSubmittingComment}
+                          disabled={!userFile|| ( !userComment.trim() || isSubmittingComment)}
                           // className={`bg-blue-500 text-white px-4 py-2 rounded ml-4`}
-                          className={`px-4 py-2 rounded-lg ml-4 ${(!userComment.trim() || isSubmittingComment)
+                          className={`px-4 py-2 rounded-lg ml-4 ${(!userFile || !userComment.trim() || isSubmittingComment)
                             ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
                             : 'bg-blue-600 text-white hover:bg-blue-700'
                             }`}
                         >
-                          {isSubmittingComment ? 'Submitting...' : 'Submit Comment'}
+                          {isSubmittingComment ? 'Submitting...' : 'Submit Updated Resume'}
                         </button>
                       </div>
                     </div>
@@ -1237,8 +1267,8 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
                               />
 
                               <button
-                                onClick={handleForwardToClientTicket} disabled={!comment.trim() || isSubmittingComment}
-                                className={`px-4 py-2 rounded-lg ml-4 ${(!comment.trim() || isSubmittingComment)
+                                onClick={handleForwardToClientTicket} disabled={!userFile || !comment.trim() || isSubmittingComment}
+                                className={`px-4 py-2 rounded-lg ml-4 ${(!userFile || !comment.trim() || isSubmittingComment)
                                   ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
                                   : 'bg-blue-600 text-white hover:bg-blue-700'
                                   }`}>
