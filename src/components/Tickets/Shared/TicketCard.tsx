@@ -24,6 +24,8 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick }) => {
     closed: 'bg-gray-100 text-gray-800',
     forwarded: 'bg-yellow-100 text-yellow-800',
     manager_attention: 'bg-purple-100 text-purple-800',
+    pending_client_review: 'bg-purple-100 text-purple-800',
+    reopen: 'bg-orange-100 text-orange-800',
     replied: 'bg-orange-100 text-orange-800',
   };
 

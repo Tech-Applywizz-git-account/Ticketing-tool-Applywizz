@@ -6,7 +6,7 @@ import { ClientOnboardingModal } from '../Clients/ClientOnboardingModal';
 import { ClientEditModal } from '../Clients/ClientEditModal';
 import { UserManagementModal } from '../Admin/UserManagementModal';
 import { VLTicketEditModal } from '../Tickets/VolumeShortfall/VLTicketEditModal';
-import { TicketEditModal } from '../Tickets/ResumeUpdate/RUTicketEditModel';
+import { RUTicketEditModal } from '../Tickets/ResumeUpdate/RUTicketEditModel';
 import { Ticket, Client, AssignedUser, User } from '@/types';
 
 interface Props {

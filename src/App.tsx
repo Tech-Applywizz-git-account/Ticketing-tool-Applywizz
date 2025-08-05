@@ -10,7 +10,7 @@ import { TicketList } from './components/Tickets/Shared/TicketList';
 import { CreateTicketModal } from './components/Tickets/Shared/CreateTicketModal';
 import { VLTicketEditModal } from './components/Tickets/VolumeShortfall/VLTicketEditModal';
 import { DMTicketEditModal } from '@/components/Tickets/DataMismatch/DMTicketEditModel';
-import { TicketEditModal } from './components/Tickets/ResumeUpdate/RUTicketEditModel';
+import { RUTicketEditModal } from './components/Tickets/ResumeUpdate/RUTicketEditModel';
 import { ClientOnboardingModal } from './components/Clients/ClientOnboardingModal';
 import { PendingOnboardingList } from './components/Clients/PendingOnboardingList';
 import { ClientEditModal } from './components/Clients/ClientEditModal';
@@ -57,7 +57,7 @@ function App() {
       // console.log("Clients:", clientData);
       setClients(clientData || []);
     }
-
+    
     // 3. Get all ticket assignments
     const { data: assignmentData, error: assignmentError } = await supabase
       .from('ticket_assignments')
@@ -441,25 +441,31 @@ function App() {
             }}
           />
         );
-      // case "resume_update":
-      //   return (
-      //     <TicketEditModal
-      //       ticket={selectedTicket}
-      //       user={currentUser}
-      //       isOpen={isTicketEditModalOpen}
-      //       assignments={assignments}
-      //       onClose={() => {
-      //         setIsTicketEditModalOpen(false);
-      //         setSelectedTicket(null);
-      //       }}
-      //       onSubmit={(updateData) => {
-      //         if (selectedTicket) {
-      //           handleUpdateTicket(selectedTicket.id, updateData);
-      //         }
-      //       }}
-      //       onTicketUpdated={handleTicketUpdated} // Add this line
-      //     />
-      //   )
+      case "resume_update":
+        return (
+          <RUTicketEditModal
+            ticket={selectedTicket}
+            user={currentUser}
+            isOpen={isTicketEditModalOpen}
+            assignments={assignments}
+            onClose={() => {
+              setIsTicketEditModalOpen(false);
+              setSelectedTicket(null);
+            }}
+            onSubmit={(updateData) => {
+              if (selectedTicket) {
+                handleUpdateTicket(selectedTicket.id, updateData);
+              }
+            }}
+            
+            onUpdate={() => {
+              fetchData(); // ⬅️ refresh data when modal updates a ticket
+              setIsTicketEditModalOpen(false);
+              setSelectedTicket(null);
+            }}
+            // onTicketUpdated={handleTicketUpdated} // Add this line
+          />
+        )
       default:
         return null;
     }

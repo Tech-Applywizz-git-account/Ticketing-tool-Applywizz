@@ -64,7 +64,7 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({ user, ti
         >
           <option value="">All</option>
           <option value="volume_shortfall">Volume Shortfall</option>
-          {/* <option value="resume_update">Resume Update</option> */}
+          <option value="resume_update">Resume Update</option>
           {/* Add more as needed */}
         </select>
       </div>

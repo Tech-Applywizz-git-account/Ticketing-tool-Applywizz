@@ -5,6 +5,8 @@ export type UserRole =
   | 'career_associate'
   | 'ca_team_lead'
   | 'resume_team'
+  | 'resume_team_head'
+  | 'resume_team_member'
   | 'scraping_team'
   | 'cro'
   | 'coo'
@@ -14,7 +16,7 @@ export type UserRole =
 export type TicketType =
   | 'volume_shortfall'
   | 'data_mismatch'
-// | 'resume_update';
+  | 'resume_update';
 // | 'high_rejections'
 // | 'no_interviews'
 // | 'profile_data_issue'
@@ -26,7 +28,7 @@ export type TicketType =
 // | 'am_not_responding';
 
 export type TicketPriority = 'critical' | 'high' | 'medium' | 'low';
-export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'escalated' | 'manager_attention' | 'closed' | 'forwarded' | 'replied';
+export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'escalated' | 'manager_attention' | 'reopen' | 'pending_client_review' | 'closed' | 'forwarded' | 'replied';
 
 export type AssignedUser = {
   id: string;
@@ -81,7 +83,7 @@ export interface Ticket {
   metadata: Record<string, any>;
   comments: TicketComment[];
   createdbyclient: boolean;
-  requiredManagerAttention:boolean;
+  requiredManagerAttention: boolean;
 }
 
 export interface TicketComment {
@@ -91,6 +93,7 @@ export interface TicketComment {
   content: string;
   createdAt: Date;
   isInternal: boolean;
+  show_to_client:boolean;
 }
 
 export type SLAConfig = {

@@ -3,7 +3,7 @@
 export type TicketType =
   | 'volume_shortfall'
   | 'data_mismatch'
-  // | 'resume_update'
+  | 'resume_update'
   // | 'high_rejections'
   // | 'no_interviews'
   // | 'profile_data_issue'
@@ -21,6 +21,8 @@ export type UserRole =
   | 'career_associate'
   | 'ca_team_lead'
   | 'resume_team'
+  | 'resume_team_head'
+  | 'resume_team_member'
   | 'scraping_team'
   | 'credential_resolution'
   | 'cro'

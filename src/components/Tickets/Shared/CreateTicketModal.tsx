@@ -120,7 +120,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     const titles: Record<TicketType, string> = {
       volume_shortfall: 'Volume Shortfall - Applications below expectation',
       data_mismatch: 'Data Mismatch - Mistake in application process',
-      // resume_update: 'Client Resume Update Required',
+      resume_update: 'Client Resume Update Required',
       // high_rejections: 'High Rejection Rate - Client feedback needed',
       // no_interviews: 'No Interview Calls - Client concern',
       // profile_data_issue: 'Profile Data Correction Required',
