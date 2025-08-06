@@ -26,13 +26,14 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   isAttentionNeeded=false,
   date
 }) => {
- const getIcon = () => {
+  const getIcon = () => {
   if (isResolved) return <Check className="h-4 w-4 text-green-500" />;
   if (isAttentionNeeded) return <AlertCircle className="h-4 w-4 text-yellow-500" />;
   if (isCurrent) return <Clock className="h-4 w-4 text-blue-500" />;
   if (isCompleted) return <Check className="h-4 w-4 text-green-500" />;
   return <div className="w-2 h-2 bg-gray-300 rounded-full" />;
 };
+
 
   return (
     <div className="flex items-start">

@@ -7,7 +7,7 @@ import { supabase } from '../../../lib/supabaseClient';
 import { id } from 'date-fns/locale';
 // import { toast } from 'sonner';
 import { toast } from 'react-toastify';
-import TicketTimeline from '../ClientTicketTimeLine/TicketTimeline';
+import TicketTimeline from './TicektTimeline';
 import { v4 as uuidv4 } from 'uuid';
 
 interface AssignedUser {
@@ -780,7 +780,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black gap-6 bg-opacity-50 flex items-center justify-center z-50 p-4">
-      {/* {(['account_manager', 'coo', 'cro', 'ceo', 'client'].includes(user.role)) && <TicketTimeline ticket={ticket} />} */}
+    {(['account_manager', 'coo', 'cro', 'ceo', 'client','resume_team_head'].includes(user.role)) && <TicketTimeline ticket={ticket} />} 
       <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
