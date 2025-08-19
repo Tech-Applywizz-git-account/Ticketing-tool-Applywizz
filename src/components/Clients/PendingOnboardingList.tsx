@@ -55,7 +55,8 @@ export const PendingOnboardingList: React.FC<Props> = ({
           .from("users")
           .select("id, name")
           .eq("role", role)
-          .eq("is_active", true);
+          .eq("is_active", true)
+          .order('name', { ascending: true });
 
         if (data) {
           setUsersByRole((prev) => ({
