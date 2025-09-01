@@ -7,6 +7,7 @@ import { supabase } from '../../../lib/supabaseClient'; // your Supabase client 
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'react-toastify';
 import { set } from 'date-fns';
+import { ca } from 'date-fns/locale';
 
 interface CreateTicketModalProps {
   user: UserType;
@@ -496,7 +497,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       <html>
         <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
           <h2 style="color:#1E90FF;">Hello Sriketh (sriketh@applywizz.com)</h2>
-          <p></p>
+          <p>A ticket has been created by ${user.name} (client) to make changes in resume</p>
           <hr style="border:none;border-top:1px solid #eee;" />
           <p><strong>Ticket Type:</strong> ${ticketTypeLabels[newTicket.type]}</p>
           <h3 style="color:#1E90FF;">Ticket Details:</h3>
@@ -513,6 +514,102 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
                 ? '<p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. </p>'
                 : ''
               }
+          <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
+          <hr style="border:none;border-top:1px solid #eee;" />
+          <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
+        </body>
+      </html>
+    `
+          })
+        });
+        await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: "sriketh@Applywizz.com",
+            subject: "New Ticket raised in ApplyWizz Ticketing Tool For Resume Update",
+            htmlBody: `
+      <html>
+        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
+          <h2 style="color:#1E90FF;">Hello ${selectedClient?.careerassociateid?.name}(${caEmail}) </h2>
+          <p>A ticket has been created by ${user.name} (client) to make changes in resume</p>
+          <hr style="border:none;border-top:1px solid #eee;" />
+          <p><strong>Ticket Type:</strong> ${ticketTypeLabels[newTicket.type]}</p>
+          <h3 style="color:#1E90FF;">Ticket Details:</h3>
+          <ul>
+            <li><strong>Title:</strong> ${newTicket.title}</li>
+            <li><strong>Description:</strong> ${newTicket.description}</li>
+            <li><strong>Priority:</strong> ${newTicket.priority.toUpperCase()}</li>
+            <li><strong>Status:</strong> ${newTicket.status.charAt(0).toUpperCase() + newTicket.status.slice(1)}</li>
+            <li><strong>SLA Hours:</strong> ${newTicket.sla_hours} hours</li>
+            <li><strong>Due Date:</strong> ${new Date(newTicket.dueDate).toLocaleString()}</li>
+            <li><strong>Created At:</strong> ${new Date(newTicket.createdat).toLocaleString()}</li>
+          </ul>
+          <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. </p>
+          <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
+          <hr style="border:none;border-top:1px solid #eee;" />
+          <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
+        </body>
+      </html>
+    `
+          })
+        });
+        await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: caEmail,
+            subject: "New Ticket raised in ApplyWizz Ticketing Tool For Resume Update",
+            htmlBody: `
+      <html>
+        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
+          <h2 style="color:#1E90FF;">Hello Sriketh (sriketh@applywizz.com)</h2>
+          <p>A ticket has been created by ${user.name} (client) to make changes in resume.</p>
+          <hr style="border:none;border-top:1px solid #eee;" />
+          <p><strong>Ticket Type:</strong> ${ticketTypeLabels[newTicket.type]}</p>
+          <h3 style="color:#1E90FF;">Ticket Details:</h3>
+          <ul>
+            <li><strong>Title:</strong> ${newTicket.title}</li>
+            <li><strong>Description:</strong> ${newTicket.description}</li>
+            <li><strong>Priority:</strong> ${newTicket.priority.toUpperCase()}</li>
+            <li><strong>Status:</strong> ${newTicket.status.charAt(0).toUpperCase() + newTicket.status.slice(1)}</li>
+            <li><strong>SLA Hours:</strong> ${newTicket.sla_hours} hours</li>
+            <li><strong>Due Date:</strong> ${new Date(newTicket.dueDate).toLocaleString()}</li>
+            <li><strong>Created At:</strong> ${new Date(newTicket.createdat).toLocaleString()}</li>
+          </ul>
+          <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. </p>
+          <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
+          <hr style="border:none;border-top:1px solid #eee;" />
+          <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
+        </body>
+      </html>
+    `
+          })
+        });
+        await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: catlEmail,
+            subject: "New Ticket raised in ApplyWizz Ticketing Tool For Resume Update",
+            htmlBody: `
+      <html>
+        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
+          <h2 style="color:#1E90FF;">Hello ${selectedClient?.careerassociatemanagerid?.name || ''} (${catlEmail}) </h2>
+          <p>A ticket has been created by ${user.name} (client) to make changes in resume</p>
+          <hr style="border:none;border-top:1px solid #eee;" />
+          <p><strong>Ticket Type:</strong> ${ticketTypeLabels[newTicket.type]}</p>
+          <h3 style="color:#1E90FF;">Ticket Details:</h3>
+          <ul>
+            <li><strong>Title:</strong> ${newTicket.title}</li>
+            <li><strong>Description:</strong> ${newTicket.description}</li>
+            <li><strong>Priority:</strong> ${newTicket.priority.toUpperCase()}</li>
+            <li><strong>Status:</strong> ${newTicket.status.charAt(0).toUpperCase() + newTicket.status.slice(1)}</li>
+            <li><strong>SLA Hours:</strong> ${newTicket.sla_hours} hours</li>
+            <li><strong>Due Date:</strong> ${new Date(newTicket.dueDate).toLocaleString()}</li>
+            <li><strong>Created At:</strong> ${new Date(newTicket.createdat).toLocaleString()}</li>
+          </ul>
+          <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. </p>
           <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
           <hr style="border:none;border-top:1px solid #eee;" />
           <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
@@ -565,58 +662,6 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       //           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
       //           required
       //           title="Credential Issue Type"
-      //         >
-
-      // IF NEW.createdbyclient THEN
-      //   INSERT INTO ticket_assignments (ticket_id, user_id)
-      //   SELECT NEW.id, c.account_manager_id
-      //   FROM clients c
-      //   JOIN users u ON u.email = c.personal_email
-      //   WHERE u.id = NEW.createdBy;
-      // ELSE 
-      //   INSERT INTO ticket_assignments (ticket_id, user_id)
-      //   SELECT NEW.id, u.id
-      //   FROM users u
-      //   JOIN clients c ON c.personal_email=u.email
-      //   WHERE c.id = NEW."clientId";
-      // END IF;
-      // -- Check if the ticket type is 'volume shortfall'
-      // IF NEW.type = 'volume_shortfall' THEN
-      //   -- Insert assigned users from clients table based on ticket.client.id
-      //   INSERT INTO ticket_assignments (ticket_id, user_id)
-      //   SELECT NEW.id, c.careerassociatemanagerid
-      //   FROM clients c
-      //   WHERE c.id = NEW."clientId";
-
-      // ElSIF NEW.type = 'data_mismatch' THEN
-      //   -- Insert assigned users from clients table based on ticket.client.id
-      //   INSERT INTO ticket_assignments (ticket_id, user_id)
-      //   SELECT NEW.id, c.careerassociatemanagerid
-      //   FROM clients c
-      //   WHERE c.id = NEW."clientId";
-      //   INSERT INTO ticket_assignments (ticket_id, user_id)
-      //   SELECT NEW.id, c.careerassociateid
-      //   FROM clients c
-      //   WHERE c.id = NEW."clientId";
-
-
-      // -- Check if the ticket type is 'resume update'
-      // ELSIF NEW.type = 'resume_update' THEN
-      //   -- Insert assigned users from users table based on resume team leads
-      //   INSERT INTO ticket_assignments (ticket_id, user_id)
-      //   SELECT NEW.id, u.id
-      //   FROM users u
-      //   WHERE u.role = 'resume_team_head';  
-      //   INSERT INTO ticket_assignments (ticket_id, user_id)
-      //   SELECT NEW.id, c.careerassociatemanagerid
-      //   FROM clients c
-      //   WHERE c.id = NEW."clientId";
-      //   INSERT INTO ticket_assignments (ticket_id, user_id)
-      //   SELECT NEW.id, c.careerassociateid
-      //   FROM clients c
-      //   WHERE c.id = NEW."clientId";
-      // END IF;
-
       //           <option value="">Select issue type</option>
       //           <option value="password_changed">Password Changed</option>
       //           <option value="account_locked">Account Locked</option>
