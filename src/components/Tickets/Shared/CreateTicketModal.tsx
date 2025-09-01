@@ -920,10 +920,10 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     fetchClientsdata();
   }, [clientId]);
   useEffect(() => {
-    if (catlEmail) console.log('selected client 2 (state catlEmail):', catlEmail);
-    if (amEmail) console.log('selected client 2 (state catlEmail):', amEmail);
-    if (caEmail) console.log('selected client 2 (state catlEmail):', caEmail);
-  }, [catlEmail]);
+    if (catlEmail) console.log('selected client 2 (state catlEmail):' );
+    if (amEmail) console.log('selected client 2 (state catlEmail):' );
+    if (caEmail) console.log('selected client 2 (state catlEmail):');
+  }, [catlEmail,amEmail,caEmail]);
 
   if (!isOpen) return null;
 
