@@ -526,45 +526,13 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            to: "sriketh@Applywizz.com",
+            to: caEmail,
             subject: "New Ticket raised in ApplyWizz Ticketing Tool For Resume Update",
             htmlBody: `
       <html>
         <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
           <h2 style="color:#1E90FF;">Hello ${selectedClient?.careerassociateid?.name}(${caEmail}) </h2>
           <p>A ticket has been created by ${user.name} (client) to make changes in resume</p>
-          <hr style="border:none;border-top:1px solid #eee;" />
-          <p><strong>Ticket Type:</strong> ${ticketTypeLabels[newTicket.type]}</p>
-          <h3 style="color:#1E90FF;">Ticket Details:</h3>
-          <ul>
-            <li><strong>Title:</strong> ${newTicket.title}</li>
-            <li><strong>Description:</strong> ${newTicket.description}</li>
-            <li><strong>Priority:</strong> ${newTicket.priority.toUpperCase()}</li>
-            <li><strong>Status:</strong> ${newTicket.status.charAt(0).toUpperCase() + newTicket.status.slice(1)}</li>
-            <li><strong>SLA Hours:</strong> ${newTicket.sla_hours} hours</li>
-            <li><strong>Due Date:</strong> ${new Date(newTicket.dueDate).toLocaleString()}</li>
-            <li><strong>Created At:</strong> ${new Date(newTicket.createdat).toLocaleString()}</li>
-          </ul>
-          <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. </p>
-          <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
-          <hr style="border:none;border-top:1px solid #eee;" />
-          <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
-        </body>
-      </html>
-    `
-          })
-        });
-        await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: caEmail,
-            subject: "New Ticket raised in ApplyWizz Ticketing Tool For Resume Update",
-            htmlBody: `
-      <html>
-        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
-          <h2 style="color:#1E90FF;">Hello Sriketh (sriketh@applywizz.com)</h2>
-          <p>A ticket has been created by ${user.name} (client) to make changes in resume.</p>
           <hr style="border:none;border-top:1px solid #eee;" />
           <p><strong>Ticket Type:</strong> ${ticketTypeLabels[newTicket.type]}</p>
           <h3 style="color:#1E90FF;">Ticket Details:</h3>
