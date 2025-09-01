@@ -34,7 +34,7 @@ return data.access_token;
 }
 
 // Send email
-async function sendEmail(to: string, subject: string, htmlBody: string) {
+async function sendEmail(to , subject , htmlBody) {
   const token = await getAccessToken();
   const payload = {
     message: {
