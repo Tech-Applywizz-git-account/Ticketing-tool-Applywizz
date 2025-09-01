@@ -1151,7 +1151,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
             htmlBody: `
       <html>
         <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
-          <h2 style="color:#1E90FF;">Hello ${clientEmail.data?.full_name} (${catlEmail})</h2>
+          <h2 style="color:#1E90FF;">Hello ${selectedClient.careerassociatemanagerid?.name} (${catlEmail})</h2>
           <p>A new ticket has been raised in the Applywizz Ticketing Tool by ${user.name} (client)</p>
           <hr style="border:none;border-top:1px solid #eee;" />
           <p><strong>Ticket Type:</strong> ${ticketTypeLabels[newTicket.type]}</p>
