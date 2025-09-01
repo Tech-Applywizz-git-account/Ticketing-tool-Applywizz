@@ -7,6 +7,14 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const SENDER_EMAIL = process.env.SENDER_EMAIL;
 
+interface TokenResponse {
+  token_type: string;
+  expires_in: number;
+  ext_expires_in: number;
+  access_token: string;
+}
+
+
 // Get access token
 async function getAccessToken() {
   const url = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`;
@@ -17,10 +25,12 @@ async function getAccessToken() {
   params.append('grant_type', 'client_credentials');
 
   const res = await fetch(url, { method: 'POST', body: params });
-  const data = await res.json();
+//   const data = await res.json();
+const data: TokenResponse = await res.json() as TokenResponse;
 
   if (!res.ok) throw new Error(`Failed to get access token: ${JSON.stringify(data)}`);
-  return data.access_token;
+//   return data.access_token;
+return data.access_token;
 }
 
 // Send email
