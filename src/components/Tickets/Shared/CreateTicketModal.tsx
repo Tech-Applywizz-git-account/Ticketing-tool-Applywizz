@@ -1072,7 +1072,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       console.log("client email", clientEmail.data?.company_email);
       // Send email notification 
       if (user.role === 'client') {
-        await fetch("/api/send-email", {
+        await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1105,7 +1105,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
           })
         });
         if (amEmail) {
-          await fetch("/api/send-email", {
+          await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -1142,7 +1142,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
         }
       }
       if (ticketType === "volume_shortfall" && catlEmail) {
-        await fetch("/api/send-email", {
+        await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1181,7 +1181,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
         const recipients = [];
         if (caEmail) recipients.push(caEmail);
         if (catlEmail) recipients.push(catlEmail);
-        await fetch("/api/send-email", {
+        await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1218,7 +1218,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
         });
       } else if (ticketType === "resume_update") {  // 
         // Logic for resume_update email notifications can be added here
-        await fetch("/api/send-email", {
+        await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
