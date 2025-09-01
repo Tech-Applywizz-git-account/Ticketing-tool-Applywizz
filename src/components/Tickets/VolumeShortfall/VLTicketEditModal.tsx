@@ -1514,7 +1514,6 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                         <button
                           onClick={handleCommentSubmit}
                           disabled={!userComment.trim() || isSubmittingComment}
-                          // className={`bg-blue-500 text-white px-4 py-2 rounded ml-4`}
                           className={`px-4 py-2 rounded-lg ml-4 ${(!userComment.trim() || isSubmittingComment)
                             ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
                             : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -1558,8 +1557,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
 
                         <button
                           onClick={handleResolveTicket}
-                          disabled={!resolutionComment.trim() || isSubmittingComment}
-                          // className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"                     
+                          disabled={!resolutionComment.trim() || isSubmittingComment}                   
                           className={`px-4 py-2 rounded-lg mt-4 ${(!resolutionComment.trim() || isSubmittingComment)
                             ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
                             : 'bg-green-600 text-white hover:bg-green-700 rounded'
