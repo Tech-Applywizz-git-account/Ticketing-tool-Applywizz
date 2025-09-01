@@ -920,10 +920,10 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     fetchClientsdata();
   }, [clientId]);
   useEffect(() => {
-    if (catlEmail) console.log('selected client 2 (state catlEmail):' );
-    if (amEmail) console.log('selected client 2 (state catlEmail):' );
+    if (catlEmail) console.log('selected client 2 (state catlEmail):');
+    if (amEmail) console.log('selected client 2 (state catlEmail):');
     if (caEmail) console.log('selected client 2 (state catlEmail):');
-  }, [catlEmail,amEmail,caEmail]);
+  }, [catlEmail, amEmail, caEmail]);
 
   if (!isOpen) return null;
 
@@ -1178,18 +1178,17 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
         });
       } else if ((ticketType === "data_mismatch") && (caEmail || catlEmail)) {  // added catlEmail  to keep in loop 
         const recipients = [];
-        if (caEmail) recipients.push(caEmail);
-        if (catlEmail) recipients.push(catlEmail);
-        await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: recipients.join(','),
-            subject: "New Ticket raised in ApplyWizz Ticketing Tool regarding Data Mismatch",
-            htmlBody: `
+        if (caEmail) {
+          await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              to: caEmail,
+              subject: "New Ticket raised in ApplyWizz Ticketing Tool regarding Data Mismatch",
+              htmlBody: `
       <html>    
         <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;"> 
-          <h2 style="color:#1E90FF;">Hello ${selectedClient?.careerassociateid?.name || ''} ${selectedClient?.careerassociatemanagerid?.name ? 'and ' + selectedClient.careerassociatemanagerid.name : ''} </h2>
+          <h2 style="color:#1E90FF;">Hello ${selectedClient?.careerassociateid?.name }(${caEmail}) </h2>
           <p>A ticket has been created by ${user.name} (client).</p>
           <hr style="border:none;border-top:1px solid #eee;" />
           <p><strong>Ticket Type:</strong> ${ticketTypeLabels[newTicket.type]}</p>
@@ -1204,17 +1203,56 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
             <li><strong>Created At:</strong> ${new Date(newTicket.createdat).toLocaleString()}</li>
           </ul>
           ${ticketType === "data_mismatch"
-                ? '<p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. </p>'
-                : ''
-              }
+                  ? '<p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. </p>'
+                  : ''
+                }
           <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
           <hr style="border:none;border-top:1px solid #eee;" />
           <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
         </body>
       </html>
     `
-          })
-        });
+            })
+          });
+
+        }
+        if (catlEmail) {
+          await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              to: catlEmail,
+              subject: "New Ticket raised in ApplyWizz Ticketing Tool regarding Data Mismatch",
+              htmlBody: `
+      <html>    
+        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;"> 
+          <h2 style="color:#1E90FF;">Hello ${selectedClient?.careerassociatemanagerid?.name || ''} (${catlEmail}) </h2>
+          <p>A ticket has been created by ${user.name} (client).</p>
+          <hr style="border:none;border-top:1px solid #eee;" />
+          <p><strong>Ticket Type:</strong> ${ticketTypeLabels[newTicket.type]}</p>
+          <h3 style="color:#1E90FF;">Ticket Details:</h3>
+          <ul>
+            <li><strong>Title:</strong> ${newTicket.title}</li>
+            <li><strong>Description:</strong> ${newTicket.description}</li>
+            <li><strong>Priority:</strong> ${newTicket.priority.toUpperCase()}</li>
+            <li><strong>Status:</strong> ${newTicket.status.charAt(0).toUpperCase() + newTicket.status.slice(1)}</li>
+            <li><strong>SLA Hours:</strong> ${newTicket.sla_hours} hours</li>
+            <li><strong>Due Date:</strong> ${new Date(newTicket.dueDate).toLocaleString()}</li>
+            <li><strong>Created At:</strong> ${new Date(newTicket.createdat).toLocaleString()}</li>
+          </ul>
+          ${ticketType === "data_mismatch"
+                  ? '<p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. </p>'
+                  : ''
+                }
+          <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
+          <hr style="border:none;border-top:1px solid #eee;" />
+          <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
+        </body>
+      </html>
+    `
+            })
+          });
+        }
       } else if (ticketType === "resume_update") {  // 
         // Logic for resume_update email notifications can be added here
         await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
