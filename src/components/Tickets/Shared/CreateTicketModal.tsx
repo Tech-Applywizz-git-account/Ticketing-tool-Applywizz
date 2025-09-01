@@ -1109,8 +1109,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              // to: amEmail,
-              to: "ganesh@Applywizz.com",
+              to: amEmail,
               subject: "New Ticket raised in ApplyWizz Ticketing Tool",
               htmlBody: `
       <html>
