@@ -1140,7 +1140,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
           });
         }
       }
-      if (ticketType === "volume_shortfall" && catlEmail) {
+      if (ticketType === "volume_shortfall" ) {
         await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1176,8 +1176,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
     `
           })
         });
-      } else if ((ticketType === "data_mismatch") && (caEmail || catlEmail)) {  // added catlEmail  to keep in loop 
-        const recipients = [];
+      } else if (ticketType === "data_mismatch") {  // added catlEmail  to keep in loop 
         if (caEmail) {
           await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
             method: "POST",
