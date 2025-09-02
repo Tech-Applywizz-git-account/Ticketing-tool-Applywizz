@@ -112,7 +112,7 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canViewClients: true,
     canManageUsers: false,
     canViewReports: false,
-    canOnboardClients: false,
+    canOnboardClients: true,
   },
   resume_team_member: {
     canCreateTickets: [],
