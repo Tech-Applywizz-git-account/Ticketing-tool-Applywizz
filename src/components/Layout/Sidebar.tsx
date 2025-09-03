@@ -48,7 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, activeView, onViewChange
       id: "pending_onboarding",
       label: "Pending Onboarding",
       icon: UserPlus,
-      show: ["cro", "ceo", "coo","resume_team_head"].includes(user.role),
+      show: ["cro", "ceo", "coo", "resume_team_head", "ca_team_lead"].includes(user.role),
       hasNotification: pendingClientsCount > 0,
     },
     // {
