@@ -712,7 +712,7 @@ function App() {
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
 
-              {currentUser?.role === 'sales' && (
+              {(currentUser?.role === 'sales'||currentUser?.role === 'ca_team_lead') && (
                 <button
                   onClick={() => setIsClientOnboardingModalOpen(true)}
                   className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
