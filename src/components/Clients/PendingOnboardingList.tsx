@@ -74,8 +74,8 @@ export const PendingOnboardingList: React.FC<Props> = ({
     if (
       !roleAssignments.accountManagerId ||
       !roleAssignments.careerassociatemanagerid ||
-      !roleAssignments.careerassociateid ||
-      !roleAssignments.scraperid
+      !roleAssignments.careerassociateid //||
+      // !roleAssignments.scraperid
     ) {
       alert("Please assign all roles.");
       return;
@@ -87,7 +87,7 @@ export const PendingOnboardingList: React.FC<Props> = ({
       accountManagerId: "",
       careerassociatemanagerid: "",
       careerassociateid: "",
-      scraperid: "",
+      scraperid: "51ce13f8-52fa-4e74-b346-450643b6a376", // Default scraper ID
     });
   };
 
@@ -142,7 +142,7 @@ export const PendingOnboardingList: React.FC<Props> = ({
               { label: "Account Manager", key: "accountManagerId", role: "account_manager" },
               { label: "CA Team Lead", key: "careerassociatemanagerid", role: "ca_team_lead" },
               { label: "Career Associate", key: "careerassociateid", role: "career_associate" },
-              { label: "Scraper", key: "scraperid", role: "scraping_team" },
+              // { label: "Scraper", key: "scraperid", role: "scraping_team" },
             ].map(({ label, key, role }) => (
               <div key={key}>
                 <label className="block text-sm font-medium mb-1">{label}</label>
