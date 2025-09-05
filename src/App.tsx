@@ -17,6 +17,7 @@ import { ClientEditModal } from './components/Clients/ClientEditModal';
 import { UserManagementModal } from './components/Admin/UserManagementModal';
 import { Plus, Users, FileText, BarChart3, UserPlus, Search, Edit, Settings } from 'lucide-react';
 import { supabase } from './lib/supabaseClient';
+import { supabase1 } from './lib/supabaseClient';
 import { DialogProvider } from './context/DialogContext';
 import { supabaseAdmin } from './lib/supabaseAdminClient';
 import EmailConfirmed from './components/Auth/EmailConfirmed';
@@ -27,6 +28,8 @@ import AppLayout from './components/Layout/AppLayout';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import FeedbackButton from './components/FeedbackButton';
 import { ClientSearchBar } from './components/ClientSearchBar';
+import { ca } from 'date-fns/locale';
+import { SupabaseAdminCreateClient } from './lib/supabaseAdminCreateClient';
 
 function App() {
   const fetchData = async () => {
@@ -57,7 +60,7 @@ function App() {
       // console.log("Clients:", clientData);
       setClients(clientData || []);
     }
-    
+
     // 3. Get all ticket assignments
     const { data: assignmentData, error: assignmentError } = await supabase
       .from('ticket_assignments')
@@ -339,10 +342,23 @@ function App() {
     clientData: any,          // ✅ Add this
     rolesData: any
   ) => {
-    console.log("INSERT PAYLOAD", {
-      ...clientData,
-      ...rolesData
-    });
+    // console.log("INSERT PAYLOAD", {
+    //   ...clientData,
+    //   ...rolesData
+    // });
+    const { data: caEmail, error: caEmailError } = await supabase.from('users').select('email').eq('id', rolesData.careerassociateid).single();
+    if (caEmailError) {
+      console.log("ca id", rolesData.careerassociateid)
+    }
+    const { data: cad, error: cadError } = await supabase1.from('users').select(
+      'id,name,team_id'
+    ).eq('email', caEmail.email)
+      .single();
+    if (cadError) {
+      console.log("verror", cadError)
+      alert("Failed to complete onboarding, Selected CA not found in CA Management tool");
+      return;
+    }
 
     const { error: insertError } = await supabase.from('clients').insert({
       full_name: clientData.full_name,
@@ -354,16 +370,85 @@ function App() {
       salary_range: clientData.salary_range,
       location_preferences: clientData.location_preferences,
       work_auth_details: clientData.work_auth_details,
+      visa_type: clientData.visa_type,
       account_manager_id: rolesData.accountManagerId,
       careerassociatemanagerid: rolesData.careerassociatemanagerid,
       careerassociateid: rolesData.careerassociateid,
-      scraperid: rolesData.scraperid,
-      onboarded_by: currentUser!.id
+      scraperid: "51ce13f8-52fa-4e74-b346-450643b6a376",
+      onboarded_by: currentUser!.id,
+      sponsorship: clientData.sponsorship,
     });
 
     if (insertError) {
       alert("Failed to complete onboarding");
       console.error("Onboarding failed:", insertError.message);
+      return;
+    }
+
+    const name = clientData.full_name?.trim();
+    const email = clientData.company_email?.trim().toLowerCase();
+    const password = "Created@123";
+    const role = 'client';
+    const department = 'Client Services';
+
+
+    const { data: userData, error } = await SupabaseAdminCreateClient.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // User can login immediately
+    });
+    if(userData) console.log("Created user:", userData.user);
+
+    if (error) {
+      if (error.message.includes('already been registered')) {
+        console.log("Error", error)
+        console.error(`❌ Error creating ${clientData.company_email} : Already registered`);
+      } else {
+        console.log("Error", error)
+        console.error(`❌ Error creating ${clientData.company_email} : ${error.message}`);
+      }
+    }
+
+    const { error: userInsertError } = await supabase.from('users').insert({
+      id: userData.user.id, // must match auth.users.id
+      name: clientData.full_name,
+      email: clientData.company_email,
+      role: 'client',
+      department: 'Client Services',
+      is_active: true,
+    });
+
+    if (userInsertError) {
+      console.error(`❌ Error inserting into users table for ${clientData.company_email} : ${userInsertError.message}`);
+      console.error(userInsertError);
+    }
+
+    const { data: tid, error: b } = await supabase1.from('teams')
+      .select('name').eq('id', cad.team_id).single();
+    if (b) {
+      console.log("Error", b)
+      return;
+    }
+    const { error: verror } = await supabase1.from('clients').insert({
+      name: clientData.full_name,
+      email: clientData.company_email,
+      status: 'Not Started',
+      assigned_ca_id: cad.id,
+      team_id: cad.team_id,
+      emails_required: 25,
+      assigned_ca_name: cad.name,
+      team_lead_name: tid.name.replace(' Team', ' '),
+      emails_submitted: 0,
+      jobs_applied: 0,
+      visa_type: clientData.visa_type,
+      work_auth_details: clientData.work_auth_details,
+      sponsorship: clientData.sponsorship,
+      applywizz_id: clientData.applywizz_id,
+    })
+
+    if (verror) {
+      alert("Failed to complete onboardin3g");
+      console.error("Onboarding failed :", verror);
       return;
     }
 
@@ -457,13 +542,13 @@ function App() {
                 handleUpdateTicket(selectedTicket.id, updateData);
               }
             }}
-            
+
             onUpdate={() => {
               fetchData(); // ⬅️ refresh data when modal updates a ticket
               setIsTicketEditModalOpen(false);
               setSelectedTicket(null);
             }}
-            // onTicketUpdated={handleTicketUpdated} // Add this line
+          // onTicketUpdated={handleTicketUpdated} // Add this line
           />
         )
       default:
@@ -712,7 +797,7 @@ function App() {
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
 
-              {(currentUser?.role === 'sales'||currentUser?.role === 'ca_team_lead') && (
+              {(currentUser?.role === 'sales' || currentUser?.role === 'ca_team_lead') && (
                 <button
                   onClick={() => setIsClientOnboardingModalOpen(true)}
                   className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"

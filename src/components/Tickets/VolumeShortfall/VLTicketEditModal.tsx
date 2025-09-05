@@ -959,7 +959,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
 
         if (error) throw error;
         // alert("Ticket marked as resolved");
-        toast("Ticket marked as resolved!", {
+        toast("Ticket marked as resolved! Thanks for your update.", {
           position: "top-center",
           autoClose: 4000,
           hideProgressBar: false,
