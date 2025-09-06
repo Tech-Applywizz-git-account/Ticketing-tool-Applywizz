@@ -62,6 +62,9 @@ export interface Client {
   careerassociatemanagerid: string;
   careerassociateid: string;
   scraperid: string;
+  visa_type: string;
+  sponsorship: string;
+  applywizz_id: string;
 }
 
 export interface Ticket {
