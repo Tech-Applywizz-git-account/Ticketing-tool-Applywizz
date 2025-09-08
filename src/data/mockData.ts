@@ -2,8 +2,8 @@ import { User, Client, Ticket, SLAConfig, RolePermissions, TicketType, UserRole 
 
 export const slaConfig: SLAConfig = {
   volume_shortfall: { priority: 'high', hours: 24 },
-  data_mismatch: { priority: 'high', hours: 24 },
-  resume_update: { priority: 'high', hours: 24 },
+  data_mismatch: { priority: 'high', hours: 96 },
+  resume_update: { priority: 'high', hours: 48 },
   // credential_issue: { priority: 'critical', hours: 8 },
   // profile_data_issue: { priority: 'critical', hours: 12 },
   // bulk_complaints: { priority: 'critical', hours: 24 },
