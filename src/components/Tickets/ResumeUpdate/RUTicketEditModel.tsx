@@ -39,6 +39,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
   const [status, setStatus] = useState<TicketStatus>('open');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [clientName, setClientName] = useState<string>('');
+  const [clientEmail, setClientEmail] = useState<string>('');
   const [resolution, setResolution] = useState('');
   const [ticketFiles, setTicketFiles] = useState<any[]>([]);
   const [createdByUser, setCreatedByUser] = useState<any>(null);
@@ -165,13 +166,13 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
   }, [ticket ? ticket.clientId : null])
 
   useEffect(() => {
-    const fetchClientName = async () => {
+    const fetchClientData = async () => {
       if (!ticket) return;
       if (!ticket.clientId) return;
 
       const { data, error } = await supabase
         .from('clients')
-        .select(`full_name`)
+        .select(`full_name,company_email`)
         .eq('id', ticket.clientId)
         .single();
 
@@ -179,10 +180,11 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
         console.error('Error fetching client name:', error);
       } else {
         setClientName(data?.full_name || '');
+        setClientEmail(data?.company_email || '');
       }
     };
 
-    fetchClientName();
+    fetchClientData();
   }, [ticket ? ticket.clientId : null]);
 
   useEffect(() => {
@@ -348,6 +350,36 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
       setSaparateCommnetID(uuidv4());
       setUserFile(null);
       onClose(); // close modal
+      if (clientEmail) {
+        await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: clientEmail,
+            subject: "Response form Applywizz Ticketing Tool",
+            htmlBody: `
+            <html>
+              <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+                <div style="text-align:center; margin-bottom:20px;">
+                  <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                       alt="ApplyWizz Logo" 
+                       style="width:150px;"/>
+                </div>
+                <h2 style="color:#1E90FF;">Hi ${clientName} (${clientEmail}),</h2>
+                <p>Our team has responded to your ApplyWizz ticket ${ticket.short_code} — ${ticket.title}}.</p>
+                <p>We've updated your resume. Review it and if you're satisfied, conform it. If not, click on need some more changes.</p>
+                <p>You can manage your ticket here: <a href="https://ticketingtoolapplywizz.vercel.app/" target="_blank">ApplyWizz Ticketing Tool</a></p>
+                <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. <br/>Updates will be shared as progress is made.</p>     
+                <p>Thanks for your patience,<br/>- ApplyWizz Support</p>                
+                <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
+                <hr style="border:none;border-top:1px solid #eee;" />
+                <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
+              </body>
+            </html>
+          `
+          })
+        });
+      }
     } catch (error) {
       console.error(error);
       alert("Failed to close ticket.");
