@@ -44,6 +44,7 @@ export const DMTicketEditModal: React.FC<TicketEditModalProps> = ({
     const [status, setStatus] = useState<TicketStatus>('open');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [clientName, setClientName] = useState<string>('');
+    const [clientEmail, setClientEamil] = useState<string>('');
     const [clientCA, setClientCA] = useState<string>('');
     const [resolution, setResolution] = useState('');
     const [ticketFiles, setTicketFiles] = useState<any[]>([]);
@@ -172,13 +173,13 @@ export const DMTicketEditModal: React.FC<TicketEditModalProps> = ({
     }, [ticket ? ticket.clientId : null])
 
     useEffect(() => {
-        const fetchClientName = async () => {
+        const fetchClientData = async () => {
             if (!ticket) return;
             if (!ticket.clientId) return;
 
             const { data, error } = await supabase
                 .from('clients')
-                .select(`full_name`)
+                .select(`full_name,company_email`)
                 .eq('id', ticket.clientId)
                 .single(); // because only one client expected
 
@@ -187,10 +188,11 @@ export const DMTicketEditModal: React.FC<TicketEditModalProps> = ({
                 console.error('Error fetching client name:', error);
             } else {
                 setClientName(data?.full_name || '');
+                setClientEamil(data?.company_email || '');
             }
         };
 
-        fetchClientName();
+        fetchClientData();
     }, [ticket ? ticket.clientId : null]);
     useEffect(() => {
         const fetchClientCA = async () => {
@@ -398,6 +400,36 @@ export const DMTicketEditModal: React.FC<TicketEditModalProps> = ({
             setSaparateCommnetID(uuidv4());
             setUserFile(null);
             onClose(); // close modal
+            if (clientEmail) {
+                await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        to: clientEmail,
+                        subject: "Response form Applywizz Ticketing Tool",
+                        htmlBody: `
+            <html>
+              <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+                <div style="text-align:center; margin-bottom:20px;">
+                  <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                       alt="ApplyWizz Logo" 
+                       style="width:150px;"/>
+                </div>
+                <h2 style="color:#1E90FF;">Hi ${clientName} (${clientEmail}),</h2>
+                <p>Our team has responded to your ApplyWizz ticket ${ticket.short_code} — ${ticket.title}}.</p>
+                <p>please review the update and close the ticket if your issue is resolved.</p>
+                <p>You can manage your ticket here: <a href="https://ticketingtoolapplywizz.vercel.app/" target="_blank">ApplyWizz Ticketing Tool</a></p>
+                <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. <br/>Updates will be shared as progress is made.</p>     
+                <p>Thanks for your patience,<br/>- ApplyWizz Support</p>                
+                <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
+                <hr style="border:none;border-top:1px solid #eee;" />
+                <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
+              </body>
+            </html>
+          `
+                    })
+                });
+            }
         } catch (error) {
             console.error(error);
             alert("Failed to close ticket.");
@@ -926,7 +958,7 @@ export const DMTicketEditModal: React.FC<TicketEditModalProps> = ({
                                                     .replace(/^./, (str) => str.toUpperCase())}
                                             </label>
                                             <p className="text-blue-900">
-                                                {(key==='faultType') ? String(value).replaceAll('_',' ').replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()):<a href={`${String(value)}`}>{String(value)}</a>}
+                                                {(key === 'faultType') ? String(value).replaceAll('_', ' ').replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()) : <a href={`${String(value)}`}>{String(value)}</a>}
                                             </p>
                                         </div>
                                     ))}
@@ -1020,7 +1052,7 @@ export const DMTicketEditModal: React.FC<TicketEditModalProps> = ({
                                     <button
                                         onClick={() => handleAssistanceResponse(true)}
                                         className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                        >
+                                    >
                                         No, I need help
                                     </button>
                                 </div>
@@ -1124,7 +1156,7 @@ export const DMTicketEditModal: React.FC<TicketEditModalProps> = ({
                                                     .replace(/^./, (str) => str.toUpperCase())}
                                             </label>
                                             <p className="text-blue-900">
-                                                {(key==='faultType') ? String(value).replaceAll('_',' ').replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()):<a href={`${String(value)}`}>{String(value)}</a>}
+                                                {(key === 'faultType') ? String(value).replaceAll('_', ' ').replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()) : <a href={`${String(value)}`}>{String(value)}</a>}
                                             </p>
                                         </div>
                                     ))}
@@ -1220,7 +1252,7 @@ export const DMTicketEditModal: React.FC<TicketEditModalProps> = ({
                         {canEdit() &&
                             (
                                 <form onSubmit={handleSubmit} className="space-y-6">
-                                    {currentUserRole === 'ca_team_lead' && ticket.status === 'open'  && (
+                                    {currentUserRole === 'ca_team_lead' && ticket.status === 'open' && (
                                         <>
                                             <div className="bg-green-50 rounded-lg p-6 border border-green-200">
                                                 <h3 className="text-lg font-semibold text-green-900">Take Action</h3>

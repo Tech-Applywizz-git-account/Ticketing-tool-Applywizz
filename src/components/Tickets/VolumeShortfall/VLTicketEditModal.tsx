@@ -404,7 +404,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             to: clientEmail,
-            subject: "New Ticket raised in ApplyWizz Ticketing Tool",
+            subject: "Response form Applywizz Ticketing Tool",
             htmlBody: `
             <html>
               <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
@@ -415,7 +415,6 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                 </div>
                 <h2 style="color:#1E90FF;">Hi ${clientName} (${clientEmail}),</h2>
                 <p>Our team has responded to your ApplyWizz ticket ${ticket.short_code} — ${ticket.title}}.</p>
-                <p>Our team has responded to your ApplyWizz ticket.</p>
                 <p>please review the update and close the ticket if your issue is resolved.</p>
                 <p>You can manage your ticket here: <a href="https://ticketingtoolapplywizz.vercel.app/" target="_blank">ApplyWizz Ticketing Tool</a></p>
                 <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. <br/>Updates will be shared as progress is made.</p>     
