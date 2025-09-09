@@ -407,7 +407,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
             subject: "New Ticket raised in ApplyWizz Ticketing Tool",
             htmlBody: `
             <html>
-               <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+              <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
                 <div style="text-align:center; margin-bottom:20px;">
                   <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
                        alt="ApplyWizz Logo" 
@@ -415,10 +415,11 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                 </div>
                 <h2 style="color:#1E90FF;">Hi ${clientName} (${clientEmail}),</h2>
                 <p>Our team has responded to your ApplyWizz ticket ${ticket.short_code} — ${ticket.title}}.</p>
+                <p>Our team has responded to your ApplyWizz ticket.</p>
                 <p>please review the update and close the ticket if your issue is resolved.</p>
-                <p>You can manage your ticket here: <a href="https://ticketingtool.applywizz.com" target="_blank">ApplyWizz Ticketing Tool</a></p>
-                <p>Thanks for your patience,<br/>— ApplyWizz Support</p>                
+                <p>You can manage your ticket here: <a href="https://ticketingtoolapplywizz.vercel.app/" target="_blank">ApplyWizz Ticketing Tool</a></p>
                 <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. <br/>Updates will be shared as progress is made.</p>     
+                <p>Thanks for your patience,<br/>- ApplyWizz Support</p>                
                 <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
                 <hr style="border:none;border-top:1px solid #eee;" />
                 <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
