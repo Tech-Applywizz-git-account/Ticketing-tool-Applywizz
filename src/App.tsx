@@ -15,7 +15,7 @@ import { ClientOnboardingModal } from './components/Clients/ClientOnboardingModa
 import { PendingOnboardingList } from './components/Clients/PendingOnboardingList';
 import { ClientEditModal } from './components/Clients/ClientEditModal';
 import { UserManagementModal } from './components/Admin/UserManagementModal';
-import { Plus, Users, FileText, BarChart3, UserPlus, Search, Edit, Settings } from 'lucide-react';
+import { Plus, Users, FileText, BarChart3, UserPlus, Search, Edit, Settings, Mail } from 'lucide-react';
 import { supabase } from './lib/supabaseClient';
 import { supabase1 } from './lib/supabaseClient';
 import { DialogProvider } from './context/DialogContext';
@@ -313,6 +313,33 @@ function App() {
     });
   };
 
+  const handleSendEmail = async () => {
+    await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: 'vivek@applywizz.com',
+        subject: "Ticket Created Successfully in ApplyWizz Ticketing Tool",
+        htmlBody: `
+      <html>
+        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+                  <div style="text-align:center; margin-bottom:20px;">
+                    <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                         alt="ApplyWizz Logo" 
+                         style="width:150px;"/>
+                  </div>
+                  <p>Dear User,</p>
+                  <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. </p>
+                  <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
+                  <hr style="border:none;border-top:1px solid #eee;" />
+                  <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
+                </body>
+      </html>
+    `
+      })
+    });
+  }
+
   const handleCreateTicket = async (ticketData: any) => {
     const newTicket = {
       ...ticketData,
@@ -397,7 +424,7 @@ function App() {
       password,
       email_confirm: true, // User can login immediately
     });
-    if(userData) console.log("Created user:", userData.user);
+    if (userData) console.log("Created user:", userData.user);
 
     if (error) {
       if (error.message.includes('already been registered')) {
@@ -640,6 +667,15 @@ function App() {
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
               <div className="flex space-x-3">
+                {currentUser?.role === 'system_admin' && (
+                  <button
+                    onClick={() => handleSendEmail()}
+                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    <Mail className="h-5 w-5" />
+                    <span>Send mail</span>
+                  </button>
+                )}
                 {currentUser?.role === 'sales' && (
                   <button
                     onClick={() => setIsClientOnboardingModalOpen(true)}
@@ -797,7 +833,7 @@ function App() {
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
 
-              {(currentUser?.role === 'sales' ) && (
+              {(currentUser?.role === 'sales') && (
                 <button
                   onClick={() => setIsClientOnboardingModalOpen(true)}
                   className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"

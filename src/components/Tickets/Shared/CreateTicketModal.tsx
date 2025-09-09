@@ -335,7 +335,12 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
             subject: "Ticket Created Successfully in ApplyWizz Ticketing Tool",
             htmlBody: `
       <html>
-        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
+         <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+          <div style="text-align:center; margin-bottom:20px;">
+            <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                 alt="ApplyWizz Logo" 
+                 style="width:150px;"/>
+          </div>
           <h2 style="color:#1E90FF;">Hello ${user.name} (${user.email})</h2>
           <p>Thank you for reaching out to us.Your ticket has been created successfully in the Applywizz Ticketing Tool.</p>
           <hr style="border:none;border-top:1px solid #eee;" />
@@ -368,7 +373,12 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
               subject: "New Ticket raised in ApplyWizz Ticketing Tool",
               htmlBody: `
       <html>
-        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
+         <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+          <div style="text-align:center; margin-bottom:20px;">
+            <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                 alt="ApplyWizz Logo" 
+                 style="width:150px;"/>
+          </div>
           <h2 style="color:#1E90FF;">Hello ${selectedClient.account_manager_id?.name} (${selectedClient.account_manager_id?.email})</h2>
           <p>A new ticket has been raised in the Applywizz Ticketing Tool by ${user.name} (client).</p>
           <hr style="border:none;border-top:1px solid #eee;" />
@@ -404,7 +414,12 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
             subject: "New Ticket raised in ApplyWizz Ticketing Tool",
             htmlBody: `
       <html>
-        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
+         <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+          <div style="text-align:center; margin-bottom:20px;">
+            <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                 alt="ApplyWizz Logo" 
+                 style="width:150px;"/>
+          </div>
           <h2 style="color:#1E90FF;">Hello ${selectedClient.careerassociatemanagerid?.name} (${catlEmail})</h2>
           <p>A new ticket has been raised in the Applywizz Ticketing Tool by ${user.name} (client)</p>
           <hr style="border:none;border-top:1px solid #eee;" />
@@ -441,7 +456,12 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
               subject: "New Ticket raised in ApplyWizz Ticketing Tool regarding Data Mismatch",
               htmlBody: `
       <html>    
-        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;"> 
+         <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+          <div style="text-align:center; margin-bottom:20px;">
+            <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                 alt="ApplyWizz Logo" 
+                 style="width:150px;"/>
+          </div> 
           <h2 style="color:#1E90FF;">Hello ${selectedClient?.careerassociateid?.name}(${caEmail}) </h2>
           <p>A ticket has been created by ${user.name} (client).</p>
           <hr style="border:none;border-top:1px solid #eee;" />
@@ -479,7 +499,12 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
               subject: "New Ticket raised in ApplyWizz Ticketing Tool regarding Data Mismatch",
               htmlBody: `
       <html>    
-        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;"> 
+         <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+          <div style="text-align:center; margin-bottom:20px;">
+            <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                 alt="ApplyWizz Logo" 
+                 style="width:150px;"/>
+          </div> 
           <h2 style="color:#1E90FF;">Hello ${selectedClient?.careerassociatemanagerid?.name || ''} (${catlEmail}) </h2>
           <p>A ticket has been created by ${user.name} (client).</p>
           <hr style="border:none;border-top:1px solid #eee;" />
@@ -517,7 +542,12 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
             subject: "New Ticket raised in ApplyWizz Ticketing Tool For Resume Update",
             htmlBody: `
       <html>
-        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
+         <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+          <div style="text-align:center; margin-bottom:20px;">
+            <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                 alt="ApplyWizz Logo" 
+                 style="width:150px;"/>
+          </div>
           <h2 style="color:#1E90FF;">Hello Sriketh (sriketh@applywizz.com)</h2>
           <p>A ticket has been created by ${user.name} (client) to make changes in resume</p>
           <hr style="border:none;border-top:1px solid #eee;" />
@@ -552,7 +582,12 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
             subject: "New Ticket raised in ApplyWizz Ticketing Tool For Resume Update",
             htmlBody: `
       <html>
-        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
+         <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+          <div style="text-align:center; margin-bottom:20px;">
+            <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                 alt="ApplyWizz Logo" 
+                 style="width:150px;"/>
+          </div>
           <h2 style="color:#1E90FF;">Hello ${selectedClient?.careerassociateid?.name}(${caEmail}) </h2>
           <p>A ticket has been created by ${user.name} (client) to make changes in resume</p>
           <hr style="border:none;border-top:1px solid #eee;" />
@@ -584,7 +619,12 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
             subject: "New Ticket raised in ApplyWizz Ticketing Tool For Resume Update",
             htmlBody: `
       <html>
-        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">
+         <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+          <div style="text-align:center; margin-bottom:20px;">
+            <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                 alt="ApplyWizz Logo" 
+                 style="width:150px;"/>
+          </div>
           <h2 style="color:#1E90FF;">Hello ${selectedClient?.careerassociatemanagerid?.name || ''} (${catlEmail}) </h2>
           <p>A ticket has been created by ${user.name} (client) to make changes in resume</p>
           <hr style="border:none;border-top:1px solid #eee;" />
