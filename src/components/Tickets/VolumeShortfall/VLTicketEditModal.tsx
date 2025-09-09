@@ -44,6 +44,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
   const [status, setStatus] = useState<TicketStatus>('open');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [clientName, setClientName] = useState<string>('');
+  const [clientEmail, setClientEamil] = useState<string>('');
   const [clientCA, setClientCA] = useState<string>('');
   const [resolution, setResolution] = useState('');
   const [ticketFiles, setTicketFiles] = useState<any[]>([]);
@@ -170,13 +171,13 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
   }, [ticket ? ticket.clientId : null])
 
   useEffect(() => {
-    const fetchClientName = async () => {
+    const fetchClientData = async () => {
       if (!ticket) return;
       if (!ticket.clientId) return;
 
       const { data, error } = await supabase
         .from('clients')
-        .select(`full_name`)
+        .select(`full_name,company_email`)
         .eq('id', ticket.clientId)
         .single(); // because only one client expected
 
@@ -185,10 +186,11 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
         console.error('Error fetching client name:', error);
       } else {
         setClientName(data?.full_name || '');
+        setClientEamil(data?.company_email || '');
       }
     };
 
-    fetchClientName();
+    fetchClientData();
   }, [ticket ? ticket.clientId : null]);
   useEffect(() => {
     const fetchClientCA = async () => {
@@ -350,7 +352,6 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
 
       const { careerassociateid } = clientData;
       if (
-        ticket?.type === 'volume_shortfall' &&
         ticket?.status === 'replied' &&
         user?.role === 'ca_team_lead' &&
         wantsToEscalate &&
@@ -381,7 +382,6 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
           });
         }
       }
-
       // alert("Ticket closed successfully!");
       toast("Ticket closed successfully!", {
         position: "top-center",
@@ -398,6 +398,36 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
       setSaparateCommnetID(uuidv4());
       setUserFile(null);
       onClose(); // close modal
+      if (clientEmail) {
+        await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: clientEmail,
+            subject: "New Ticket raised in ApplyWizz Ticketing Tool",
+            htmlBody: `
+            <html>
+               <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+                <div style="text-align:center; margin-bottom:20px;">
+                  <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                       alt="ApplyWizz Logo" 
+                       style="width:150px;"/>
+                </div>
+                <h2 style="color:#1E90FF;">Hi ${clientName} (${clientEmail}),</h2>
+                <p>Our team has responded to your ApplyWizz ticket ${ticket.short_code} — ${ticket.title}}.</p>
+                <p>please review the update and close the ticket if your issue is resolved.</p>
+                <p>You can manage your ticket here: <a href="https://ticketingtool.applywizz.com" target="_blank">ApplyWizz Ticketing Tool</a></p>
+                <p>Thanks for your patience,<br/>— ApplyWizz Support</p>                
+                <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. <br/>Updates will be shared as progress is made.</p>     
+                <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
+                <hr style="border:none;border-top:1px solid #eee;" />
+                <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
+              </body>
+            </html>
+          `
+          })
+        });
+      }
     } catch (error) {
       console.error(error);
       alert("Failed to close ticket.");
@@ -935,18 +965,6 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
       if (needsHelp) {
         setShowCallbackPopup(true);
         return;
-        // Update to needs_manager_review status
-        // const { error } = await supabase
-        //   .from('tickets')
-        //   .update({
-        //     status: 'manager_attention',
-        //     requiredManagerAttention: true,
-        //     updatedAt: new Date().toISOString()
-        //   })
-        //   .eq('id', ticket.id);
-
-        // if (error) throw error;
-        // alert("Account manager will contact you shortly");
       } else {
         // Update directly to resolved
         const { error } = await supabase
@@ -1097,14 +1115,6 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  {/* <div>
-                    <label className="text-sm font-medium text-gray-500">Client name</label>
-                    <p className="text-gray-900">{clientName}</p>
-                    </div> */}
-                  {/* <div>
-                  <label className="text-sm font-medium text-gray-500">Ticket ID</label>
-                  <p className="text-gray-900">{ticket.id}</p>
-                  </div> */}
                   <div>
                     <label className="text-sm font-medium text-gray-500">Type</label>
                     <p className="text-gray-900">{ticketTypeLabels[ticket.type]}</p>
@@ -1151,51 +1161,49 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                 <h3 className="text-md font-semibold mb-2">Comments:</h3>
                 <ul className="space-y-3">
                   {ticketComments
-                  .filter((comment)=>(comment.users.role!=='scraping_team' && comment.users.role!=='career_associate'))
-                  .map((comment, index) => (
-                    <li key={index} className="bg-gray-50 p-3 rounded border text-sm">
-                      <div className="text-gray-700">
-                        {comment.content}
-                        {' '}<span className="text-gray-600 italic">
-                          — {comment.users?.name || 'Unknown'} ({comment.users?.role?.replace('_', ' ') || 'Unknown Role'})
-                        </span>
-                      </div>
-                      <div className="text-gray-500 text-xs mt-1">
-                        {new Date(comment.created_at).toLocaleString()}
-                      </div>
-                      {/* --- Files --- */}
-                      {ticketFiles.filter((file) => file.commentid === comment.id).length > 0 && (
-                        <div className="mt-6 border-t pt-4">
-                          <h3 className="text-md font-semibold mb-2">Uploaded File :</h3>
-                          <ul className="space-y-2 text-sm">
-                            {ticketFiles.filter((file) => file.commentid === comment.id).map((file, index) => (
-                              <li key={index}>
-                                <a
-                                  href={`https://zkebbnegghodwmgmkynt.supabase.co/storage/v1/object/public/ticket-attachments/${file.file_path}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  {file.file_name}
-                                </a>{' '}
-                                <span className="text-gray-400 text-xs">
-                                  ({new Date(file.uploaded_at).toLocaleString()})
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
+                    .filter((comment) => (comment.users.role !== 'scraping_team' && comment.users.role !== 'career_associate'))
+                    .map((comment, index) => (
+                      <li key={index} className="bg-gray-50 p-3 rounded border text-sm">
+                        <div className="text-gray-700">
+                          {comment.content}
+                          {' '}<span className="text-gray-600 italic">
+                            — {comment.users?.name || 'Unknown'} ({comment.users?.role?.replace('_', ' ') || 'Unknown Role'})
+                          </span>
                         </div>
-                      )}
-                    </li>
-                  ))}
+                        <div className="text-gray-500 text-xs mt-1">
+                          {new Date(comment.created_at).toLocaleString()}
+                        </div>
+                        {/* --- Files --- */}
+                        {ticketFiles.filter((file) => file.commentid === comment.id).length > 0 && (
+                          <div className="mt-6 border-t pt-4">
+                            <h3 className="text-md font-semibold mb-2">Uploaded File :</h3>
+                            <ul className="space-y-2 text-sm">
+                              {ticketFiles.filter((file) => file.commentid === comment.id).map((file, index) => (
+                                <li key={index}>
+                                  <a
+                                    href={`https://zkebbnegghodwmgmkynt.supabase.co/storage/v1/object/public/ticket-attachments/${file.file_path}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline"
+                                  >
+                                    {file.file_name}
+                                  </a>{' '}
+                                  <span className="text-gray-400 text-xs">
+                                    ({new Date(file.uploaded_at).toLocaleString()})
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </li>
+                    ))}
                 </ul>
               </div>
             )}
             {ticket.status === 'closed' && (
               <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mt-6">
-                {/* <h3 className="text-lg font-semibold text-blue-900 mb-4">
-                  Follow Up Question
-                </h3> */}
+                {/* Follow Up Question */}
                 <p className="text-gray-700 mb-4">
                   Was your problem completely solved?
                 </p>
@@ -1410,59 +1418,59 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {currentUserRole === 'ca_team_lead' && ticket.type === 'volume_shortfall' && (ticket.status === 'open' || ticket.status === 'replied') && (
                     <>
-                    <div className="bg-green-50 rounded-lg p-6 border border-green-200">
-                      <h3 className="text-lg font-semibold text-green-900">Take Action</h3>
-                      <div className="space-y-2 mt-2" >
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Add a comment : <span className="text-red-800 text-xl relative top-1">*</span>
-                        </label>
-                        <textarea
-                          className="w-full border p-2 rounded"
-                          placeholder="Add a comment before closing or forwarding..."
-                          value={comment}
-                          onChange={(e) => setComment(e.target.value)}
-                          required
-                        />
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Upload File (Only .pdf, .png, .jpg, .jpeg formats are supported) </label>
-                          <input
-                            type="file"
-                            onChange={(e) => {
-                              if (e.target.files && e.target.files[0]) {
-                                setUserFile(e.target.files[0])
-                              }
-                            }}
-                            accept=".pdf,.png,.jpg,.jpeg"
-                            className="block w-full border rounded px-3 py-2"
-                            title="Upload a file (PDF, PNG, JPG, JPEG)"
-                            placeholder="Choose a file"
+                      <div className="bg-green-50 rounded-lg p-6 border border-green-200">
+                        <h3 className="text-lg font-semibold text-green-900">Take Action</h3>
+                        <div className="space-y-2 mt-2" >
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Add a comment : <span className="text-red-800 text-xl relative top-1">*</span>
+                          </label>
+                          <textarea
+                            className="w-full border p-2 rounded"
+                            placeholder="Add a comment before closing or forwarding..."
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            required
                           />
-                        </div>
-                        <button
-                          onClick={handleCloseTicket} disabled={!comment.trim() || isSubmittingComment}
-                          className={`px-4 py-2 rounded-lg ml-4 ${(!comment.trim() || isSubmittingComment)
-                            ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
-                            }`}>
-                          {isSubmittingComment ? 'Closing ticket...' : 'Close Ticket '}
-                        </button>
-                        <button
-                          onClick={handleForwardTicket}
-                          disabled={!comment.trim() || isSubmittingComment}
-                          // className={`bg-blue-500 text-white px-4 py-2 rounded ml-4`}
-                          className={`px-4 py-2 rounded-lg ml-4 ${(!comment.trim() || isSubmittingComment)
-                            ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
-                            }`}
-                        >
-                          {client?.careerassociateid === client?.careerassociatemanagerid ? (isSubmittingComment ? ' Forwarding to Scraping Team ... ' : ' Forward to Scraping Team ') : (isSubmittingComment ? ' Forwarding to CA & Scraping Team ... ' : ' Forward to CA & Scraping Team ')}
-                        </button>
-                        <div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Upload File (Only .pdf, .png, .jpg, .jpeg formats are supported) </label>
+                            <input
+                              type="file"
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  setUserFile(e.target.files[0])
+                                }
+                              }}
+                              accept=".pdf,.png,.jpg,.jpeg"
+                              className="block w-full border rounded px-3 py-2"
+                              title="Upload a file (PDF, PNG, JPG, JPEG)"
+                              placeholder="Choose a file"
+                            />
+                          </div>
+                          <button
+                            onClick={handleCloseTicket} disabled={!comment.trim() || isSubmittingComment}
+                            className={`px-4 py-2 rounded-lg ml-4 ${(!comment.trim() || isSubmittingComment)
+                              ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                              : 'bg-blue-600 text-white hover:bg-blue-700'
+                              }`}>
+                            {isSubmittingComment ? 'Closing ticket...' : 'Close Ticket '}
+                          </button>
+                          <button
+                            onClick={handleForwardTicket}
+                            disabled={!comment.trim() || isSubmittingComment}
+                            // className={`bg-blue-500 text-white px-4 py-2 rounded ml-4`}
+                            className={`px-4 py-2 rounded-lg ml-4 ${(!comment.trim() || isSubmittingComment)
+                              ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                              : 'bg-blue-600 text-white hover:bg-blue-700'
+                              }`}
+                          >
+                            {client?.careerassociateid === client?.careerassociatemanagerid ? (isSubmittingComment ? ' Forwarding to Scraping Team ... ' : ' Forward to Scraping Team ') : (isSubmittingComment ? ' Forwarding to CA & Scraping Team ... ' : ' Forward to CA & Scraping Team ')}
+                          </button>
+                          <div>
                             <p>Respective Career Associate Name : {clientCA}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  
+
                       <div className="bg-red-50 border border-red-300 rounded-lg p-4 mt-4">
                         <label className="flex items-center gap-2 mb-2">
                           <input
@@ -1482,8 +1490,8 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
                           />
                         )}
                       </div>
-                      </>
-                    )}
+                    </>
+                  )}
 
                   {['career_associate', 'scraping_team'].includes(user?.role) && ticket.type === 'volume_shortfall' && ticket.status === 'forwarded' && (
 
@@ -1557,7 +1565,7 @@ export const VLTicketEditModal: React.FC<TicketEditModalProps> = ({
 
                         <button
                           onClick={handleResolveTicket}
-                          disabled={!resolutionComment.trim() || isSubmittingComment}                   
+                          disabled={!resolutionComment.trim() || isSubmittingComment}
                           className={`px-4 py-2 rounded-lg mt-4 ${(!resolutionComment.trim() || isSubmittingComment)
                             ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
                             : 'bg-green-600 text-white hover:bg-green-700 rounded'

@@ -323,17 +323,21 @@ function App() {
         htmlBody: `
       <html>
         <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
-                  <div style="text-align:center; margin-bottom:20px;">
-                    <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
-                         alt="ApplyWizz Logo" 
-                         style="width:150px;"/>
-                  </div>
-                  <p>Dear User,</p>
-                  <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. </p>
-                  <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
-                  <hr style="border:none;border-top:1px solid #eee;" />
-                  <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
-                </body>
+                <div style="text-align:center; margin-bottom:20px;">
+                  <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                       alt="ApplyWizz Logo" 
+                       style="width:150px;"/>
+                </div>
+                <h2 style="color:#1E90FF;">Hi Vivek (vivke),</h2>
+                <p>Our team has responded to your ApplyWizz ticket.</p>
+                <p>please review the update and close the ticket if your issue is resolved.</p>
+                <p>You can manage your ticket here: <a href="https://ticketingtool.applywizz.com" target="_blank">ApplyWizz Ticketing Tool</a></p>
+                <p>Thanks for your patience,<br/>— ApplyWizz Support</p>                
+                <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. <br/>Updates will be shared as progress is made.</p>     
+                <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
+                <hr style="border:none;border-top:1px solid #eee;" />
+                <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
+              </body>
       </html>
     `
       })
