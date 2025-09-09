@@ -301,6 +301,28 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       }
       // alert("Ticket created successfully!");
       // toast.success("Ticket created successfully!");
+      toast("Ticket created successfully!", {
+        position: "top-center",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      onClose();
+      onTicketCreated();
+      // Reset form
+      setTicketType('');
+      setClientId('');
+      setTitle('');
+      setDescription('');
+      setUrgency('');
+      setMetadata({});
+      setFile(null);
+      onClose();
+      setIsCreatingTicket(false);
 
       console.log("client email", clientEmail.data?.company_email);
       // Send email notification 
@@ -587,28 +609,6 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
           })
         });
       }
-      toast("Ticket created successfully!", {
-        position: "top-center",
-        autoClose: 4000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });
-      onClose();
-      onTicketCreated();
-      // Reset form
-      setTicketType('');
-      setClientId('');
-      setTitle('');
-      setDescription('');
-      setUrgency('');
-      setMetadata({});
-      setFile(null);
-      onClose();
-      setIsCreatingTicket(false);
     } catch (error: any) {
       console.error("Supabase insert error:", error);
       toast.error(`Failed to create ticket: ${error.message}`);
