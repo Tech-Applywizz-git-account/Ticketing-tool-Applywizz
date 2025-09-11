@@ -33,12 +33,12 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
             <div className='px-4 text-center'>
               <p>
                 You’re now using the beta version of our internal ticketing system. 🎉
-              We’re testing and improving how tickets are created, tracked, and resolved across teams.
-                </p>
-                <p>
-              💬 Found a bug or have feedback? Let us know  — your input helps us make it better!
-              — ApplyWizz Ops & Tech Team
-                </p>
+                We’re testing and improving how tickets are created, tracked, and resolved across teams.
+              </p>
+              <p>
+                💬 Found a bug or have feedback? Let us know  — your input helps us make it better!
+                — ApplyWizz Ops & Tech Team
+              </p>
             </div>
           </div>
           <div></div>
@@ -67,6 +67,28 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
               <div className="text-sm font-medium text-gray-900">{user.email}</div>
               {/* <div className="text-xs text-gray-500">{}</div> */}
             </div>
+            {/* <button
+              className='text-sm px-2 py-1 bg-blue-100 text-blue-600 rounded-lg font-medium'
+              onClick={() => {
+                const labId = '68aa42ade9597b1e6bc69fd2'; // use your real labId
+                const uid = encodeURIComponent(user.id ?? user.email);
+                const apiBase = import.meta.env.DEV ? 'http://localhost:3000' : ''; // dev uses vercel dev port
+                window.open(`${apiBase}/api/fermion-redirect?labId=${labId}&uid=${uid}`, '_blank', 'noopener');
+              }}
+            >
+              Coding Labs
+            </button> */}
+            <button
+              className="text-sm px-2 py-1 bg-blue-100 text-blue-600 rounded-lg font-medium"
+              onClick={() => {
+                const uid = encodeURIComponent(user.id ?? user.email);
+                // Relative path works on Vercel (prod & preview)
+                window.open(`/api/fermion-redirect?uid=${uid}`, '_blank', 'noopener');
+              }}
+            >
+              Coding Labs
+            </button>
+
             <button
               onClick={onLogout}
               className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
