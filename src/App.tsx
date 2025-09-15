@@ -38,7 +38,6 @@ function App() {
       .from('tickets')
       .select('*')
       .order('createdat', { ascending: false });
-    // if(ticketData)console.log(ticketData);
     if (ticketError) console.error(ticketError);
 
     // 2. Get all users
