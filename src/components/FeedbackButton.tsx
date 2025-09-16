@@ -62,7 +62,7 @@ const FeedbackButton: React.FC<FeedbackProps> = ({ user }) => {
                             >
                                 <option value="bug">Bug Report</option>
                                 <option value="feature">Feature Request</option>
-                                <option value="general">General Feedback</option>
+                                <option value="general">General Feedback for our tool</option>
                             </select>
                         </div>
                         <div className="mb-4">

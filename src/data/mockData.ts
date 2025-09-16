@@ -4,6 +4,7 @@ export const slaConfig: SLAConfig = {
   volume_shortfall: { priority: 'high', hours: 24 },
   data_mismatch: { priority: 'high', hours: 96 },
   resume_update: { priority: 'high', hours: 48 },
+  call_support: { priority: 'high', hours: 24 },
   // credential_issue: { priority: 'critical', hours: 8 },
   // profile_data_issue: { priority: 'critical', hours: 12 },
   // bulk_complaints: { priority: 'critical', hours: 24 },
@@ -21,6 +22,7 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
       'volume_shortfall',
       'data_mismatch',
       'resume_update',
+      'call_support',
     ],
     canViewTickets: true,
     canEditTickets: false,
@@ -47,7 +49,7 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canCreateTickets: [
       'volume_shortfall',
       'resume_update',
-      'data_mismatch'
+      'data_mismatch',
     ],
     // canCreateTickets: [
     //   'volume_shortfall',
@@ -82,7 +84,9 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canOnboardClients: false,
   },
   ca_team_lead: {
-    canCreateTickets: [],
+    canCreateTickets: [
+      'call_support',
+    ],
     canViewTickets: true,
     canEditTickets: true,
     canResolveTickets: true,
@@ -105,7 +109,8 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
   },
   resume_team_head: {
     canCreateTickets: [
-      'resume_update',],
+      'resume_update',
+    ],
     canViewTickets: true,
     canEditTickets: true,
     canResolveTickets: true,
@@ -141,7 +146,8 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canCreateTickets: [
       'volume_shortfall',
       'resume_update',
-      'data_mismatch'
+      'data_mismatch',
+      'call_support',
       // 'high_rejections',
       // 'no_interviews',
       // 'profile_data_issue',
@@ -164,7 +170,8 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canCreateTickets: [
       'volume_shortfall',
       'data_mismatch',
-      'resume_update'
+      'resume_update',
+      'call_support',
     ],
     canViewTickets: true,
     canEditTickets: false,
@@ -179,7 +186,8 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canCreateTickets: [
       'volume_shortfall',
       'data_mismatch',
-      'resume_update'
+      'resume_update',
+      'call_support',
     ],
     canViewTickets: true,
     canEditTickets: false,
@@ -207,6 +215,7 @@ export const ticketTypeLabels: Record<TicketType, string> = {
   volume_shortfall: 'Volume Shortfall',
   data_mismatch: 'Data Mismatch',
   resume_update: 'Resume Update',
+  call_support: 'Call Support',
   // high_rejections: 'High Rejections',
   // no_interviews: 'No Interviews',
   // profile_data_issue: 'Profile Data Issue',
