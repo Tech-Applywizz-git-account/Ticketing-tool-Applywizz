@@ -172,6 +172,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
       volume_shortfall: 'Volume Shortfall - Applications below expectation',
       data_mismatch: 'Data Mismatch - Mistake in application process',
       resume_update: 'Client Resume Update Required',
+      call_support: 'Need a call from support team',
       // high_rejections: 'High Rejection Rate - Client feedback needed',
       // no_interviews: 'No Interview Calls - Client concern',
       // profile_data_issue: 'Profile Data Correction Required',
@@ -989,7 +990,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Client Selection - for roles that can select clients */}
-          {(user.role === 'account_manager' || user.role === 'sales' || user.role == 'resume_team_head' || isExecutive) && (
+          {(user.role === 'account_manager' || user.role === 'sales' || user.role == 'resume_team_head' || user.role == 'ca_team_lead' || isExecutive) && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Select Client

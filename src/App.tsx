@@ -11,6 +11,7 @@ import { CreateTicketModal } from './components/Tickets/Shared/CreateTicketModal
 import { VLTicketEditModal } from './components/Tickets/VolumeShortfall/VLTicketEditModal';
 import { DMTicketEditModal } from '@/components/Tickets/DataMismatch/DMTicketEditModel';
 import { RUTicketEditModal } from './components/Tickets/ResumeUpdate/RUTicketEditModel';
+import { CSTicketEditModal } from './components/Tickets/CallSupport/CSTicketEditModel';
 import { ClientOnboardingModal } from './components/Clients/ClientOnboardingModal';
 import { PendingOnboardingList } from './components/Clients/PendingOnboardingList';
 import { ClientEditModal } from './components/Clients/ClientEditModal';
@@ -572,7 +573,30 @@ function App() {
                 handleUpdateTicket(selectedTicket.id, updateData);
               }
             }}
-
+            onUpdate={() => {
+              fetchData(); // ⬅️ refresh data when modal updates a ticket
+              setIsTicketEditModalOpen(false);
+              setSelectedTicket(null);
+            }}
+          // onTicketUpdated={handleTicketUpdated} // Add this line
+          />
+        )
+      case "call_support":
+        return (
+          <CSTicketEditModal
+            ticket={selectedTicket}
+            user={currentUser}
+            isOpen={isTicketEditModalOpen}
+            assignments={assignments}
+            onClose={() => {
+              setIsTicketEditModalOpen(false);
+              setSelectedTicket(null);
+            }}
+            onSubmit={(updateData) => {
+              if (selectedTicket) {
+                handleUpdateTicket(selectedTicket.id, updateData);
+              }
+            }}
             onUpdate={() => {
               fetchData(); // ⬅️ refresh data when modal updates a ticket
               setIsTicketEditModalOpen(false);
@@ -689,15 +713,19 @@ function App() {
                   </button>
                 )}
                 {/* {(currentUser?.role === 'sales' || currentUser?.role == 'account_manager' || currentUser?.role == 'career_associate' || currentUser?.role == 'cro' || currentUser?.role == 'credential_resolution') && ( */}
-                {(currentUser?.role == 'account_manager' || isExecutive || currentUser.role == 'resume_team_head') && (
-                  <button
-                    onClick={() => setIsCreateTicketModalOpen(true)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <Plus className="h-5 w-5" />
-                    <span>Create Ticket</span>
-                  </button>
-                )}
+                {(currentUser?.role == 'account_manager'
+                  || isExecutive
+                  || currentUser.role == 'resume_team_head'
+                  || currentUser.role == 'ca_team_lead'
+                ) && (
+                    <button
+                      onClick={() => setIsCreateTicketModalOpen(true)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <Plus className="h-5 w-5" />
+                      <span>Create Ticket</span>
+                    </button>
+                  )}
               </div>
             </div>
 
@@ -802,19 +830,25 @@ function App() {
         );
 
       case 'tickets':
+        const isExecutive1 = currentUser && ['ceo', 'coo', 'cro'].includes(currentUser.role);
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-gray-900">Tickets</h1>
-              {(currentUser?.role == 'account_manager' || currentUser.role == 'ceo' || currentUser.role == 'resume_team_head' || currentUser.role == 'coo' || currentUser.role == 'cro' || currentUser.role == 'client') && (
-                <button
-                  onClick={() => setIsCreateTicketModalOpen(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Plus className="h-5 w-5" />
-                  <span>Create Ticket</span>
-                </button>
-              )}
+              {(currentUser?.role == 'account_manager'
+                || currentUser.role == 'client'
+                || isExecutive1
+                || currentUser.role == 'resume_team_head'
+                || currentUser.role == 'ca_team_lead'
+              ) && (
+                  <button
+                    onClick={() => setIsCreateTicketModalOpen(true)}
+                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Plus className="h-5 w-5" />
+                    <span>Create Ticket</span>
+                  </button>
+                )}
             </div>
             <TicketList
               tickets={getVisibleTickets()}
