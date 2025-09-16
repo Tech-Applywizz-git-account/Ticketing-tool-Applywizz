@@ -255,28 +255,28 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
     if (!comment) {
       // alert("Please write a comment before forwarding to client");
       toast("Please write a comment before forwarding to client!", {
-          position: "top-center",
-          autoClose: 4000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-        });
+        position: "top-center",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
       return;
     }
     if (!userFile) {
       toast("Please attach a updated resume file before forwarding to client!", {
-          position: "top-center",
-          autoClose: 4000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-        });
+        position: "top-center",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
       return;
     }
     setIsSubmittingComment(true);
@@ -522,15 +522,15 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
     if (!ticket.id || !user?.id) return;
     if (!userComment || !userFile) {
       toast("Please write a comment and attach updated resume file.", {
-          position: "top-center",
-          autoClose: 4000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-        });
+        position: "top-center",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
       return;
     }
 
@@ -648,6 +648,25 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
     } catch (err) {
       console.error("Error submitting comment:", err);
       alert("Failed to submit comment.");
+    }
+  };
+  const downloadFile = async (filePath, fileName) => {
+    try {
+      const response = await fetch(`https://zkebbnegghodwmgmkynt.supabase.co/storage/v1/object/public/ticket-attachments/${filePath}`);
+      const blob = await response.blob(); // Convert the file content to a Blob object
+      const url = URL.createObjectURL(blob); // Create a temporary URL for the Blob
+
+      const a = document.createElement('a'); // Create an <a> element
+      a.href = url;
+      a.download = fileName; // Set the file name for the download
+      document.body.appendChild(a);
+      a.click(); // Trigger the download
+      document.body.removeChild(a); // Clean up after download
+
+      // Optionally, revoke the URL after download
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
     }
   };
   const handleCATLSubmit = async () => {
@@ -812,7 +831,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black gap-6 bg-opacity-50 flex items-center justify-center z-50 p-4">
-    {(['account_manager', 'coo', 'cro', 'ceo', 'client','resume_team_head'].includes(user.role)) && <TicketTimeline ticket={ticket} />} 
+      {(['account_manager', 'coo', 'cro', 'ceo', 'client', 'resume_team_head'].includes(user.role)) && <TicketTimeline ticket={ticket} />}
       <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
@@ -1115,6 +1134,12 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
                                 <span className="text-gray-400 text-xs">
                                   ({new Date(file.uploaded_at).toLocaleString()})
                                 </span>
+                                <button
+                                  onClick={() => downloadFile(file.file_path, file.file_name)}
+                                  className="ml-2 text-xs text-blue-500 hover:underline"
+                                >
+                                  Download
+                                </button>
                               </li>
                             ))}
                           </ul>
@@ -1211,7 +1236,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
 
                         <button
                           onClick={handleCommentSubmit}
-                          disabled={!userFile|| ( !userComment.trim() || isSubmittingComment)}
+                          disabled={!userFile || (!userComment.trim() || isSubmittingComment)}
                           // className={`bg-blue-500 text-white px-4 py-2 rounded ml-4`}
                           className={`px-4 py-2 rounded-lg ml-4 ${(!userFile || !userComment.trim() || isSubmittingComment)
                             ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
