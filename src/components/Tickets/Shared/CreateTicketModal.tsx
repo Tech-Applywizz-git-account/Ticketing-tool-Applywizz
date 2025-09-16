@@ -989,7 +989,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Client Selection - for roles that can select clients */}
-          {(user.role === 'account_manager' || user.role === 'sales' || isExecutive) && (
+          {(user.role === 'account_manager' || user.role === 'sales' || user.role == 'resume_team_head' || isExecutive) && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Select Client
