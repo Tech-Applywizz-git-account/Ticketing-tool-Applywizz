@@ -46,6 +46,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
   const [client, setClient] = useState<Client>(null);
 
   const [RTMs, setRTMs] = useState<any[]>([]);
+  const [emails, setEmails] = useState<any[]>([]);
   const [RTMId, setRTMId] = useState<string>('');
 
   const [userComment, setUserComment] = useState('');
@@ -244,9 +245,22 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
 
       const assignedIds = new Set(data.map(assignment => assignment.user_id));
       setAlreadyAssignedIds(assignedIds);
+      const {data: Emails, error: EmailsEmails} = await supabase
+        .from('users')
+        .select('id, name, email') 
+        .in('role', ['career_associate', 'ca_team_lead'])
+        .in('id', Array.from(assignedIds));
+      if (EmailsEmails) {
+        console.error('Failed to fetch RTM details:', EmailsEmails);
+        return;
+      }
+      if (Emails && Emails.length > 0) {
+        console.log("Emails1",Emails.map(e => e.email));
+        setEmails(Emails);
+      }
     };
 
-    fetchTicketAssignments();
+    fetchTicketAssignments();    
   }, [ticket?.id]);
 
   const handleForwardToClientTicket = async () => {
@@ -731,6 +745,37 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
       });
       onUpdate?.();
       onClose();
+      if (emails && emails.length > 0) {
+        emails.forEach(async (email) => {
+          await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              to: email.email,
+              subject: "Response form Applywizz Ticketing Tool",
+              htmlBody: `      
+            <html>
+              <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+                <div style="text-align:center; margin-bottom:20px;">
+                  <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+                       alt="ApplyWizz Logo" 
+                       style="width:150px;"/>
+                </div>
+                <p>Resume team has updated the resume for ApplyWizz ticket ${ticket.short_code} — ${ticket.title}}.</p>
+                <p>Please apply with updated resume.</p>
+                <p>You can find updated resume in ticket tool : <a href="https://ticketingtoolapplywizz.vercel.app/" target="_blank">ApplyWizz Ticketing Tool</a></p>
+                <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. <br/>Updates will be shared as progress is made.</p>     
+                <p>Thanks for your patience,<br/>- ApplyWizz Support</p>                
+                <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
+                <hr style="border:none;border-top:1px solid #eee;" />
+                <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
+              </body>
+            </html>
+          `
+          })
+        });
+      });
+    }
     } catch (error) {
       console.error("Forward to CATL error:", error);
       alert("Unexpected error during resolution.");
