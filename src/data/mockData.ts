@@ -104,7 +104,8 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canOnboardClients: false,
   },
   resume_team_head: {
-    canCreateTickets: [],
+    canCreateTickets: [
+      'resume_update',],
     canViewTickets: true,
     canEditTickets: true,
     canResolveTickets: true,
