@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Clock, User, AlertTriangle, CheckCircle, MessageSquare, Calendar, Heading4 } from 'lucide-react';
 import { Ticket, User as UserType, Client, TicketStatus } from '../../../types';
 import { ticketTypeLabels } from '../../../data/mockData';
-import { format } from 'date-fns';
+import { format, set } from 'date-fns';
 import { supabase } from '../../../lib/supabaseClient';
 import { id } from 'date-fns/locale';
 // import { toast } from 'sonner';
@@ -245,9 +245,9 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
 
       const assignedIds = new Set(data.map(assignment => assignment.user_id));
       setAlreadyAssignedIds(assignedIds);
-      const {data: Emails, error: EmailsEmails} = await supabase
+      const { data: Emails, error: EmailsEmails } = await supabase
         .from('users')
-        .select('id, name, email') 
+        .select('id, name, email')
         .in('role', ['career_associate', 'ca_team_lead'])
         .in('id', Array.from(assignedIds));
       if (EmailsEmails) {
@@ -255,12 +255,12 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
         return;
       }
       if (Emails && Emails.length > 0) {
-        console.log("Emails1",Emails.map(e => e.email));
+        console.log("Emails1", Emails.map(e => e.email));
         setEmails(Emails);
       }
     };
 
-    fetchTicketAssignments();    
+    fetchTicketAssignments();
   }, [ticket?.id]);
 
   const handleForwardToClientTicket = async () => {
@@ -522,7 +522,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
       setUserComment('');
       setSaparateCommnetID(uuidv4());
       setUserFile(null);
-
+      setRTMId('');
     } catch (error) {
       console.error("Unexpected error:", error);
       alert("Unexpected error occurred while forwarding.");
@@ -530,6 +530,137 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
       setIsSubmittingComment(false);
     }
   };
+  // const handleTransferTicket = async () => {
+  //   setIsSubmittingComment(true);
+  //   try {
+  //     if (!ticket) return;
+  //     if (!ticket.clientId) {
+  //       alert("Client ID missing from ticket.");
+  //       return;
+  //     }
+
+  //     const { error: insertError } = await supabase
+  //       .from('ticket_assignments')
+  //       .insert({
+  //         ticket_id: ticket.id,
+  //         user_id: RTMId,
+  //         assignedBy: user?.id,
+  //       });
+  //     if (insertError) {
+  //       console.error("Failed to assign users:", insertError);
+  //       ("Error while assigning new users.");
+  //       return;
+  //     } else {
+  //       toast("Ticket transfor to Resume Team Member!", {
+  //         position: "top-center",
+  //         autoClose: 4000,
+  //         hideProgressBar: false,
+  //         closeOnClick: false,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "dark",
+  //       });
+  //     }
+  //     onUpdate?.();
+  //     onClose();
+  //     setUserComment('');
+  //     setSaparateCommnetID(uuidv4());
+  //     setUserFile(null);
+  //     setRTMId('');
+
+  //   } catch (error) {
+  //     console.error("Unexpected error:", error);
+  //     alert("Unexpected error occurred while forwarding.");
+  //   } finally {
+  //     setIsSubmittingComment(false);
+  //   }
+  // };
+
+  const handleTransferTicket = async () => {
+  setIsSubmittingComment(true);
+  try {
+    if (!ticket) return;
+    if (!ticket.clientId) {
+      alert("Client ID missing from ticket.");
+      return;
+    }
+
+    // Step 1: Fetch the current user with the 'resume_team_member' role from the 'users' table
+    const { data: resumeTeamMembers, error: fetchUsersError } = await supabase
+      .from('users')
+      .select('id, role')
+      .eq('role', 'resume_team_member');  // Fetch users with 'resume_team_member' role
+
+    if (fetchUsersError) {
+      console.error("Error fetching resume_team_member users:", fetchUsersError);
+      return;
+    }
+
+    // Step 2: Fetch the current assignment for the ticket (old user_id) where the role is 'resume_team_member'
+    const { data: currentAssignments, error: fetchAssignmentsError } = await supabase
+      .from('ticket_assignments')
+      .select('user_id')
+      .eq('ticket_id', ticket.id); // Fetch assignments for the current ticket
+
+    if (fetchAssignmentsError) {
+      console.error("Error fetching ticket assignments:", fetchAssignmentsError);
+      return;
+    }
+
+    // Step 3: Find the old user_id with the 'resume_team_member' role in the assignment
+    const oldAssignment = currentAssignments?.find(
+      (assignment) => resumeTeamMembers?.some((user) => user.id === assignment.user_id)
+    );
+
+    if (oldAssignment) {
+      // Step 4: Update the assignment's user_id to the new RTMId (replace the old one)
+      const { error: updateError } = await supabase
+        .from('ticket_assignments')
+        .update({
+          user_id: RTMId,  // Replace the old user_id with the new RTMId
+          assignedBy: user?.id,  // Track who is updating this assignment
+          assigned_at: new Date().toISOString()  // Update timestamp
+        })
+        .eq('ticket_id', ticket.id)  // Ensure we're updating the correct ticket
+        .eq('user_id', oldAssignment.user_id);  // Only update the specific row
+
+      if (updateError) {
+        console.error("Failed to update ticket assignment:", updateError);
+        return;
+      }
+
+      toast("Ticket transfer to Resume Team Member!", {
+        position: "top-center",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    } else {
+      console.error("No matching assignment found for resume_team_member role.");
+      return;  // If no matching assignment found, do nothing
+    }
+
+    // Step 6: Reset form state and notify parent component
+    onUpdate?.();
+    onClose();
+    setUserComment('');
+    setSaparateCommnetID(uuidv4());
+    setUserFile(null);
+    setRTMId('');
+
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    alert("Unexpected error occurred while transferring.");
+  } finally {
+    setIsSubmittingComment(false);
+  }
+};
+
 
   const handleCommentSubmit = async () => {
     if (!ticket) return;
@@ -774,10 +905,10 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
               </body>
             </html>
           `
-          })
+            })
+          });
         });
-      });
-    }
+      }
     } catch (error) {
       console.error("Forward to CATL error:", error);
       alert("Unexpected error during resolution.");
@@ -1253,6 +1384,44 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
                         </div>
                       </div>
                     </>
+                  )}
+
+                  {['resume_team_head'].includes(user?.role) && ticket.status === 'forwarded' && (
+
+                    <div className="bg-green-50 rounded-lg p-6 border border-green-200">
+                      <h3 className="text-lg font-semibold text-green-900 mb-4">Transfer to other team member</h3>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Select Resume team member
+                        </label>
+                        <select
+                          value={RTMId}
+                          onChange={(e) => setRTMId(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 mb-2"
+                          required
+                          title="Select Resume team member"
+                        >
+                          <option value="">Choose a Resume team member</option>
+                          {RTMs.map(RTM => (
+
+                            <option key={RTM.id} value={RTM.id}>
+                              {RTM.name}
+                            </option>
+
+                          ))}
+                        </select>
+                      </div>
+                      <button
+                        onClick={handleTransferTicket}
+                        disabled={(!RTMId || isSubmittingComment)}
+                        className={`px-4 py-2 rounded-lg mt-2 ${(!RTMId || isSubmittingComment)
+                          ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                          }`}
+                      >
+                        {isSubmittingComment ? ' Forwarding to Resume team member ... ' : ' Forward to Resume Team '}
+                      </button>
+                    </div>
                   )}
 
                   {['resume_team_member'].includes(user?.role) && ticket.status === 'forwarded' && (
