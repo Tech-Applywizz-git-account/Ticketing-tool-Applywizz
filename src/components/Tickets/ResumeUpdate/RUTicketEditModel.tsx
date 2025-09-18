@@ -380,7 +380,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
                        style="width:150px;"/>
                 </div>
                 <h2 style="color:#1E90FF;">Hi ${clientName} (${clientEmail}),</h2>
-                <p>Our team has responded to your ApplyWizz ticket ${ticket.short_code} — ${ticket.title}}.</p>
+                <p>Our team has responded to your ApplyWizz ticket ${ticket.short_code} — ${ticket.title}.</p>
                 <p>We've updated your resume. Review it and if you're satisfied, conform it. If not, click on need some more changes.</p>
                 <p>You can manage your ticket here: <a href="https://ticketingtoolapplywizz.vercel.app/" target="_blank">ApplyWizz Ticketing Tool</a></p>
                 <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. <br/>Updates will be shared as progress is made.</p>     
@@ -761,7 +761,9 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
                        alt="ApplyWizz Logo" 
                        style="width:150px;"/>
                 </div>
-                <p>Resume team has updated the resume for ApplyWizz ticket ${ticket.short_code} — ${ticket.title}}.</p>
+                <p>Resume team has updated the resume for ApplyWizz ticket ${ticket.short_code} — ${ticket.title}.</p>
+                <p>Client name : ${clientName}</p>
+                <p>Client email : ${clientEmail}</p>
                 <p>Please apply with updated resume.</p>
                 <p>You can find updated resume in ticket tool : <a href="https://ticketingtoolapplywizz.vercel.app/" target="_blank">ApplyWizz Ticketing Tool</a></p>
                 <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. <br/>Updates will be shared as progress is made.</p>     
