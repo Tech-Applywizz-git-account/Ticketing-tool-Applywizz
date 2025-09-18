@@ -266,83 +266,77 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
   const handleForwardToClientTicket = async () => {
     if (!ticket) return;
     if (!ticket.id || !user?.id) return;
-    if (!comment) {
-      // alert("Please write a comment before forwarding to client");
-      toast("Please write a comment before forwarding to client!", {
-        position: "top-center",
-        autoClose: 4000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });
-      return;
-    }
-    if (!userFile) {
-      toast("Please attach a updated resume file before forwarding to client!", {
-        position: "top-center",
-        autoClose: 4000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });
-      return;
-    }
-    setIsSubmittingComment(true);
+    // if (!comment) {
+    //   // alert("Please write a comment before forwarding to client");
+    //   toast("Please write a comment before forwarding to client!", {
+    //     position: "top-center",
+    //     autoClose: 4000,
+    //     hideProgressBar: false,
+    //     closeOnClick: false,
+    //     pauseOnHover: true,
+    //     draggable: true,
+    //     progress: undefined,
+    //     theme: "dark",
+    //   });
+    //   return;
+    // }
+    // if (!userFile) {
+    //   toast("Please attach a updated resume file before forwarding to client!", {
+    //     position: "top-center",
+    //     autoClose: 4000,
+    //     hideProgressBar: false,
+    //     closeOnClick: false,
+    //     pauseOnHover: true,
+    //     draggable: true,
+    //     progress: undefined,
+    //     theme: "dark",
+    //   });
+    //   return;
+    // }
+    // setIsSubmittingComment(true);
     try {
       setIsUploading(true);
-      let uploadedFilePath = null;
+      // let uploadedFilePath = null;
 
-      if (userFile) {
-        // Upload file to Supabase storage
-        const filePath = `${ticket.id}/${Date.now()}-${userFile.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from('ticket-attachments')
-          .upload(filePath, userFile);
+      // if (userFile) {
+      //   // Upload file to Supabase storage
+      //   const filePath = `${ticket.id}/${Date.now()}-${userFile.name}`;
+      //   const { error: uploadError } = await supabase.storage
+      //     .from('ticket-attachments')
+      //     .upload(filePath, userFile);
 
-        if (uploadError) {
-          console.error("File upload failed:", uploadError);
-          alert("File upload failed.");
-          return;
-        }
-        uploadedFilePath = filePath;
-        const { error: insertError } = await supabase.from('ticket_files').insert(
-          {
-            commentid: saprateCommnetID,
-            ticket_id: ticket.id,
-            uploaded_by: user.id,
-            file_path: uploadedFilePath,
-            uploaded_at: new Date().toISOString(),
-            file_name: userFile.name,
-          },
-        );
-        if (insertError) {
-          console.error("Failed to record uploaded file:", insertError);
-          alert("Error saving file info.");
-          return;
-        }
-      }
+      //   if (uploadError) {
+      //     console.error("File upload failed:", uploadError);
+      //     alert("File upload failed.");
+      //     return;
+      //   }
+      //   uploadedFilePath = filePath;
+      //   const { error: insertError } = await supabase.from('ticket_files').insert(
+      //     {
+      //       commentid: saprateCommnetID,
+      //       ticket_id: ticket.id,
+      //       uploaded_by: user.id,
+      //       file_path: uploadedFilePath,
+      //       uploaded_at: new Date().toISOString(),
+      //       file_name: userFile.name,
+      //     },
+      //   );
+      //   if (insertError) {
+      //     console.error("Failed to record uploaded file:", insertError);
+      //     alert("Error saving file info.");
+      //     return;
+      //   }
+      // }
 
       // Insert comment with status at time
-      if (comment.trim() !== '') {
-        await supabase.from('ticket_comments').insert([
+      // if (comment.trim() !== '') {
+       const { error:verr } = await supabase.from('ticket_comments').update(
           {
-            id: saprateCommnetID,
-            ticket_id: ticket.id,
-            user_id: user.id,
-            content: comment,
-            is_internal: false,
-            ticketStatusAtTime: 'closed',
             show_to_client: true,
-          },
-        ]);
-      }
+          }).eq('ticket_id', ticket.id).eq('ticketStatusAtTime','forwarded');
+      // }
 
+      console.log("verr",verr);
       // Update ticket status
       const { error } = await supabase.from('tickets').update({
         status: 'pending_client_review',
@@ -423,7 +417,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
             user_id: user.id,
             content: comment,
             is_internal: false,
-            ticketStatusAtTime: 'pending_client_review',
+            ticketStatusAtTime: ticket.status,
             show_to_client: true,
           },
         ]);
@@ -476,7 +470,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
             user_id: currentUserId,
             content: comment,
             is_internal: false,
-            ticketStatusAtTime: 'closed',
+            ticketStatusAtTime: ticket.status,
           },
         ]);
       }
@@ -1464,7 +1458,8 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
 
                           <div className="flex space-x-4">
                             <button
-                              onClick={() => setResumeSatisfaction('yes')}
+                              // onClick={() => setResumeSatisfaction('yes')}
+                              onClick={handleForwardToClientTicket}
                               className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                             >
                               Yes
@@ -1481,7 +1476,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
                       {resumeSatisfaction !== null && (
                         <div className="bg-green-50 rounded-lg p-6 border border-green-200">
                           <h3 className="text-lg font-semibold text-green-900">Take Action</h3>
-                          {resumeSatisfaction === 'yes' && (
+                          {/* {resumeSatisfaction === 'yes' && (
                             <div className="space-y-2 mt-2" >
                               <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Add a comment : <span className="text-red-800 text-xl relative top-1">*</span>
@@ -1517,7 +1512,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
                                 {isSubmittingComment ? 'Forwarding updated resume to client ...' : 'Forward updated resume to client '}
                               </button>
                             </div>
-                          )}
+                          )} */}
                           {resumeSatisfaction === 'no' && (
                             <div className="space-y-2 mt-2" >
                               <label className="block text-sm font-medium text-gray-700 mb-2">
