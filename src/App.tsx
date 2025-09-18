@@ -346,7 +346,7 @@ function App() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        to: 'tunguturidineshkumar@gmail.com',
+        to: 'dinesh@applywizz.com',
         subject: "Response form Applywizz Ticketing Tool",
         htmlBody: `
             <html>
