@@ -578,88 +578,88 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
   // };
 
   const handleTransferTicket = async () => {
-  setIsSubmittingComment(true);
-  try {
-    if (!ticket) return;
-    if (!ticket.clientId) {
-      alert("Client ID missing from ticket.");
-      return;
-    }
-
-    // Step 1: Fetch the current user with the 'resume_team_member' role from the 'users' table
-    const { data: resumeTeamMembers, error: fetchUsersError } = await supabase
-      .from('users')
-      .select('id, role')
-      .eq('role', 'resume_team_member');  // Fetch users with 'resume_team_member' role
-
-    if (fetchUsersError) {
-      console.error("Error fetching resume_team_member users:", fetchUsersError);
-      return;
-    }
-
-    // Step 2: Fetch the current assignment for the ticket (old user_id) where the role is 'resume_team_member'
-    const { data: currentAssignments, error: fetchAssignmentsError } = await supabase
-      .from('ticket_assignments')
-      .select('user_id')
-      .eq('ticket_id', ticket.id); // Fetch assignments for the current ticket
-
-    if (fetchAssignmentsError) {
-      console.error("Error fetching ticket assignments:", fetchAssignmentsError);
-      return;
-    }
-
-    // Step 3: Find the old user_id with the 'resume_team_member' role in the assignment
-    const oldAssignment = currentAssignments?.find(
-      (assignment) => resumeTeamMembers?.some((user) => user.id === assignment.user_id)
-    );
-
-    if (oldAssignment) {
-      // Step 4: Update the assignment's user_id to the new RTMId (replace the old one)
-      const { error: updateError } = await supabase
-        .from('ticket_assignments')
-        .update({
-          user_id: RTMId,  // Replace the old user_id with the new RTMId
-          assignedBy: user?.id,  // Track who is updating this assignment
-          assigned_at: new Date().toISOString()  // Update timestamp
-        })
-        .eq('ticket_id', ticket.id)  // Ensure we're updating the correct ticket
-        .eq('user_id', oldAssignment.user_id);  // Only update the specific row
-
-      if (updateError) {
-        console.error("Failed to update ticket assignment:", updateError);
+    setIsSubmittingComment(true);
+    try {
+      if (!ticket) return;
+      if (!ticket.clientId) {
+        alert("Client ID missing from ticket.");
         return;
       }
 
-      toast("Ticket transfer to Resume Team Member!", {
-        position: "top-center",
-        autoClose: 4000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });
-    } else {
-      console.error("No matching assignment found for resume_team_member role.");
-      return;  // If no matching assignment found, do nothing
+      // Step 1: Fetch the current user with the 'resume_team_member' role from the 'users' table
+      const { data: resumeTeamMembers, error: fetchUsersError } = await supabase
+        .from('users')
+        .select('id, role')
+        .eq('role', 'resume_team_member');  // Fetch users with 'resume_team_member' role
+
+      if (fetchUsersError) {
+        console.error("Error fetching resume_team_member users:", fetchUsersError);
+        return;
+      }
+
+      // Step 2: Fetch the current assignment for the ticket (old user_id) where the role is 'resume_team_member'
+      const { data: currentAssignments, error: fetchAssignmentsError } = await supabase
+        .from('ticket_assignments')
+        .select('user_id')
+        .eq('ticket_id', ticket.id); // Fetch assignments for the current ticket
+
+      if (fetchAssignmentsError) {
+        console.error("Error fetching ticket assignments:", fetchAssignmentsError);
+        return;
+      }
+
+      // Step 3: Find the old user_id with the 'resume_team_member' role in the assignment
+      const oldAssignment = currentAssignments?.find(
+        (assignment) => resumeTeamMembers?.some((user) => user.id === assignment.user_id)
+      );
+
+      if (oldAssignment) {
+        // Step 4: Update the assignment's user_id to the new RTMId (replace the old one)
+        const { error: updateError } = await supabase
+          .from('ticket_assignments')
+          .update({
+            user_id: RTMId,  // Replace the old user_id with the new RTMId
+            assignedBy: user?.id,  // Track who is updating this assignment
+            assigned_at: new Date().toISOString()  // Update timestamp
+          })
+          .eq('ticket_id', ticket.id)  // Ensure we're updating the correct ticket
+          .eq('user_id', oldAssignment.user_id);  // Only update the specific row
+
+        if (updateError) {
+          console.error("Failed to update ticket assignment:", updateError);
+          return;
+        }
+
+        toast("Ticket transfer to Resume Team Member!", {
+          position: "top-center",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+      } else {
+        console.error("No matching assignment found for resume_team_member role.");
+        return;  // If no matching assignment found, do nothing
+      }
+
+      // Step 6: Reset form state and notify parent component
+      onUpdate?.();
+      onClose();
+      setUserComment('');
+      setSaparateCommnetID(uuidv4());
+      setUserFile(null);
+      setRTMId('');
+
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      alert("Unexpected error occurred while transferring.");
+    } finally {
+      setIsSubmittingComment(false);
     }
-
-    // Step 6: Reset form state and notify parent component
-    onUpdate?.();
-    onClose();
-    setUserComment('');
-    setSaparateCommnetID(uuidv4());
-    setUserFile(null);
-    setRTMId('');
-
-  } catch (error) {
-    console.error("Unexpected error:", error);
-    alert("Unexpected error occurred while transferring.");
-  } finally {
-    setIsSubmittingComment(false);
-  }
-};
+  };
 
 
   const handleCommentSubmit = async () => {
@@ -1380,6 +1380,21 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
                               }`}
                           >
                             {isSubmittingComment ? ' Forwarding to Resume team member ... ' : ' Forward to Resume Team '}
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {currentUserRole === 'resume_team_head' && ticket.status === 'pending_client_review' && (
+                    <>
+                      <div className="bg-green-50 rounded-lg p-6 border border-green-200">
+                        <h3 className="text-lg font-semibold text-green-900">Close the ticket as client</h3>
+                        <div className="space-y-2 mt-2" >
+                          <button
+                            onClick={handleForwardToCATL}
+                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                          >
+                            Click here to Close Ticket
                           </button>
                         </div>
                       </div>
