@@ -530,52 +530,6 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
       setIsSubmittingComment(false);
     }
   };
-  // const handleTransferTicket = async () => {
-  //   setIsSubmittingComment(true);
-  //   try {
-  //     if (!ticket) return;
-  //     if (!ticket.clientId) {
-  //       alert("Client ID missing from ticket.");
-  //       return;
-  //     }
-
-  //     const { error: insertError } = await supabase
-  //       .from('ticket_assignments')
-  //       .insert({
-  //         ticket_id: ticket.id,
-  //         user_id: RTMId,
-  //         assignedBy: user?.id,
-  //       });
-  //     if (insertError) {
-  //       console.error("Failed to assign users:", insertError);
-  //       ("Error while assigning new users.");
-  //       return;
-  //     } else {
-  //       toast("Ticket transfor to Resume Team Member!", {
-  //         position: "top-center",
-  //         autoClose: 4000,
-  //         hideProgressBar: false,
-  //         closeOnClick: false,
-  //         pauseOnHover: true,
-  //         draggable: true,
-  //         progress: undefined,
-  //         theme: "dark",
-  //       });
-  //     }
-  //     onUpdate?.();
-  //     onClose();
-  //     setUserComment('');
-  //     setSaparateCommnetID(uuidv4());
-  //     setUserFile(null);
-  //     setRTMId('');
-
-  //   } catch (error) {
-  //     console.error("Unexpected error:", error);
-  //     alert("Unexpected error occurred while forwarding.");
-  //   } finally {
-  //     setIsSubmittingComment(false);
-  //   }
-  // };
 
   const handleTransferTicket = async () => {
     setIsSubmittingComment(true);
@@ -874,7 +828,6 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
         progress: undefined,
         theme: "dark",
       });
-      onUpdate?.();
       onClose();
       if (emails && emails.length > 0) {
         emails.forEach(async (email) => {
@@ -886,7 +839,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
               subject: "Response form Applywizz Ticketing Tool",
               htmlBody: `      
             <html>
-              <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+            <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
                 <div style="text-align:center; margin-bottom:20px;">
                   <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
                        alt="ApplyWizz Logo" 
@@ -902,20 +855,21 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
                 <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
                 <hr style="border:none;border-top:1px solid #eee;" />
                 <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
-              </body>
+                </body>
             </html>
           `
-            })
-          });
-        });
-      }
-    } catch (error) {
-      console.error("Forward to CATL error:", error);
-      alert("Unexpected error during resolution.");
-    } finally {
-      setIsSubmittingComment(false);
-    }
-  };
+        })
+      });
+    });
+  }
+  onUpdate?.();
+} catch (error) {
+  console.error("Forward to CATL error:", error);
+  alert("Unexpected error during resolution.");
+} finally {
+  setIsSubmittingComment(false);
+}
+};
 
   // If the modal is not open or there is no ticket, return null
   if (!isOpen || !ticket) return null;
