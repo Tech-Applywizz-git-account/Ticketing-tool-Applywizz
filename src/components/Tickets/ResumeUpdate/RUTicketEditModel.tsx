@@ -380,7 +380,7 @@ export const RUTicketEditModal: React.FC<TicketEditModalProps> = ({
                        style="width:150px;"/>
                 </div>
                 <h2 style="color:#1E90FF;">Hi ${clientName} (${clientEmail}),</h2>
-                <p>Our team has responded to your ApplyWizz ticket ${ticket.short_code} — ${ticket.title}}.</p>
+                <p>Our team has responded to your ApplyWizz ticket ${ticket.short_code} — ${ticket.title}.</p>
                 <p>We've updated your resume. Review it and if you're satisfied, conform it. If not, click on need some more changes.</p>
                 <p>You can manage your ticket here: <a href="https://ticketingtoolapplywizz.vercel.app/" target="_blank">ApplyWizz Ticketing Tool</a></p>
                 <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. <br/>Updates will be shared as progress is made.</p>     

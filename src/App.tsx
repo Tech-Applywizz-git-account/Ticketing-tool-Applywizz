@@ -314,23 +314,51 @@ function App() {
   };
 
   const handleSendEmail = async () => {
+    // await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({
+    //     to: 'vivek@applywizz.com',
+    //     subject: "Ticket Created Successfully in ApplyWizz Ticketing Tool",
+    //     htmlBody: `
+    //   <html>
+    //     <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+    //             <div style="text-align:center; margin-bottom:20px;">
+    //               <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
+    //                    alt="ApplyWizz Logo" 
+    //                    style="width:150px;"/>
+    //             </div>
+    //             <h2 style="color:#1E90FF;">Hi Vivek (vivke),</h2>
+    //             <p>Our team has responded to your ApplyWizz ticket.</p>
+    //             <p>please review the update and close the ticket if your issue is resolved.</p>
+    //             <p>You can manage your ticket here: <a href="https://ticketingtoolapplywizz.vercel.app/" target="_blank">ApplyWizz Ticketing Tool</a></p>
+    //             <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. <br/>Updates will be shared as progress is made.</p>     
+    //             <p>Thanks for your patience,<br/>- ApplyWizz Support</p>                
+    //             <p>Best regards,<br/> <strong>ApplyWizz Ticketing Tool Support Team.</strong></p> 
+    //             <hr style="border:none;border-top:1px solid #eee;" />
+    //             <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
+    //           </body>
+    //   </html>
+    // `
+    //   })
+    // });
     await fetch("https://ticketingtoolapplywizz.vercel.app/api/send-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        to: 'vivek@applywizz.com',
-        subject: "Ticket Created Successfully in ApplyWizz Ticketing Tool",
+        to: 'saketh.tech01@gmail.com',
+        subject: "Response form Applywizz Ticketing Tool",
         htmlBody: `
-      <html>
-        <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
+            <html>
+              <body style="font-family: Arial, sans-serif; line-height:1.6; color:#333;">   
                 <div style="text-align:center; margin-bottom:20px;">
                   <img src="https://storage.googleapis.com/solwizz/website_content/Black%20Version.png" 
                        alt="ApplyWizz Logo" 
                        style="width:150px;"/>
                 </div>
-                <h2 style="color:#1E90FF;">Hi Vivek (vivke),</h2>
-                <p>Our team has responded to your ApplyWizz ticket.</p>
-                <p>please review the update and close the ticket if your issue is resolved.</p>
+                <h2 style="color:#1E90FF;">Hi Saketh Narla (saketh.tech01@gmail.com),</h2>
+                <p>Our team has responded to your ApplyWizz ticket TKT-15/09/2025-0002 — Saketh Narla Resume.</p>
+                <p>We've updated your resume. Review it and if you're satisfied, conform it. If not, click on need some more changes.</p>
                 <p>You can manage your ticket here: <a href="https://ticketingtoolapplywizz.vercel.app/" target="_blank">ApplyWizz Ticketing Tool</a></p>
                 <p style="background-color:#FFF3CD;padding:10px;border-left:4px solid #FFC107;">Kindly note that this ticket is now in the system for tracking and resolution. <br/>Updates will be shared as progress is made.</p>     
                 <p>Thanks for your patience,<br/>- ApplyWizz Support</p>                
@@ -338,8 +366,8 @@ function App() {
                 <hr style="border:none;border-top:1px solid #eee;" />
                 <p style="font-size:12px;color:#777;">This is an automated message. Please do not reply to this email.</p>
               </body>
-      </html>
-    `
+            </html>
+          `
       })
     });
   }
